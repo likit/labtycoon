@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form method="post">
+    <div class="field">
+        <label class="label">{{ form.email.label }}</label>
+        <div class="control">
+            {{ form.email(class="input") }}
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">{{ form.password.label }}</label>
+        <div class="control">
+            {{ form.password(class="input") }}
+        </div>
+    </div>
+</form>
+
+</body>
+</html>

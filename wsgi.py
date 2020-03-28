@@ -5,3 +5,5 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = create_app()
+
+from auth.models import *
