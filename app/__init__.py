@@ -13,10 +13,10 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__)
 
-    from main import main_blueprint
+    from app.main import main_blueprint
     app.register_blueprint(main_blueprint, url_prefix='/main')
 
-    from auth import auth_blueprint
+    from app.auth import auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')

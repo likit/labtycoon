@@ -6,4 +6,4 @@ load_dotenv()
 
 app = create_app()
 
-from auth.models import *
+from app.auth.models import *

@@ -5,9 +5,27 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-one-third is-offset-4 box">
-                    <h1 class="title is-size-3 has-text-centered">Login</h1>
+                    <h1 class="title is-size-3 has-text-centered">User Registration</h1>
                     <hr>
                     <form method="post">
+                        <div class="field">
+                            <label class="label">{{ form.firstname.label }}</label>
+                            <div class="control">
+                                {{ form.firstname(class="input") }}
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.lastname.label }}</label>
+                            <div class="control">
+                                {{ form.lastname(class="input") }}
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.license_id.label }}</label>
+                            <div class="control">
+                                {{ form.license_id(class="input", placeholder='License or Student ID') }}
+                            </div>
+                        </div>
                         <div class="field">
                             <label class="label">{{ form.email.label }}</label>
                             <div class="control">
@@ -18,6 +36,12 @@
                             <label class="label">{{ form.password.label }}</label>
                             <div class="control">
                                 {{ form.password(class="input") }}
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.confirm.label }}</label>
+                            <div class="control">
+                                {{ form.confirm(class="input") }}
                             </div>
                         </div>
                         <div class="field is-grouped is-grouped-centered">

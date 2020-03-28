@@ -4,6 +4,15 @@ from wtforms.validators import Email, InputRequired, EqualTo
 
 
 class RegistrationForm(FlaskForm):
+    firstname = TextField('First Name', [
+        InputRequired()
+    ])
+    lastname = TextField('Last Name', [
+        InputRequired()
+    ])
+    license_id = TextField('License ID', [
+        InputRequired()
+    ])
     email = TextField('Email', [
         InputRequired(),
         Email()
