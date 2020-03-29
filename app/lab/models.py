@@ -7,6 +7,8 @@ class LabResultChoiceSet(db.Model):
     __tablename__ = 'lab_result_choice_set'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     name = db.Column('name', db.String())
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('choice_sets'))
 
     def __str__(self):
         return self.name
@@ -17,7 +19,7 @@ class LabResultChoiceItem(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     result = db.Column('result', db.String(), nullable=False)
     choice_set_id = db.Column('choices_id', db.ForeignKey('lab_result_choice_set.id'))
-    choice_set = db.relationship(LabResultChoiceSet, backref=db.backref('choices'))
+    choice_set = db.relationship(LabResultChoiceSet, backref=db.backref('choice_items'))
     interpretation = db.Column('interpretation', db.String())
     ref = db.Column('ref', db.Boolean(), default=False)
 
