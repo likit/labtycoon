@@ -132,5 +132,44 @@ class LabQuanTestOrder(db.Model):
     received_at = db.Column('received_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
     receiver = db.relationship(User,
-                               backref=db.backref('received_orders'),
+                               backref=db.backref('received_quan_orders'),
+                               foreign_keys=[receiver_id])
+
+
+class LabQualTest(db.Model):
+    __tablename__ = 'lab_qual_tests'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column('name', db.String(), nullable=False)
+    detail = db.Column('detail', db.Text())
+    # choices for results in text
+    choice_set_id = db.Column('choice_set', db.ForeignKey('lab_result_choice_set.id'))
+    choice_set = db.relationship(LabResultChoiceSet)
+    active = db.Column('active', db.Boolean(), default=True)
+    added_at = db.Column('added_at', db.DateTime(timezone=True))
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('qual_tests'))
+
+    def __str__(self):
+        return self.name
+
+
+class LabQualTestOrder(db.Model):
+    __tablename__ = 'lab_qual_test_orders'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('qual_test_orders'))
+    customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
+    customer = db.relationship(LabCustomer, backref=db.backref('qual_test_orders'))
+    test_id = db.Column('test_id', db.ForeignKey('lab_qual_tests.id'))
+    test = db.relationship(LabQualTest, backref=db.backref('orders'))
+    ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
+    ordered_by_id = db.Column('ordered_by_id', db.ForeignKey('user.id'))
+    ordered_by = db.relationship(User,
+                                 backref=db.backref('qual_test_orders'),
+                                 foreign_keys=[ordered_by_id])
+    cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
+    received_at = db.Column('received_at', db.DateTime(timezone=True))
+    receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
+    receiver = db.relationship(User,
+                               backref=db.backref('received_qual_orders'),
                                foreign_keys=[receiver_id])
