@@ -34,7 +34,8 @@
                             <td>{{ customer.gender }}</td>
                             <td>{{ customer.dob }}</td>
                             <td>
-                                <a class="button is-rounded is-small is-info">
+                                <a class="button is-rounded is-small is-info"
+                                    href="{{ url_for('lab.add_test_order_menu', lab_id=lab.id, customer_id=customer.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-plus-circle"></i>
                                     </span>

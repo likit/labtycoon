@@ -113,3 +113,24 @@ class LabQuanTestRecord(db.Model):
     updated_by = db.Column('updator_id', db.ForeignKey('user.id'))
     updator = db.relationship(User, backref=db.backref('updated_result_records'))
 
+
+class LabQuanTestOrder(db.Model):
+    __tablename__ = 'lab_quan_test_orders'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('quan_test_orders'))
+    customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
+    customer = db.relationship(LabCustomer, backref=db.backref('quan_test_orders'))
+    test_id = db.Column('test_id', db.ForeignKey('lab_quan_tests.id'))
+    test = db.relationship(LabQuanTest, backref=db.backref('orders'))
+    ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
+    ordered_by_id = db.Column('ordered_by_id', db.ForeignKey('user.id'))
+    ordered_by = db.relationship(User,
+                                 backref=db.backref('quan_test_orders'),
+                                 foreign_keys=[ordered_by_id])
+    cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
+    received_at = db.Column('received_at', db.DateTime(timezone=True))
+    receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
+    receiver = db.relationship(User,
+                               backref=db.backref('received_orders'),
+                               foreign_keys=[receiver_id])

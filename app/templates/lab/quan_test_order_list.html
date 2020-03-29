@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <p class="notification is-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <h1 class="title has-text-centered">All Orders</h1>
+                <div class="box">
+                    <table class="table is-striped is-fullwidth">
+                    <thead>
+                    <th>Order No.</th>
+                    <th>Ordered At</th>
+                    <th>H.N.</th>
+                    <th>Customer</th>
+                    <th>Test Name</th>
+                    <th>Ordered By</th>
+                    <th colspan="2"></th>
+                    </thead>
+                    <tbody>
+                        {% for qtest in lab.quan_test_orders %}
+                            {% if not qtest.cancelled_at and not qtest.received_at %}
+                            <tr>
+                                <td>{{ qtest.id }}</td>
+                                <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                <td>{{ qtest.customer.id }}</td>
+                                <td>{{ qtest.customer.title }}{{ qtest.customer }}</td>
+                                <td>{{ qtest.test.name }}</td>
+                                <td>{{ qtest.ordered_by }}</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <a href="{{ url_for('lab.receive_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                           class="button is-small is-rounded is-success">
+                                            Receive
+                                        </a>
+                                        <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                           class="button is-small is-rounded is-danger">
+                                            Reject
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}

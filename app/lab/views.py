@@ -5,7 +5,10 @@ from app.main.models import Laboratory
 from app import db
 from . import lab_blueprint as lab
 from .forms import ChoiceItemForm, ChoiceSetForm, LabQuanTestForm, LabCustomerForm
-from .models import LabResultChoiceItem, LabActivity, LabResultChoiceSet, LabQuanTest, LabCustomer
+from .models import (LabResultChoiceItem, LabActivity,
+                     LabResultChoiceSet, LabQuanTest,
+                     LabCustomer, LabQuanTestOrder
+                     )
 
 
 @lab.route('/<int:lab_id>')
@@ -195,3 +198,85 @@ def add_patient(lab_id):
         else:
             flash('Failed to add a new patient.', 'danger')
     return render_template('lab/new_customer.html', form=form)
+
+
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/menu', methods=['GET', 'POST'])
+@login_required
+def add_test_order_menu(lab_id, customer_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/new_test_order.html', lab=lab, customer_id=customer_id)
+
+
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/quant/tests/<int:test_id>/add', methods=['GET', 'POST'])
+@login_required
+def add_quan_test_order(lab_id, customer_id, test_id):
+    test = LabQuanTest.query.get(test_id)
+    if test:
+        order = LabQuanTestOrder(
+            lab_id=lab_id,
+            customer_id=customer_id,
+            test_id=test.id,
+            ordered_at=arrow.now('Asia/Bangkok').datetime,
+            ordered_by=current_user
+        )
+        db.session.add(order)
+        activity = LabActivity(
+            lab_id=lab_id,
+            actor=current_user,
+            message='Added a test order.',
+            detail=test.name,
+            added_at=arrow.now('Asia/Bangkok').datetime
+        )
+        db.session.add(activity)
+        db.session.commit()
+        flash('New order has been added.', 'success')
+        return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+    flash('Test does not exists.', 'danger')
+    return redirect(request.referrer)
+
+
+@lab.route('/<int:lab_id>/orders', methods=['GET', 'POST'])
+@login_required
+def list_test_orders(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/quan_test_order_list.html', lab=lab)
+
+
+@lab.route('/<int:lab_id>/orders/<int:order_id>/cancel', methods=['GET', 'POST'])
+@login_required
+def cancel_quan_test_order(lab_id, order_id):
+    order = LabQuanTestOrder.query.get(order_id)
+    order.cancelled_at = arrow.now('Asia/Bangkok').datetime
+    order.cancelled_by = current_user
+    db.session.add(order)
+    activity = LabActivity(
+        lab_id=lab_id,
+        actor=current_user,
+        message='Cancelled the test order.',
+        detail=order.id,
+        added_at=arrow.now('Asia/Bangkok').datetime
+    )
+    db.session.add(activity)
+    db.session.commit()
+    flash('The order has been cancelled.', 'success')
+    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+
+
+@lab.route('/<int:lab_id>/orders/<int:order_id>/receive', methods=['GET', 'POST'])
+@login_required
+def receive_quan_test_order(lab_id, order_id):
+    order = LabQuanTestOrder.query.get(order_id)
+    order.received_at = arrow.now('Asia/Bangkok').datetime
+    order.receiver = current_user
+    db.session.add(order)
+    activity = LabActivity(
+        lab_id=lab_id,
+        actor=current_user,
+        message='Received the test order.',
+        detail=order.id,
+        added_at=arrow.now('Asia/Bangkok').datetime
+    )
+    db.session.add(activity)
+    db.session.commit()
+    flash('The order has been received.', 'success')
+    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
