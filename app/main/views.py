@@ -13,6 +13,11 @@ def index():
     return render_template('main/index.html', labs=labs)
 
 
+@main.route('/about')
+def about():
+    return render_template('main/about.html')
+
+
 @main.route('/labs/<int:lab_id>/members')
 @login_required
 def list_members(lab_id):
