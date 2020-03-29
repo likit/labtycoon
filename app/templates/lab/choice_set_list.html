@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="tabs is-centered is-boxed">
+            <ul>
+                <li><a href="{{ url_for('lab.list_tests', lab_id=lab.id) }}">Tests</a></li>
+                <li class="is-active"><a>Result Choice Sets</a></li>
+            </ul>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <div class="buttons is-right">
+                    <a class="button is-success is-rounded">
+                        <span class="icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </span>
+                        <span>New Set</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+            {% for cs in lab.choice_sets %}
+                <h1 class="title is-size-5 is-link">
+                    <span class="title is-size-5">{{ cs.name }}</span>
+                    <a>
+                        <span class="icon">
+                            <i class="fas fa-pencil-alt"></i>
+                        </span>
+                    </a>
+                </h1>
+                <table class="table is-striped box">
+                    <thead>
+                    <th>Result</th>
+                    <th>Interpretation</th>
+                    <th colspan="2"></th>
+                    </thead>
+                    <tbody>
+                    {% for ci in cs.choice_items %}
+                        <tr>
+                            <td>{{ ci.result }}</td>
+                            <td>{{ ci.interpretation }}</td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="4">
+                            <a href="" class="button is-info is-rounded">
+                                <span class="icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </span>
+                                <span>Choice</span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}
