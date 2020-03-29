@@ -9,8 +9,32 @@
     <title>Title</title>
 </head>
 <body>
+{% block navbar %}
+    {% include "nav.html" %}
+{% endblock %}
 {% block content %}
 {% endblock %}
+<footer class="footer">
+    <div class="container has-text-centered">
+        <p>
+            <h1 class="title is-size-4">Lab Tycoon</h1>
+        </p>
+        <p>
+            <strong>
+                Open Source Laboratory Information System for Education
+            </strong>
+        </p>
+        <p>
+            by Knowledge Base and Informatics Lab.
+        </p>
+        <p>
+            Department of Community Medical Technology
+        </p>
+        <p>
+            Faculty of Medical Technology, Mahidol University
+        </p>
+    </div>
+</footer>
 {% block scripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
 {% endblock %}
