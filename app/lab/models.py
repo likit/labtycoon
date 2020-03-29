@@ -15,9 +15,9 @@ class LabCustomer(db.Model):
                                                                               'เด็กชาย',
                                                                               'พระภิกษุ',
                                                                               'สามเณร']]})
-    firstname = db.Column('firstname', db.String())
-    lastname = db.Column('lastname', db.String())
-    dob = db.Column('dob', db.Date())
+    firstname = db.Column('firstname', db.String(), info={'label': 'First Name'})
+    lastname = db.Column('lastname', db.String(), info={'label': 'Last Name'})
+    dob = db.Column('dob', db.Date(), info={'label': 'Date of Birth'})
     gender = db.Column('gender', db.String(), info={'label': 'Gender',
                                                     'choices': [(g, g) for g in ['ชาย', 'หญิง']]})
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
