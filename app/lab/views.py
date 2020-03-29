@@ -399,3 +399,10 @@ def receive_qual_test_order(lab_id, order_id):
 def list_pending_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
     return render_template('lab/pending_orders.html', lab=lab)
+
+
+@lab.route('/<int:lab_id>/activities')
+@login_required
+def list_activities(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/log.html', lab=lab)

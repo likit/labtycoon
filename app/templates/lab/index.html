@@ -46,6 +46,12 @@
                     </span>
                     ผลการทดสอบ
                 </a>
+                <a class="panel-block" href="{{ url_for('lab.list_activities', lab_id=lab.id) }}">
+                    <span class="panel-icon">
+                        <i class="far fa-clock"></i>
+                    </span>
+                    ประวัติกิจกรรม (activity log)
+                </a>
                 <a class="panel-block" href="{{ url_for('main.index') }}">
                     <span class="panel-icon">
                        <i class="fas fa-sign-out-alt"></i>

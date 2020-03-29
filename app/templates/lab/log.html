@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-two-thirds is-offset-2">
+            <h1 class="title is-size-4 has-text-centered">Activity Log</h1>
+                <div class="box">
+                    <table class="table is-striped is-fullwidth">
+                        <thead>
+                        <th>No.</th>
+                        <th>Member</th>
+                        <th>Activity</th>
+                        <th>Detail</th>
+                        <th>At</th>
+                        </thead>
+                        <tbody>
+                        {% for activity in lab.member_activities|sort(attribute='added_at', reverse=True) %}
+                            <tr
+                                    {% if activity.message.startswith('Added') or activity.message.startswith('Received') %}
+                                        class="has-text-success"
+                                    {% else %}
+                                        class="has-text-danger"
+                                    {% endif %}
+                            >
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                {{ activity.actor }}
+                            </td>
+                            <td>{{ activity.message }}</td>
+                            <td>{{ activity.detail }}</td>
+                            <td>{{ activity.added_at|humanizedt }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="buttons is-centered">
+            <a href="{{ url_for('lab.landing', lab_id=lab.id) }}"
+               class="button is-light is-rounded">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+    </section>
+{% endblock %}
