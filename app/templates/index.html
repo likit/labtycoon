@@ -10,7 +10,7 @@
     <div class="hero-body">
         <div class="container">
             <div class="columns">
-                <div class="column is-two-thirds">
+                <div class="column is-half">
                     <div class="box">
                         <h1 class="title has-text-black"><span>Welcome to</span><span class="has-text-info"> Lab Tycoon</span></h1>
                         <h1 class="subtitle has-text-black">
@@ -21,6 +21,12 @@
                             <a href="{{ url_for('main.about') }}" class="button is-info is-rounded">About</a>
                         </div>
                     </div>
+                </div>
+                <div class="column">
+                    <p class="title is-size-4">
+                        What I cannot create, I do not understand. -- Richard Feynman
+                    </p>
+                    <img src="{{ url_for('static', filename='img/richard-feyman.jpeg') }}">
                 </div>
             </div>
         </div>
