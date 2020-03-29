@@ -21,6 +21,14 @@
                             <a href="{{ url_for('main.about') }}" class="button is-info is-rounded">About</a>
                         </div>
                     </div>
+                    <div class="box">
+                        {% for a in announcements %}
+                            <span class="icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </span>
+                            <span class="has-text-black">{{ a.detail }}</span>
+                        {% endfor %}
+                    </div>
                 </div>
                 <div class="column">
                     <p class="title is-size-4">

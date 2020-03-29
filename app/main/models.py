@@ -33,3 +33,12 @@ class UserLabAffil(db.Model):
     user = db.relationship(User, backref=db.backref('lab_affils', lazy=True))
     lab = db.relationship(Laboratory, backref=db.backref('lab_members'))
 
+
+class Announcement(db.Model):
+    __tablename__ = 'announcements'
+    user_id = db.Column('user_id', db.ForeignKey('user.id'), primary_key=True)
+    category = db.Column('category', db.String(), info={'label': 'Category',
+                                                        'choices': [(cat, cat) for cat in ['feature', 'bug', 'news']]})
+    detail = db.Column('detail', db.String(), nullable=False)
+    added_at = db.Column('added_at', db.DateTime(timezone=True))
+    user = db.relationship('User', backref=db.backref('announcements'))
