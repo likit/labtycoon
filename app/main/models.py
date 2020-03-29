@@ -2,12 +2,6 @@ from app import db
 from app.auth.models import User
 
 
-user_lab_tables = db.Table('user_labs',
-                           db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
-                           db.Column('lab_id', db.ForeignKey('labs.id'), primary_key=True)
-                           )
-
-
 class Laboratory(db.Model):
     __tablename__ = 'labs'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
@@ -17,7 +11,23 @@ class Laboratory(db.Model):
     active = db.Column('active', db.Boolean(), default=True)
     creator_id = db.Column('creator_id', db.ForeignKey('user.id'))
     creator = db.relationship(User, backref=db.backref('user', lazy=True))
-    members = db.relationship(User,
-                              secondary=user_lab_tables,
-                              lazy='subquery',
-                              backref=db.backref('labs', lazy=True))
+
+    @property
+    def num_pending_members(self):
+        return len([m for m in self.lab_members if not m.approved])
+
+    @property
+    def num_approved_members(self):
+        return len([m for m in self.lab_members if m.approved])
+
+
+
+class UserLabAffil(db.Model):
+    __tablename__ = 'user_lab_affils'
+    user_id = db.Column('user_id', db.ForeignKey('user.id'), primary_key=True)
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'), primary_key=True)
+    joined_at = db.Column('joined_at', db.DateTime(timezone=True))
+    approved = db.Column('approved', db.Boolean(), default=False)
+    user = db.relationship(User, backref=db.backref('lab_affils', lazy=True))
+    lab = db.relationship(Laboratory, backref=db.backref('lab_members'))
+
