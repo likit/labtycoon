@@ -4,8 +4,8 @@ from flask_login import login_required, current_user
 from app.main.models import Laboratory
 from app import db
 from . import lab_blueprint as lab
-from .forms import ChoiceItemForm, ChoiceSetForm, LabQuanTestForm
-from .models import LabResultChoiceItem, LabActivity, LabResultChoiceSet, LabQuanTest
+from .forms import ChoiceItemForm, ChoiceSetForm, LabQuanTestForm, LabCustomerForm
+from .models import LabResultChoiceItem, LabActivity, LabResultChoiceSet, LabQuanTest, LabCustomer
 
 
 @lab.route('/<int:lab_id>')
@@ -160,3 +160,38 @@ def add_quan_test(lab_id):
         else:
             flash(form.errors, 'danger')
     return render_template('lab/new_quan_test.html', form=form)
+
+
+
+@lab.route('/<int:lab_id>/patients')
+@login_required
+def list_patients(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/customer_list.html', lab=lab)
+
+
+@lab.route('/<int:lab_id>/patients/add', methods=['GET', 'POST'])
+@login_required
+def add_patient(lab_id):
+    form = LabCustomerForm()
+    lab = Laboratory.query.get(lab_id)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_customer = LabCustomer()
+            form.populate_obj(new_customer)
+            new_customer.lab_id = lab_id
+            db.session.add(new_customer)
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Added a new patient',
+                detail=new_customer.fullname,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(activity)
+            db.session.commit()
+            flash('New patient has been added.', 'success')
+            return render_template('lab/customer_list.html', lab=lab)
+        else:
+            flash('Failed to add a new patient.', 'danger')
+    return render_template('lab/new_customer.html', form=form)

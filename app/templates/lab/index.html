@@ -23,6 +23,12 @@
                     </span>
                     รายการทดสอบ
                 </a>
+                <a class="panel-block" href="{{ url_for('lab.list_patients', lab_id=lab.id) }}">
+                    <span class="panel-icon">
+                        <i class="fas fa-vial"></i>
+                    </span>
+                    รายชื่อผู้ป่วย/ผู้รับบริการ
+                </a>
                 <a class="panel-block" href="{{ url_for('main.index') }}">
                     <span class="panel-icon">
                        <i class="fas fa-sign-out-alt"></i>
