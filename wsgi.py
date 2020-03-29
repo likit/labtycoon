@@ -21,6 +21,7 @@ admin.add_view(ModelView(LabQuanTestRecord, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
 admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
+admin.add_view(ModelView(LabCustomer, db.session, category='Customers'))
 
 
 @app.template_filter('humanizedt')

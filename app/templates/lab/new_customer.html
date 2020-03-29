@@ -1,18 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <div class="field">
-        <label class="label">{{ form.title.label }}</label>
-        <div class="control">
-            {{ form.title(class="input") }}
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-one-third is-offset-4">
+                <form method="post" class="box">
+                    {{ form.hidden_tag() }}
+                    <div class="field">
+                        <label class="label">{{ form.title.label }}</label>
+                        <div class="control">
+                            <div class="select">
+                                {{ form.title(class="input") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">{{ form.firstname.label }}</label>
+                        <div class="control">
+                            {{ form.firstname(class="input") }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">{{ form.lastname.label }}</label>
+                        <div class="control">
+                            {{ form.lastname(class="input") }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">{{ form.gender.label }}</label>
+                        <div class="control">
+                            <div class="select">
+                                {{ form.gender(class="input") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">{{ form.dob.label }}</label>
+                        <div class="control">
+                            {{ form.dob(class="input") }}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="field is-grouped is-grouped-centered">
+                        <div class="control">
+                            <button class="button is-success is-rounded" type="submit">Add</button>
+                        </div>
+                        <div class="control">
+                            <a href="" class="button is-rounded is-danger">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</form>
-</body>
-</html>
+    </section>
+{% endblock %}
