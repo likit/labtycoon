@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% endblock %}
+{% block content %}
+    <section class="hero is-info is-large">
+    <div class="hero-head">
+        {% include "nav.html" %}
+    </div>
+    <div class="hero-body">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-two-thirds">
+                    <div class="box">
+                        <h1 class="title has-text-black"><span>Welcome to</span><span class="has-text-info"> Lab Tycoon</span></h1>
+                        <h1 class="subtitle has-text-black">
+                            Open Source Laboratory Information System for Education
+                        </h1>
+                        <div class="buttons">
+                            <a href="{{ url_for('main.index') }}" class="button is-success is-rounded">Enter</a>
+                            <a href="{{ url_for('main.about') }}" class="button is-info is-rounded">About</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}
