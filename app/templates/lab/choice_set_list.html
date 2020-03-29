@@ -11,6 +11,17 @@
         </div>
         <div class="columns">
             <div class="column">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <p class="notification is-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
                 <div class="buttons is-right">
                     <a class="button is-success is-rounded">
                         <span class="icon">
@@ -49,15 +60,18 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="icon">
-                                    <i class="fas fa-trash"></i>
-                                </span>
+                                <a href="{{ url_for('lab.remove_choice_item', lab_id=lab.id, choice_set_id=cs.id, choice_item_id=ci.id) }}">
+                                    <span class="icon">
+                                        <i class="fas fa-trash"></i>
+                                    </span>
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
                     <tr>
                         <td colspan="4">
-                            <a href="" class="button is-info is-rounded">
+                            <a href="{{ url_for('lab.add_choice_item', lab_id=lab.id, choice_set_id=cs.id) }}"
+                               class="button is-info is-rounded">
                                 <span class="icon">
                                     <i class="fas fa-plus-circle"></i>
                                 </span>

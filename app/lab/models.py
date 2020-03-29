@@ -3,6 +3,19 @@ from app.main.models import Laboratory
 from app.auth.models import User
 
 
+class LabActivity(db.Model):
+    __tablename__ = 'lab_activities'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    actor_id = db.Column('actor_id', db.ForeignKey('user.id'))
+    actor = db.relationship(User, backref=db.backref('activities'))
+    message = db.Column('message', db.String(), nullable=False)
+    detail = db.Column('detail', db.String())
+    added_at = db.Column('added_at', db.DateTime(timezone=True))
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('member_activities'))
+
+
+
 class LabResultChoiceSet(db.Model):
     __tablename__ = 'lab_result_choice_set'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)

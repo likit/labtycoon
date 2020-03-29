@@ -20,6 +20,7 @@ admin.add_view(ModelView(LabQuanTestRecordSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabQuanTestRecord, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
+admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
 
 
 @app.template_filter('humanizedt')
