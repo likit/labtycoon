@@ -47,6 +47,15 @@ class LabQuanTestForm(FlaskForm):
     active = BooleanField('Active', default='checked')
 
 
+class LabQualTestForm(FlaskForm):
+    name = StringField('Name', validators=[
+        InputRequired()
+    ])
+    detail = TextField('Detail')
+    choice_sets = SelectField('Choice Sets', coerce=int)
+    active = BooleanField('Active', default='checked')
+
+
 class LabCustomerForm(ModelForm):
     class Meta:
         model = LabCustomer
