@@ -3,6 +3,34 @@ from app.main.models import Laboratory
 from app.auth.models import User
 
 
+class LabCustomer(db.Model):
+    __tablename__ = 'lab_customers'
+    # id is used as an HN
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column('title', db.String(), info={'label': 'Title',
+                                                  'choices': [(t,t) for t in ['นาย',
+                                                                              'นาง',
+                                                                              'นางสาว',
+                                                                              'เด็กหญิง',
+                                                                              'เด็กชาย',
+                                                                              'พระภิกษุ',
+                                                                              'สามเณร']]})
+    firstname = db.Column('firstname', db.String())
+    lastname = db.Column('lastname', db.String())
+    dob = db.Column('dob', db.Date())
+    gender = db.Column('gender', db.String(), info={'label': 'Gender',
+                                                    'choices': [(g, g) for g in ['ชาย', 'หญิง']]})
+    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
+    lab = db.relationship(Laboratory, backref=db.backref('customers'))
+
+    @property
+    def fullname(self):
+        return '{}{} {}'.format(self.title, self.firstname, self.lastname)
+
+    def __str__(self):
+        return self.fullname
+
+
 class LabActivity(db.Model):
     __tablename__ = 'lab_activities'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
