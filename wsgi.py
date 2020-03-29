@@ -9,3 +9,6 @@ app = create_app()
 
 from app.auth.models import *
 admin.add_view(ModelView(User, db.session, category='Users'))
+
+from app.main.models import *
+admin.add_view(ModelView(Laboratory, db.session, category='Labs'))
