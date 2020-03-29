@@ -23,7 +23,8 @@
         <div class="columns">
             <div class="column">
                 <div class="buttons is-right">
-                    <a class="button is-success is-rounded">
+                    <a class="button is-success is-rounded"
+                        href="{{ url_for('lab.add_choice_set', lab_id=lab.id) }}">
                         <span class="icon">
                             <i class="fas fa-plus-circle"></i>
                         </span>
@@ -42,11 +43,17 @@
                             <i class="fas fa-pencil-alt"></i>
                         </span>
                     </a>
+                    <a href="{{ url_for('lab.remove_choice_set', lab_id=lab.id, choice_set_id=cs.id) }}">
+                        <span class="icon">
+                            <i class="fas fa-trash"></i>
+                        </span>
+                    </a>
                 </h1>
                 <table class="table is-striped box">
                     <thead>
                     <th>Result</th>
                     <th>Interpretation</th>
+                    <th>Reference value</th>
                     <th colspan="2"></th>
                     </thead>
                     <tbody>
@@ -54,6 +61,13 @@
                         <tr>
                             <td>{{ ci.result }}</td>
                             <td>{{ ci.interpretation }}</td>
+                            <td>
+                                {% if ci.ref %}
+                                <span class="icon">
+                                    <i class="fas fa-check-circle has-text-success"></i>
+                                </span>
+                                {% endif %}
+                            </td>
                             <td>
                                 <span class="icon">
                                     <i class="fas fa-pencil-alt"></i>
@@ -69,9 +83,9 @@
                         </tr>
                     {% endfor %}
                     <tr>
-                        <td colspan="4">
+                        <td colspan="5">
                             <a href="{{ url_for('lab.add_choice_item', lab_id=lab.id, choice_set_id=cs.id) }}"
-                               class="button is-info is-rounded">
+                               class="button is-info is-rounded is-small">
                                 <span class="icon">
                                     <i class="fas fa-plus-circle"></i>
                                 </span>

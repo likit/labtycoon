@@ -3,6 +3,13 @@ from wtforms import BooleanField, StringField
 from wtforms.validators import InputRequired
 
 
+class ChoiceSetForm(FlaskForm):
+    name = StringField('Name', validators=[
+        InputRequired()
+    ])
+    reference = StringField('Reference')
+
+
 class ChoiceItemForm(FlaskForm):
     result = StringField('Result', validators=[
         InputRequired()
