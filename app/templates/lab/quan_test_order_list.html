@@ -35,7 +35,7 @@
                                 <td>{{ qtest.id }}</td>
                                 <td>{{ qtest.ordered_at|humanizedt }}</td>
                                 <td>{{ qtest.customer.id }}</td>
-                                <td>{{ qtest.customer.title }}{{ qtest.customer }}</td>
+                                <td>{{ qtest.customer }}</td>
                                 <td>{{ qtest.test.name }}</td>
                                 <td>{{ qtest.ordered_by }}</td>
                                 <td>
@@ -59,7 +59,7 @@
                                     <td>{{ qtest.id }}</td>
                                     <td>{{ qtest.ordered_at|humanizedt }}</td>
                                     <td>{{ qtest.customer.id }}</td>
-                                    <td>{{ qtest.customer.title }}{{ qtest.customer }}</td>
+                                    <td>{{ qtest.customer }}</td>
                                     <td>{{ qtest.test.name }}</td>
                                     <td>{{ qtest.ordered_by }}</td>
                                     <td>
@@ -89,6 +89,13 @@
                     <i class="fas fa-chevron-left"></i>
                 </span>
                 <span>Back</span>
+            </a>
+            <a href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}"
+               class="button is-info is-rounded">
+                <span class="icon">
+                    <i class="far fa-clock"></i>
+                </span>
+                <span>Pending orders</span>
             </a>
         </div>
     </div>

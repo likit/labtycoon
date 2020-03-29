@@ -327,6 +327,8 @@ def cancel_quan_test_order(lab_id, order_id):
     db.session.add(activity)
     db.session.commit()
     flash('The order has been cancelled.', 'success')
+    if request.args.get('pending'):
+        return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
 
 
@@ -367,6 +369,8 @@ def cancel_qual_test_order(lab_id, order_id):
     db.session.add(activity)
     db.session.commit()
     flash('The order has been cancelled.', 'success')
+    if request.args.get('pending'):
+        return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
 
 
@@ -388,3 +392,10 @@ def receive_qual_test_order(lab_id, order_id):
     db.session.commit()
     flash('The order has been received.', 'success')
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+
+
+@lab.route('/<int:lab_id>/orders/pending', methods=['GET', 'POST'])
+@login_required
+def list_pending_orders(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/pending_orders.html', lab=lab)
