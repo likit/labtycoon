@@ -21,6 +21,9 @@ def create_app():
     from app.auth import auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
+    from app.lab import lab_blueprint
+    app.register_blueprint(lab_blueprint, url_prefix='/lab')
+
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')

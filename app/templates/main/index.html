@@ -17,8 +17,16 @@
                     </div>
                     <div class="card-footer">
                         <div class="card-footer-item">
-                            <a class="button is-info is-rounded"
-                                href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">Join</a>
+                            <a class="button is-primary is-rounded"
+                                href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
+                                Join
+                            </a>
+                        </div>
+                        <div class="card-footer-item">
+                            <a class="button is-success is-rounded"
+                               href="{{ url_for('lab.landing', lab_id=lab.id) }}">
+                                Enter
+                            </a>
                         </div>
                     </div>
                     </div>
