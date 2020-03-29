@@ -45,6 +45,7 @@ def register():
         if form.validate_on_submit():
             firstname = request.form.get('firstname')
             lastname = request.form.get('lastname')
+            license_id = request.form.get('license_id')
             email = request.form.get('email')
             password = request.form.get('password')
             existing_username = User.query.filter_by(email=email).first()
@@ -54,6 +55,7 @@ def register():
                 user = User(firstname=firstname,
                             lastname=lastname,
                             email=email,
+                            license_id=license_id,
                             password=password)
                 db.session.add(user)
                 db.session.commit()

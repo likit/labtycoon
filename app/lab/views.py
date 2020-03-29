@@ -10,11 +10,16 @@ from .models import (LabResultChoiceItem, LabActivity,
                      LabCustomer, LabQuanTestOrder,
                      LabQualTest, LabQualTestOrder
                      )
+from app.main.models import UserLabAffil
 
 
 @lab.route('/<int:lab_id>')
 @login_required
 def landing(lab_id):
+    affil = UserLabAffil.query.filter_by(lab_id=lab_id, user_id=current_user.id).first()
+    if not affil:
+        flash('You do not have a permission to enter this lab.', 'danger')
+        return redirect(url_for('main.index'))
     lab = Laboratory.query.get(lab_id)
     return render_template('lab/index.html', lab=lab)
 

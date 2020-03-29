@@ -11,7 +11,10 @@ class User(db.Model):
     license_id = db.Column('license_id', db.String())
     pwdhash = db.Column('pwdhash', db.String())
 
-    def __init__(self, firstname, lastname, email, password):
+    def __init__(self, firstname, lastname, email, password, license_id):
+        self.firstname = firstname
+        self.lastname = lastname
+        self.license_id = license_id
         self.email = email
         self.pwdhash = generate_password_hash(password)
 

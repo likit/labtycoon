@@ -1,19 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import TextField, PasswordField
+from wtforms import TextField, PasswordField, StringField
 from wtforms.validators import Email, InputRequired, EqualTo
 
 
 class RegistrationForm(FlaskForm):
-    firstname = TextField('First Name', [
+    firstname = StringField('First Name', [
         InputRequired()
     ])
-    lastname = TextField('Last Name', [
+    lastname = StringField('Last Name', [
         InputRequired()
     ])
-    license_id = TextField('License ID', [
+    license_id = StringField('License ID', [
         InputRequired()
     ])
-    email = TextField('Email', [
+    email = StringField('Email', [
         InputRequired(),
         Email()
     ])
