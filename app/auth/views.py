@@ -1,9 +1,14 @@
 from . import auth_blueprint as auth
-from app import db
-from flask_login import login_required, login_user,  logout_user
+from app import db, login_manager
+from flask_login import login_required, login_user,  logout_user, current_user
 from flask import render_template, request, flash, redirect, url_for
 from .forms import LoginForm, RegistrationForm
 from .models import User
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -13,16 +18,24 @@ def login():
         if form.validate_on_submit():
             email = request.form.get('email')
             password = request.form.get('password')
-            existing_username = User.query.filter_by(email=email).first()
-            if not existing_username:
+            existing_user = User.query.filter_by(email=email).first()
+            if not existing_user:
                 flash('The email is not registered. Please register the email.', 'danger')
                 return redirect(url_for('auth.register'))
             else:
-                if existing_username.check_password(password):
-                    return 'user has logged in.'
+                if existing_user.check_password(password):
+                    login_user(existing_user)
+                    return redirect(url_for('main.index'))
         else:
             flash(form.errors, 'danger')
     return render_template('/auth/login.html', form=form)
+
+
+@auth.route('/logout')
+def logout():
+    if current_user.is_authenticated:
+        logout_user()
+    return redirect(url_for('main.index'))
 
 
 @auth.route('/register', methods=['GET', 'POST'])
