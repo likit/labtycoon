@@ -49,6 +49,15 @@
                 </div>
             </div>
         </div>
+        <div class="buttons is-centered">
+            <a href="{{ url_for('lab.landing', lab_id=lab.id) }}"
+               class="button is-light is-rounded">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                <span>Back</span>
+            </a>
+        </div>
     </div>
     </section>
 {% endblock %}

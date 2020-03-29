@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <p class="notification is-{{ category }}">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-one-third is-offset-4">
+                    <form method="post" class="box">
+                        {{ form.hidden_tag() }}
+                        <div class="field">
+                            <label class="label">{{ form.name.label }}</label>
+                            <div class="control">
+                                {{ form.name(class="input") }}
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.detail.label }}</label>
+                            <div class="control">
+                                {{ form.detail(class="textarea") }}
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.choice_sets.label }}</label>
+                            <div class="control">
+                                <div class="select">
+                                    {{ form.choice_sets() }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">{{ form.active.label }}</label>
+                            <div class="control">
+                                {{ form.active(class="checkbox") }}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control">
+                                <button class="button is-success">Add</button>
+                            </div>
+                            <div class="control">
+                                <a class="button is-danger">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
