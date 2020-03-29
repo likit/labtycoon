@@ -24,7 +24,9 @@
                         <th>Ordered At</th>
                         <th>H.N.</th>
                         <th>Customer</th>
+                        <th>Test FK</th>
                         <th>Test Name</th>
+                        <th>Ordered By FK</th>
                         <th>Ordered By</th>
                         <th></th>
                         </thead>
@@ -32,10 +34,32 @@
                         {% for qtest in lab.quan_test_orders %}
                             {% if not qtest.cancelled_at and qtest.received_at %}
                                 <tr>
-                                    <td>{{ qtest.id }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                        <span>{{ qtest.id }}</span>
+                                    </td>
                                     <td>{{ qtest.ordered_at|humanizedt }}</td>
-                                    <td>{{ qtest.customer.id }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.customer.id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.customer.id }}</span>
+                                    </td>
                                     <td>{{ qtest.customer }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.test.id }}</span>
+                                    </td>
                                     <td>{{ qtest.test.name }}</td>
                                     <td>{{ qtest.ordered_by }}</td>
                                     <td>
@@ -52,11 +76,33 @@
                         {% for qtest in lab.qual_test_orders %}
                             {% if not qtest.cancelled_at and qtest.received_at %}
                                 <tr>
-                                    <td>{{ qtest.id }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                        <span>{{ qtest.id }}</span>
+                                    </td>
                                     <td>{{ qtest.ordered_at|humanizedt }}</td>
-                                    <td>{{ qtest.customer.id }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.customer.id }}</span>
+                                    </td>
                                     <td>{{ qtest.customer }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.test.id }}</span>
+                                    </td>
                                     <td>{{ qtest.test.name }}</td>
+                                    <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                        <span>{{ qtest.ordered_by_id }}</span>
+                                    </td>
                                     <td>{{ qtest.ordered_by }}</td>
                                     <td>
                                         <div class="buttons is-centered">

@@ -11,6 +11,14 @@
         </div>
         <div class="columns">
             <div class="column">
+                <p class="notification is-info">
+                    ชุดคำตอบออกแบบมาเพื่อการทดสอบที่มีการตอบแบบตายตัวตามหลักเกณฑ์เช่น grading ซึ่งสามารถใช้กับหลายการทดสอบได้ การแยกตารางคำตอบออกมา
+                    ทำให้สะดวกในการแก้ไขและใช้ซ้ำในหลายๆ การทดสอบ ในระบบนี้ผู้ใช้สามารถเพิ่มเกณฑ์หรือการตอบได้ตามต้องการ
+                </p>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -37,7 +45,7 @@
             <div class="column">
             {% for cs in lab.choice_sets %}
                 <h1 class="title is-size-5 is-link">
-                    <span class="title is-size-5">{{ cs.name }}</span>
+                    <span class="title is-size-5">PK={{ cs.id }} {{ cs.name }}</span>
                     <a>
                         <span class="icon">
                             <i class="fas fa-pencil-alt"></i>
@@ -51,6 +59,7 @@
                 </h1>
                 <table class="table is-striped box">
                     <thead>
+                    <th>PK</th>
                     <th>Result</th>
                     <th>Interpretation</th>
                     <th>Reference value</th>
@@ -59,6 +68,12 @@
                     <tbody>
                     {% for ci in cs.choice_items %}
                         <tr>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <span>{{ ci.id }}</span>
+                            </td>
                             <td>{{ ci.result }}</td>
                             <td>{{ ci.interpretation }}</td>
                             <td>
@@ -83,7 +98,7 @@
                         </tr>
                     {% endfor %}
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             <a href="{{ url_for('lab.add_choice_item', lab_id=lab.id, choice_set_id=cs.id) }}"
                                class="button is-info is-rounded is-small">
                                 <span class="icon">

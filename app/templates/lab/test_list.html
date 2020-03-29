@@ -11,11 +11,24 @@
         </div>
         <div class="columns">
             <div class="column">
-                <p class="title is-size-5 has-text-centered">Quantitative</p>
+                <p class="notification is-info is-light">
+                    ระบบฐานข้อมูลนี้ออกแบบมาโดยแยกการทดสอบออกเป็นสองประเภทได้แก่ Quatitative กับ Qualitative เนื่องจากการจัดเก็บข้อมูลและค่าอ้างอิงจะมีความแตกต่างกัน
+                    ตาราง Test นี้จะบันทึกข้อมูลที่เกี่ยวข้องกับการทดสอบเท่านั้น ไม่เก็บผลการทดสอบเนื่องจากการทดสอบชนิดเดียวสามารถมีผลการทดสอบจำนวนมาก การแยกข้อมูลการทดสอบ
+                    ออกมาทำให้สามารถลดความซ้ำซ้อนของข้อมูลได้
+                </p>
+                <p class="notification is-warning">
+                <span class="icon is-large">
+                    <i class="fas fa-question fa-2x"></i>
+                </span>
+                    <span>
+                    นักเรียนคิดว่าข้อมูลใดอีกบ้างที่ควรจัดเก็บลงไว้ในตารางการทดสอบดังตัวอย่างด้านล่าง
+                </span>
+                </p>
             </div>
         </div>
         <div class="columns">
             <div class="column">
+            <p class="title is-size-5 has-text-centered">Quantitative</p>
             <div class="box">
                 <div class="buttons is-right">
                     <a class="button is-success is-rounded"
@@ -28,6 +41,7 @@
                 </div>
                 <table class="table is-striped">
                     <thead>
+                    <th>Primary Key</th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Choice Set</th>
@@ -41,9 +55,20 @@
                     <tbody>
                     {% for test in lab.quant_tests %}
                         <tr>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <span>{{ test.id }}</span>
+                            </td>
                             <td>{{ test.name }}</td>
                             <td>{{ test.detail }}</td>
-                            <td>{{ test.choice_set }}</td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <span>{{ test.choice_set.id }} {{ test.choice_set }}</span>
+                            </td>
                             <td>{{ test.min_value }}</td>
                             <td>{{ test.max_value }}</td>
                             <td>{{ test.min_ref_value }}</td>
@@ -85,6 +110,7 @@
                 </div>
                 <table class="table is-striped is-fullwidth">
                     <thead>
+                    <th>Primary Key</th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Choice Set</th>
@@ -94,9 +120,19 @@
                     <tbody>
                     {% for test in lab.qual_tests %}
                         <tr>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <span>{{ test.id }}</span>
+                            </td>
                             <td>{{ test.name }}</td>
                             <td>{{ test.detail }}</td>
-                            <td>{{ test.choice_set }}</td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <span>{{ test.choice_set.id }} {{ test.choice_set }}</span></td>
                             <td>{{ test.added_at|humanizedt }}</td>
                             <td>
                                 {% if test.active %}
