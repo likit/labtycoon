@@ -1,5 +1,6 @@
 from app import create_app, db, admin
 from dotenv import load_dotenv
+from flask import render_template
 from flask_admin.contrib.sqla import ModelView
 import arrow
 
@@ -22,6 +23,11 @@ admin.add_view(ModelView(LabResultChoiceSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
 admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
 admin.add_view(ModelView(LabCustomer, db.session, category='Customers'))
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.template_filter('humanizedt')
