@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <section class="hero is-danger">
+    <section class="hero is-light">
     <div class="hero-body">
         <div class="container">
             <h1 class="title">
@@ -11,6 +11,17 @@
     </div>
     </section>
     <section class="section">
+    <div class="columns">
+        <div class="column">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="notification is-{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
     <div class="columns">
         <div class="column is-one-third is-offset-4">
             <nav class="panel is-primary">
