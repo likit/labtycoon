@@ -32,9 +32,11 @@ def request_join_lab(lab_id):
     lab = Laboratory.query.get(lab_id)
     if existing_affil_record:
         if not existing_affil_record.approved:
-            return 'you are already sent a request.'
+            flash('You already sent a request. Please wait to be approved.', 'warning')
+            return redirect(url_for('main.index'))
         else:
-            return 'you are already affiliated with this lab.'
+            flash('You already affiliate with this lab.', 'success')
+            return redirect(url_for('lab.landing', lab_id=lab_id))
     else:
         affil_record = UserLabAffil(
             user=current_user,
