@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="tabs is-centered is-boxed">
+            <ul>
+                <li class="is-active"><a>Tests</a></li>
+                <li><a>Result Choice Sets</a></li>
+            </ul>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <p class="title is-size-5 has-text-centered">Quantitative</p>
+                <div class="buttons is-right">
+                    <a class="button is-success is-rounded">
+                        <span class="icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </span>
+                        <span>Add</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <table class="table is-striped box">
+                    <thead>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Choice Set</th>
+                    <th>Min Value</th>
+                    <th>Max Value</th>
+                    <th>Ref. Min Value</th>
+                    <th>Ref. Max Value</th>
+                    <th>Added at</th>
+                    <th>Active</th>
+                    </thead>
+                    <tbody>
+                    {% for test in lab.quant_tests %}
+                        <tr>
+                        <td>{{ test.name }}</td>
+                        <td>{{ test.detail }}</td>
+                        <td>{{ test.choice_set }}</td>
+                        <td>{{ test.min_value }}</td>
+                        <td>{{ test.max_value }}</td>
+                        <td>{{ test.min_ref_value }}</td>
+                        <td>{{ test.max_ref_value }}</td>
+                        <td>{{ test.added_at|humanizedt }}</td>
+                        <td>
+                            {% if test.active %}
+                                <span class="icon">
+                                    <i class="fas fa-check-circle has-text-success"></i>
+                                </span>
+                            {% else %}
+                                <span class="icon">
+                                    <i class="fas fa-minus-circle has-text-danger"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <p class="title is-size-5 has-text-centered">Qualitative</p>
+                <div class="buttons is-right">
+                    <a class="button is-success is-rounded">
+                        <span class="icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </span>
+                        <span>Add</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <table class="table is-striped box">
+                    <thead>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Choice Set</th>
+                    <th>Min Value</th>
+                    <th>Max Value</th>
+                    <th>Ref. Min Value</th>
+                    <th>Ref. Max Value</th>
+                    <th>Added at</th>
+                    <th>Active</th>
+                    </thead>
+                    <tbody>
+                    {% for test in lab.quant_tests %}
+                        <tr>
+                            <td>{{ test.name }}</td>
+                            <td>{{ test.detail }}</td>
+                            <td>{{ test.choice_set }}</td>
+                            <td>{{ test.min_value }}</td>
+                            <td>{{ test.max_value }}</td>
+                            <td>{{ test.min_ref_value }}</td>
+                            <td>{{ test.max_ref_value }}</td>
+                            <td>{{ test.added_at|humanizedt }}</td>
+                            <td>
+                                {% if test.active %}
+                                    <span class="icon">
+                                    <i class="fas fa-check-circle has-text-success"></i>
+                                </span>
+                                {% else %}
+                                    <span class="icon">
+                                    <i class="fas fa-minus-circle has-text-danger"></i>
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    </section>
+{% endblock %}

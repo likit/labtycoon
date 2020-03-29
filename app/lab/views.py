@@ -7,3 +7,9 @@ from app.main.models import Laboratory
 def landing(lab_id):
     lab = Laboratory.query.get(lab_id)
     return render_template('lab/index.html', lab=lab)
+
+
+@lab.route('/<int:lab_id>/tests')
+def list_tests(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    return render_template('lab/test_list.html', lab=lab)
