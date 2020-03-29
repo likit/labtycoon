@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                {% for lab in labs %}
+                    <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            {{ lab.name }}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p>{{ lab.desc }}</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-footer-item">
+                            <a class="button is-info">Join</a>
+                        </div>
+                    </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}

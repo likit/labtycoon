@@ -15,6 +15,8 @@ class Laboratory(db.Model):
     desc = db.Column('description', db.Text())
     created_at = db.Column('created_at', db.DateTime(timezone=True))
     active = db.Column('active', db.Boolean(), default=True)
+    creator_id = db.Column('creator_id', db.ForeignKey('user.id'))
+    creator = db.relationship(User, backref=db.backref('user', lazy=True))
     members = db.relationship(User,
                               secondary=user_lab_tables,
                               lazy='subquery',
