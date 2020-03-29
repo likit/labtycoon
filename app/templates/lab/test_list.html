@@ -13,7 +13,8 @@
             <div class="column">
                 <p class="title is-size-5 has-text-centered">Quantitative</p>
                 <div class="buttons is-right">
-                    <a class="button is-success is-rounded">
+                    <a class="button is-success is-rounded"
+                        href="{{ url_for('lab.add_quan_test', lab_id=lab.id) }}">
                         <span class="icon">
                             <i class="fas fa-plus-circle"></i>
                         </span>
