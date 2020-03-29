@@ -20,6 +20,8 @@ class Laboratory(db.Model):
     def num_approved_members(self):
         return len([m for m in self.lab_members if m.approved])
 
+    def __str__(self):
+        return self.name
 
 
 class UserLabAffil(db.Model):
