@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title">LIS Components</h1>
+                    <article class="notification">
+                        <p>
+                            ส่วนประกอบหลักของระบบสารสนเทศประกอบไปด้วย
+                        </p>
+                        <br>
+                        <ol>
+                            <li>ระบบคอมพิวเตอร์แม่ข่ายหรือ server สำหรับติดตั้งระบบฐานข้อมูลและระบบ LIS</li>
+                            <li>ระบบโปรแกรมลูกข่ายหรือ client</li>
+                            <li>ระบบฐานข้อมูล</li>
+                            <li>อุปกรณ์ต่อพ่วงเช่น scanner, printer เป็นต้น</li>
+                            <li>อุปกรณ์สำหรับรันระบบ client เช่นคอมพิวเตอร์ โทรศัพท์มือถือ tablet เป็นต้น</li>
+                        </ol>
+                        <br>
+                        <p>
+                            <h1 class="title is-size-4">รูปแสดงส่วนประกอบของระบบสารสนเทศโดยรวม</h1>
+                            <img src="{{ url_for('static', filename='img/liscomponents.png') }}">
+                        </p>
+                        <p>
+                            จากรูประบบคอมพิวเตอร์แม่ข่ายหรือ server ทำหน้าที่รับคำร้องขอหรือ request มาจากระบบลูกข่ายหรือ client ที่ติดตั้งอยู่บนคอมพิวเตอร์หรืออุปกรณ์ต่างๆ
+                            จากนั้นระบบจะประมวลผลเช่นอ่านข้อมูลจากฐานข้อมูลหรือบันทึกข้อมูลลงฐานข้อมูลและส่งต่อกลับไปยังระบบลูกข่าย (response) ซึ่งรูปแบบการส่งต่อข้อมูลมีหลายรูปแบบ
+                            และรูปแบบ (format) ของข้อมูลก็หลากลายแล้วแต่ระบบ ทั้งนี้ระบบอาจเชื่อมต่อกันผ่านระบบเครือข่ายภายใน (Local Area Network: LAN) หรือระบบ Internet
+                            ก็ได้ ในปัจจุบันระบบแม่ข่ายสามารถติดตั้งบนระบบ cloud ซึ่งมีข้อดีหลายข้อเมื่อเทียบกับระบบที่ติดตั้งภายในองค์กรเองหรือที่เรียกว่า on-premise setup
+                        </p>
+                        <br>
+                        <p>
+                            ทั้งนี้ระบบ Lab Tycoon ที่ใช้นี้ติดตั้งบนระบบ cloud ที่รวมถึงระบบ database ที่เรียกว่า managed database ที่เราสามารถใช้งานได้ทันทีโดยไม่ต้องติดตั้งและ
+                            ดูแลระบบเอง การส่งข้อมูลผ่านระบบ Internet เท่านั้นและโปรแกรมลูกข่ายเป็นระบบ web application จึงไม่ต้องติดตั้งบนเครื่องคอมพิวเตอร์หรืออุปกรณ์ใดๆ
+                            สามารถใช้งานได้ผ่านโปรแกรม web browser เช่น Google Chrome, Firefox, Safari ได้ทันที ซึ่งระบบสารสนเทศในปัจจุบันแม้ว่าจะไม่ได้ติดตั้งบนระบบ cloud
+                            แต่ก็พัฒนาระบบลูกข่ายให้ทำงานผ่าน web browser เช่นกันเนื่องจากความสะดวกในการพัฒนา ปรับปรุงและสามารถใช้งานได้โดยไม่ต้องติดตั้ง
+                        </p>
+                    </article>
+                    <div class="buttons is-centered">
+                        <a href="{{ url_for('doc.data_management') }}" class="button is-info is-rounded">
+                        <span class="icon">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                            <span>Next</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
