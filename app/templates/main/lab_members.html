@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <p class="notification is-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <p class="notification">
+                    <span class="icon">
+                        <i class="fas fa-user-clock has-text-danger"></i>
+                    </span>
+                    <span>Pending ({{ lab.num_pending_members }})</span>
+                    <span class="icon">
+                        <i class="fas fa-user-check has-text-success"></i>
+                    </span>
+                    <span>Approved ({{ lab.num_approved_members }})</span>
+                </p>
+                <table class="table is-striped is-fullwidth">
+                    <thead>
+                    <th>No.</th>
+                    <th>Name</th>
+                    <th>Joined at</th>
+                    <th colspan="2">Approved</th>
+                    </thead>
+                    <tbody>
+                    {% for member in lab.lab_members %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ member.user.fullname }}</td>
+                            <td>{{ member.joined_at|humanizedt }}
+                            <td>
+                                {% if not member.approved %}
+                                    <span class="icon">
+                            <i class="fas fa-user-clock has-text-danger"></i>
+                        </span>
+                                {% else %}
+                                    <span class="icon">
+                            <i class="fas fa-user-check has-text-success"></i>
+                        </span>
+                                {% endif %}
+                            </td>
+                            {% if current_user == lab.creator and not member.approved %}
+                                <td>
+                                    <a class="button is-text"
+                                       href="{{ url_for('main.approve_member', lab_id=lab.id, user_id=member.user.id) }}">
+                                        approve
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}
