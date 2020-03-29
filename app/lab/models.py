@@ -41,7 +41,7 @@ class LabQuanTest(db.Model):
     active = db.Column('active', db.Boolean(), default=True)
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('tests'))
+    lab = db.relationship(Laboratory, backref=db.backref('quant_tests'))
 
     def __str__(self):
         return self.name
