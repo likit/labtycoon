@@ -4,10 +4,22 @@
     <section class="section">
         <div class="container">
             <div class="columns">
+                <div class="column">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <p class="notification is-{{ category }}">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="columns">
                 <div class="column is-one-third is-offset-4 box">
                     <h1 class="title is-size-3 has-text-centered">Login</h1>
                     <hr>
                     <form method="post">
+                        {{ form.hidden_tag() }}
                         <div class="field">
                             <label class="label">{{ form.email.label }}</label>
                             <div class="control">

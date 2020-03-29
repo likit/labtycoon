@@ -1,13 +1,37 @@
 {% extends "base.html" %}
 
+{% block styles %}
+    {{ super() }}
+    <style>
+        #userDiagramDiv {
+            width: 300px;
+            height: 300px;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <section class="section">
         <div class="container">
             <div class="columns">
-                <div class="column is-one-third is-offset-4 box">
+                <div class="column">
+                   {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <p class="notification is-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-one-third is-offset-2">
+                    <div class="box">
                     <h1 class="title is-size-3 has-text-centered">User Registration</h1>
                     <hr>
                     <form method="post">
+                        {{ form.hidden_tag() }}
                         <div class="field">
                             <label class="label">{{ form.firstname.label }}</label>
                             <div class="control">
@@ -53,8 +77,86 @@
                             </div>
                         </div>
                     </form>
+                    </div>
+                </div>
+                <div class="column is-one-third">
+                    <div class="notification is-info is-light">
+                        <div class="has-text-centered">
+                            <span class="title is-size-5">User registration</span>
+                        </div>
+                        <p>ระบบ LIS จำเป็นต้องมีการลงทะเบียนเพื่อระบุตัวตนของผู้ใช้งานเพื่อการติดตามบันทึกกิจการใช้งานเพื่อให้สามารถตรวจสอบย้อนหลังได้ รวมทั้งการใช้ข้อมูลของผู้ใช้งานในการรับรองผล (approve) และรายงานผล (report)
+                        ประกอบไปด้วยข้อมูลเช่นชื่อ นามสกุล ตำแหน่ง สังกัด หมายเลขใบประกอบวิชาชีพเป็นต้น ซึ่งข้อมูลจะบันทึกในฐานข้อมูลในรูปแบบของบัญชีผู้ใช้หรือ User Account</p>
+                        <hr>
+                        <h1 class="title is-size-6">User Account Table</h1>
+                        <table class="table is-fullwidth is-bordered is-narrow">
+                            <tr>
+                                <td>ID</td>
+                                <td>Integer</td>
+                                <td>PK</td>
+                            </tr>
+                            <tr>
+                                <td>First Name</td>
+                                <td>Text</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Last Name</td>
+                                <td>Text</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>Text</td>
+                                <td>Unique</td>
+                            </tr>
+                            <tr>
+                                <td>License ID</td>
+                                <td>Text</td>
+                                <td>Unique</td>
+                            </tr>
+                            <tr>
+                                <td>Password</td>
+                                <td>Text</td>
+                                <td>Encrypted</td>
+                            </tr>
+                        </table>
+                        <ul>
+                            <li class="help">
+                                *PK หมายถึง primary key ไว้ใช้อ้างอิงข้อมูลแต่ละรายการหรือระหว่างตารางข้อมูลซึ่งข้อมูลนี้มักจะไม่ซ้ำกัน
+                            </li>
+                            <li class="help">
+                                *Unique หมายถึงข้อมูลที่ห้ามซ้ำกันในแต่ละตารางข้อมูล
+                            </li>
+                            <li class="help">
+                                *Encrypted หมายถึงข้อมูลที่มีการเข้ารหัส
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="userDiagramDiv"></div>
                 </div>
             </div>
         </div>
     </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.14.1/dist/cytoscape.min.js"></script>
+    <script>
+    var cy = cytoscape({
+        container: document.getElementById('userDiagramDiv'), // container to render in
+        elements: [
+            {
+                data: {id: 'UserAccount'}
+            },
+        ],
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'label': 'data(id)'
+                }
+            }
+        ]
+    });
+    </script>
 {% endblock %}
