@@ -28,6 +28,12 @@
                 <p class="panel-heading">
                     Menu
                 </p>
+                <a class="panel-block" href="{{ url_for('main.list_members', lab_id=lab.id) }}">
+                    <span class="panel-icon">
+                        <i class="fas fa-vial"></i>
+                    </span>
+                    รายชื่อบุคลากรในแลบ
+                </a>
                 <a class="panel-block" href="{{ url_for('lab.list_tests', lab_id=lab.id) }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
