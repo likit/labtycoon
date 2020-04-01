@@ -18,29 +18,30 @@
             <div class="column is-one-third is-offset-4">
                 {% for lab in labs %}
                     <div class="card">
-                    <div class="card-header">
-                        <div class="card-header-title">
-                            {{ lab.name }}
+                        <div class="card-header">
+                            <div class="card-header-title">
+                                {{ lab.name }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-content">
-                        <p>{{ lab.desc }}</p>
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-footer-item">
-                            <div class="buttons is-centered">
-                                <a class="button is-info is-rounded"
-                                   href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
-                                    Request to join
-                                </a>
-                                <a class="button is-success is-rounded"
-                                   href="{{ url_for('lab.landing', lab_id=lab.id) }}">
-                                    Enter
-                                </a>
+                        <div class="card-content">
+                            <p>{{ lab.desc }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-footer-item">
+                                <div class="buttons is-centered">
+                                    <a class="button is-info is-rounded"
+                                       href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
+                                        Request to join
+                                    </a>
+                                    <a class="button is-success is-rounded"
+                                       href="{{ url_for('lab.landing', lab_id=lab.id) }}">
+                                        Enter
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    </div>
+                    <br>
                 {% endfor %}
             </div>
         </div>
