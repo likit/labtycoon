@@ -25,6 +25,7 @@ admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
 admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
 admin.add_view(ModelView(LabCustomer, db.session, category='Customers'))
 admin.add_view(ModelView(Announcement, db.session, category='Announcement'))
+admin.add_view(ModelView(UserLabAffil, db.session, category='Labs'))
 
 
 @app.route('/')
