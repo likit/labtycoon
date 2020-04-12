@@ -18,8 +18,11 @@ admin.add_view(ModelView(Laboratory, db.session, category='Labs'))
 
 from app.lab.models import *
 admin.add_view(ModelView(LabQuanTest, db.session, category='Tests'))
+admin.add_view(ModelView(LabQuanTestOrder, db.session, category='Tests'))
 admin.add_view(ModelView(LabQuanTestRecordSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabQuanTestRecord, db.session, category='Tests'))
+admin.add_view(ModelView(LabQualTest, db.session, category='Tests'))
+admin.add_view(ModelView(LabQualTestOrder, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
 admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
