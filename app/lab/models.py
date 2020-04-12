@@ -96,8 +96,8 @@ class LabQuanTest(db.Model):
 class LabQuanTestRecordSet(db.Model):
     __tablename__ = 'lab_quan_result_sets'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    test_id = db.Column('test_id', db.ForeignKey('lab_quan_tests.id'))
-    test = db.relationship(LabQuanTest, backref=db.backref('result_record_sets'))
+    order_id = db.Column('order_id', db.ForeignKey('lab_quan_test_orders.id'))
+    order = db.relationship('LabQuanTestOrder', backref=db.backref('result_record_sets'))
 
 
 class LabQuanTestRecord(db.Model):
@@ -105,12 +105,14 @@ class LabQuanTestRecord(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     record_set_id = db.Column('record_set_id', db.ForeignKey('lab_quan_result_sets.id'))
     record_set = db.relationship(LabQuanTestRecordSet, backref=db.backref('records'))
-    num_result = db.Column('num_result', db.Numeric())
+    num_result = db.Column('num_result', db.Numeric(),
+                           info={'label': 'Numeric Result'})
     text_result = db.Column('text_result', db.String())
-    comment = db.Column('comment', db.Text())
+    comment = db.Column('comment', db.Text(),
+                        info={'label': 'Comment'})
     updated_at = db.Column('updated_at', db.DateTime(timezone=True))
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
-    updated_by = db.Column('updator_id', db.ForeignKey('user.id'))
+    updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
     updator = db.relationship(User, backref=db.backref('updated_result_records'))
 
 
@@ -130,6 +132,7 @@ class LabQuanTestOrder(db.Model):
                                  foreign_keys=[ordered_by_id])
     cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
     received_at = db.Column('received_at', db.DateTime(timezone=True))
+    finished_at = db.Column('finished_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
     receiver = db.relationship(User,
                                backref=db.backref('received_quan_orders'),

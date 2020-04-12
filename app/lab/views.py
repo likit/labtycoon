@@ -4,12 +4,8 @@ from flask_login import login_required, current_user
 from app.main.models import Laboratory
 from app import db
 from . import lab_blueprint as lab
-from .forms import ChoiceItemForm, ChoiceSetForm, LabQuanTestForm, LabCustomerForm, LabQualTestForm
-from .models import (LabResultChoiceItem, LabActivity,
-                     LabResultChoiceSet, LabQuanTest,
-                     LabCustomer, LabQuanTestOrder,
-                     LabQualTest, LabQualTestOrder
-                     )
+from .forms import *
+from .models import *
 from app.main.models import UserLabAffil
 
 
@@ -411,3 +407,53 @@ def list_pending_orders(lab_id):
 def list_activities(lab_id):
     lab = Laboratory.query.get(lab_id)
     return render_template('lab/log.html', lab=lab)
+
+
+@lab.route('/<int:lab_id>/orders/<int:order_id>/finish', methods=['POST', 'GET'])
+@login_required
+def finish_quan_test_order(lab_id, order_id):
+    order = LabQuanTestOrder.query.get(order_id)
+    if order:
+        order.finished_at = arrow.now('Asia/Bangkok').datetime
+        db.session.add(order)
+        db.session.commit()
+    else:
+        flash('Order no longer exists.', 'danger')
+        return redirect(request.referrer)
+
+    record_set = LabQuanTestRecordSet.query.filter_by(order_id=order_id).first()
+    if not record_set:
+        record_set = LabQuanTestRecordSet(order_id=order_id)
+        flash('New result record set has been created for the order.', 'success')
+        db.session.add(record_set)
+        db.session.commit()
+
+    form = LabQuanTestRecordForm()
+    if order.test.choice_set:
+        choices = [(c.result, c.result) for c in order.test.choice_set.choice_items]
+    else:
+        choices = []
+    form.result_choices.choices = choices
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabQuanTestRecord()
+            form.populate_obj(new_record)
+            new_record.record_set = record_set
+            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
+            new_record.updator = current_user
+            new_record.text_result = form.result_choices.data
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Added the result for a test order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(new_record)
+            db.session.add(activity)
+            db.session.commit()
+            flash('New result record has been saved.', 'success')
+            return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('lab/new_quan_test_record.html', form=form, order=order)
