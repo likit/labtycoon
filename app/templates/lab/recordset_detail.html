@@ -25,7 +25,9 @@
                         <th>Updated at</th>
                         <th>Updated by ID</th>
                         <th>Updated by</th>
+                        {% if quan %}
                         <th>Numeric Result</th>
+                        {% endif %}
                         <th>Text Result</th>
                         <th>Status</th>
                         </thead>
@@ -52,7 +54,9 @@
                                 <span>{{ rec.updator_id }}</span>
                             </td>
                             <td>{{ rec.updator }}</td>
+                            {% if quan %}
                             <td>{{ rec.num_result or '' }}</td>
+                            {% endif %}
                             <td>{{ rec.text_result or '' }}</td>
                             <td>
                                 <span class="icon">
@@ -77,6 +81,18 @@
                     <i class="fas fa-chevron-left"></i>
                 </span>
                 <span>Back</span>
+            </a>
+            <a
+                {% if quan %}
+                    href="{{ url_for('lab.edit_quan_record', customer_id=customer.id, recordset_id=recordset.id) }}"
+                {% else %}
+                    href="{{ url_for('lab.edit_qual_record', customer_id=customer.id, recordset_id=recordset.id) }}"
+                {% endif %}
+               class="button is-danger is-rounded">
+                <span class="icon">
+                    <i class="fas fa-pencil-alt"></i>
+                </span>
+                <span>Edit</span>
             </a>
         </div>
     </div>

@@ -26,7 +26,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    <input type="text" class="input" disabled value="{{ order.customer.id }}">
+                                    <input type="text" class="input" disabled value="{{ recordset.order.customer.id }}">
                                 </div>
                             </div>
                         </div>
@@ -38,7 +38,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    <input type="text" class="input" disabled value="{{ order.customer.fullname }}">
+                                    <input type="text" class="input" disabled value="{{ recordset.order.customer.fullname }}">
                                 </div>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    <input type="text" class="input" disabled value="{{ order.test.name }}">
+                                    <input type="text" class="input" disabled value="{{ recordset.order.test.name }}">
                                 </div>
                             </div>
                         </div>
@@ -62,7 +62,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    <input type="text" class="input" disabled value="{{ order.ordered_at|humanizedt }}">
+                                    <input type="text" class="input" disabled value="{{ recordset.order.ordered_at|humanizedt }}">
                                 </div>
                             </div>
                         </div>
@@ -85,12 +85,12 @@
                     {% else %}
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
-                            <label class="label">{{ form.num_result.label }}</label>
+                            <label class="label">{{ form.text_result.label }}</label>
                         </div>
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    {{ form.num_result(class="input") }}
+                                    {{ form.text_result(class="input") }}
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                                     <button class="button is-success" type="submit">Save</button>
                                 </div>
                                 <div class="control">
-                                    <a class="button is-danger" href="{{ url_for('lab.list_pending_orders', lab_id=order.lab.id) }}">Cancel</a>
+                                    <a class="button is-danger" href="{{ url_for('lab.show_customer_qual_recordset', recordset_id=recordset.id, customer_id=recordset.order.customer.id) }}">Cancel</a>
                                 </div>
                             </div>
                         </div>

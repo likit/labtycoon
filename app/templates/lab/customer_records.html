@@ -29,7 +29,7 @@
                             <th></th>
                             </thead>
                             <tbody>
-                            {% for qtest in customer.quan_test_orders %}
+                            {% for qtest in customer.quan_test_orders|sort(attribute='ordered_at', reverse=True) %}
                                 {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
                                     <tr>
                                         <td>
@@ -55,7 +55,7 @@
                                         <td>{{ qtest.ordered_by }}</td>
                                         <td>
                                             <div class="buttons is-centered">
-                                                <a href="{{ url_for('lab.show_customer_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
+                                                <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
                                                    class="button is-info is-small is-rounded">
                                                     <span class="icon">
                                                         <i class="fas fa-clipboard-list"></i>
@@ -67,7 +67,7 @@
                                     </tr>
                                 {% endif %}
                             {% endfor %}
-                            {% for qtest in customer.qual_test_orders %}
+                            {% for qtest in customer.qual_test_orders|sort(attribute='ordered_at', reverse=True) %}
                                 {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
                                     <tr>
                                         <td>
@@ -93,6 +93,13 @@
                                         <td>{{ qtest.ordered_by }}</td>
                                         <td>
                                             <div class="buttons is-centered">
+                                                <a href="{{ url_for('lab.show_customer_qual_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
+                                                   class="button is-info is-small is-rounded">
+                                                    <span class="icon">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </span>
+                                                    <span>Results</span>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

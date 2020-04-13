@@ -6,7 +6,7 @@ from wtforms.validators import InputRequired, Optional
 from wtforms_alchemy import model_form_factory, QuerySelectField
 from wtforms_alchemy.fields import QuerySelectField
 
-from .models import LabQuanTest, LabResultChoiceSet, LabCustomer, LabQuanTestRecord
+from .models import *
 from app import db
 
 BaseModelForm = model_form_factory(FlaskForm)
@@ -64,5 +64,12 @@ class LabCustomerForm(ModelForm):
 class LabQuanTestRecordForm(ModelForm):
     class Meta:
         model = LabQuanTestRecord
+
+    result_choices = SelectField('choices', validators=[Optional()])
+
+
+class LabQualTestRecordForm(ModelForm):
+    class Meta:
+        model = LabQualTestRecord
 
     result_choices = SelectField('choices', validators=[Optional()])

@@ -417,25 +417,31 @@ def show_customer_records(customer_id):
         return render_template('lab/customer_records.html', customer=customer)
 
 
-@lab.route('/customers/<int:customer_id>/records/<int:recordset_id>')
+@lab.route('/customers/<int:customer_id>/quan/records/<int:recordset_id>')
 @login_required
-def show_customer_recordset(customer_id, recordset_id):
+def show_customer_quan_recordset(customer_id, recordset_id):
     customer = LabCustomer.query.get(customer_id)
     recordset = LabQuanTestRecordSet.query.get(recordset_id)
     if customer and recordset:
         return render_template('lab/recordset_detail.html',
-                               customer=customer, recordset=recordset)
+                               customer=customer, recordset=recordset, quan=True)
 
 
-@lab.route('/<int:lab_id>/orders/<int:order_id>/finish', methods=['POST', 'GET'])
+@lab.route('/customers/<int:customer_id>/qual/records/<int:recordset_id>')
+@login_required
+def show_customer_qual_recordset(customer_id, recordset_id):
+    customer = LabCustomer.query.get(customer_id)
+    recordset = LabQualTestRecordSet.query.get(recordset_id)
+    if customer and recordset:
+        return render_template('lab/recordset_detail.html',
+                               customer=customer, recordset=recordset, quan=False)
+
+
+@lab.route('/<int:lab_id>/quan/orders/<int:order_id>/finish', methods=['POST', 'GET'])
 @login_required
 def finish_quan_test_order(lab_id, order_id):
     order = LabQuanTestOrder.query.get(order_id)
-    if order:
-        order.finished_at = arrow.now('Asia/Bangkok').datetime
-        db.session.add(order)
-        db.session.commit()
-    else:
+    if not order:
         flash('Order no longer exists.', 'danger')
         return redirect(request.referrer)
 
@@ -467,6 +473,8 @@ def finish_quan_test_order(lab_id, order_id):
                 detail=order.id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
+            order.finished_at = arrow.now('Asia/Bangkok').datetime
+            db.session.add(order)
             db.session.add(new_record)
             db.session.add(activity)
             db.session.commit()
@@ -475,3 +483,138 @@ def finish_quan_test_order(lab_id, order_id):
         else:
             flash(form.errors, 'danger')
     return render_template('lab/new_quan_test_record.html', form=form, order=order)
+
+
+@lab.route('/<int:lab_id>/qual/orders/<int:order_id>/finish', methods=['POST', 'GET'])
+@login_required
+def finish_qual_test_order(lab_id, order_id):
+    order = LabQualTestOrder.query.get(order_id)
+    if not order:
+        flash('Order no longer exists.', 'danger')
+        return redirect(request.referrer)
+
+    record_set = LabQualTestRecordSet.query.filter_by(order_id=order_id).first()
+    if not record_set:
+        record_set = LabQualTestRecordSet(order_id=order_id)
+        flash('New result record set has been created for the order.', 'success')
+        db.session.add(record_set)
+        db.session.commit()
+
+    form = LabQualTestRecordForm()
+    if order.test.choice_set:
+        choices = [(c.result, c.result) for c in order.test.choice_set.choice_items]
+    else:
+        choices = []
+    form.result_choices.choices = choices
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabQualTestRecord()
+            form.populate_obj(new_record)
+            new_record.record_set = record_set
+            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
+            new_record.updator = current_user
+            if not new_record.text_result and choices:
+                new_record.text_result = form.result_choices.data
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Added the result for a test order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(new_record)
+            db.session.add(activity)
+            order.finished_at = arrow.now('Asia/Bangkok').datetime
+            db.session.add(order)
+            db.session.commit()
+            flash('New result record has been saved.', 'success')
+            return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('lab/new_qual_test_record.html', form=form, order=order)
+
+
+@lab.route('/customers/<int:customer_id>/quan/recordsets/<int:recordset_id>/edit', methods=['POST', 'GET'])
+@login_required
+def edit_quan_record(customer_id, recordset_id):
+    recordset = LabQuanTestRecordSet.query.get(recordset_id)
+    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
+
+    form = LabQuanTestRecordForm(obj=cur_record)
+    if recordset.order.test.choice_set:
+        choices = [(c.result, c.result) for c in recordset.order.test.choice_set.choice_items]
+    else:
+        choices = []
+    form.result_choices.choices = choices
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabQuanTestRecord()
+            form.populate_obj(new_record)
+            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
+            new_record.updator = current_user
+            new_record.record_set = recordset
+            cur_record.cancelled = True
+            if choices:
+                new_record.text_result = form.result_choices.data
+            activity = LabActivity(
+                lab_id=recordset.order.lab.id,
+                actor=current_user,
+                message='Edited the result for a test order.',
+                detail=new_record.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(cur_record)
+            db.session.add(new_record)
+            db.session.add(activity)
+            db.session.commit()
+            flash('New result record has been saved.', 'success')
+            return redirect(url_for('lab.show_customer_quan_recordset',
+                                    customer_id=customer_id,
+                                    recordset_id=recordset.id))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('lab/edit_quan_test_record.html', form=form, recordset=recordset)
+
+
+@lab.route('/customers/<int:customer_id>/qual/recordsets/<int:recordset_id>/edit', methods=['POST', 'GET'])
+@login_required
+def edit_qual_record(customer_id, recordset_id):
+    recordset = LabQualTestRecordSet.query.get(recordset_id)
+    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
+
+    form = LabQualTestRecordForm(obj=cur_record)
+    if recordset.order.test.choice_set:
+        choices = [(c.result, c.result) for c in recordset.order.test.choice_set.choice_items]
+    else:
+        choices = []
+    form.result_choices.choices = choices
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabQualTestRecord()
+            form.populate_obj(new_record)
+            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
+            new_record.updator = current_user
+            new_record.record_set = recordset
+            cur_record.cancelled = True
+            if choices:
+                new_record.text_result = form.result_choices.data
+            activity = LabActivity(
+                lab_id=recordset.order.lab.id,
+                actor=current_user,
+                message='Edited the result for a test order.',
+                detail=new_record.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(cur_record)
+            db.session.add(new_record)
+            db.session.add(activity)
+            db.session.commit()
+            flash('New result record has been saved.', 'success')
+            return redirect(url_for('lab.show_customer_qual_recordset',
+                                    customer_id=customer_id,
+                                    recordset_id=recordset.id))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('lab/edit_qual_test_record.html', form=form, recordset=recordset)
