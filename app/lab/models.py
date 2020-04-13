@@ -113,7 +113,7 @@ class LabQuanTestRecord(db.Model):
     updated_at = db.Column('updated_at', db.DateTime(timezone=True))
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
     updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
-    updator = db.relationship(User, backref=db.backref('updated_result_records'))
+    updator = db.relationship(User, backref=db.backref('updated_quan_result_records'))
 
 
 class LabQuanTestOrder(db.Model):
@@ -172,7 +172,30 @@ class LabQualTestOrder(db.Model):
                                  foreign_keys=[ordered_by_id])
     cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
     received_at = db.Column('received_at', db.DateTime(timezone=True))
+    finished_at = db.Column('finished_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
     receiver = db.relationship(User,
                                backref=db.backref('received_qual_orders'),
                                foreign_keys=[receiver_id])
+
+
+class LabQualTestRecordSet(db.Model):
+    __tablename__ = 'lab_qual_result_sets'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    order_id = db.Column('order_id', db.ForeignKey('lab_qual_test_orders.id'))
+    order = db.relationship(LabQualTestOrder, backref=db.backref('result_record_set', uselist=False))
+
+
+class LabQualTestRecord(db.Model):
+    __tablename__ = 'lab_qual_result_records'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    record_set_id = db.Column('record_set_id', db.ForeignKey('lab_qual_result_sets.id'))
+    record_set = db.relationship(LabQualTestRecordSet, backref=db.backref('records'))
+    text_result = db.Column('text_result', db.String())
+    comment = db.Column('comment', db.Text(),
+                        info={'label': 'Comment'})
+    updated_at = db.Column('updated_at', db.DateTime(timezone=True))
+    cancelled = db.Column('cancelled', db.Boolean(), default=False)
+    updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
+    updator = db.relationship(User, backref=db.backref('updated_qual_result_records'))
+
