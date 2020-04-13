@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <p class="notification is-{{ category }}">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title is-size-4 has-text-centered">All Orders</h1>
+                    <div class="box">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                            <th>Order No.</th>
+                            <th>Ordered At</th>
+                            <th>Test FK</th>
+                            <th>Test Name</th>
+                            <th>Ordered By FK</th>
+                            <th>Ordered By</th>
+                            <th></th>
+                            </thead>
+                            <tbody>
+                            {% for qtest in customer.quan_test_orders %}
+                                {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
+                                    <tr>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                            <span>{{ qtest.id }}</span>
+                                        </td>
+                                        <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                            <span>{{ qtest.test.id }}</span>
+                                        </td>
+                                        <td>{{ qtest.test.name }}</td>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                            <span>{{ qtest.ordered_by_id }}</span>
+                                        </td>
+                                        <td>{{ qtest.ordered_by }}</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <a href="{{ url_for('lab.show_customer_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
+                                                   class="button is-info is-small is-rounded">
+                                                    <span class="icon">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </span>
+                                                    <span>Results</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            {% for qtest in customer.qual_test_orders %}
+                                {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
+                                    <tr>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                            <span>{{ qtest.id }}</span>
+                                        </td>
+                                        <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                            <span>{{ qtest.test.id }}</span>
+                                        </td>
+                                        <td>{{ qtest.test.name }}</td>
+                                        <td>
+                                        <span class="icon">
+                                            <i class="fas fa-link"></i>
+                                        </span>
+                                            <span>{{ qtest.ordered_by_id }}</span>
+                                        </td>
+                                        <td>{{ qtest.ordered_by }}</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+            <div class="buttons is-centered">
+                <a href="{{ url_for('lab.list_patients', lab_id=customer.lab.id) }}"
+                   class="button is-light is-rounded">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                    <span>Back</span>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

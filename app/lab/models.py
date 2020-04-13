@@ -97,7 +97,7 @@ class LabQuanTestRecordSet(db.Model):
     __tablename__ = 'lab_quan_result_sets'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     order_id = db.Column('order_id', db.ForeignKey('lab_quan_test_orders.id'))
-    order = db.relationship('LabQuanTestOrder', backref=db.backref('result_record_sets'))
+    order = db.relationship('LabQuanTestOrder', backref=db.backref('result_record_set', uselist=False))
 
 
 class LabQuanTestRecord(db.Model):

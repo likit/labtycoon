@@ -409,6 +409,24 @@ def list_activities(lab_id):
     return render_template('lab/log.html', lab=lab)
 
 
+@lab.route('/customers/<int:customer_id>/records')
+@login_required
+def show_customer_records(customer_id):
+    customer = LabCustomer.query.get(customer_id)
+    if customer:
+        return render_template('lab/customer_records.html', customer=customer)
+
+
+@lab.route('/customers/<int:customer_id>/records/<int:recordset_id>')
+@login_required
+def show_customer_recordset(customer_id, recordset_id):
+    customer = LabCustomer.query.get(customer_id)
+    recordset = LabQuanTestRecordSet.query.get(recordset_id)
+    if customer and recordset:
+        return render_template('lab/recordset_detail.html',
+                               customer=customer, recordset=recordset)
+
+
 @lab.route('/<int:lab_id>/orders/<int:order_id>/finish', methods=['POST', 'GET'])
 @login_required
 def finish_quan_test_order(lab_id, order_id):
