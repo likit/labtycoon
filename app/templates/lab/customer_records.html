@@ -29,81 +29,53 @@
                             <th></th>
                             </thead>
                             <tbody>
-                            {% for qtest in customer.quan_test_orders|sort(attribute='ordered_at', reverse=True) %}
-                                    <tr {% if qtest.cancelled_at %} class="has-text-danger" {% endif %}>
+                            {% for qtest in orders|sort(attribute='ordered_at', reverse=True) %}
+                                    <tr {% if qtest.order.cancelled_at %} class="has-text-danger" {% endif %}>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-key"></i>
                                         </span>
-                                            <span>{{ qtest.id }}</span>
+                                            <span>{{ qtest.order.id }}</span>
                                         </td>
-                                        <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                        <td>{{ qtest.order.ordered_at|humanizedt }}</td>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                            <span>{{ qtest.test.id }}</span>
+                                            <span>{{ qtest.order.test.id }}</span>
                                         </td>
-                                        <td>{{ qtest.test.name }}</td>
+                                        <td>{{ qtest.order.test.name }}</td>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                            <span>{{ qtest.ordered_by_id }}</span>
+                                            <span>{{ qtest.order.ordered_by_id }}</span>
                                         </td>
-                                        <td>{{ qtest.ordered_by }}</td>
+                                        <td>{{ qtest.order.ordered_by }}</td>
                                         <td>
                                             <div class="buttons is-centered">
-                                                {% if qtest.finished_at %}
-                                                <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
-                                                   class="button is-info is-small is-rounded">
-                                                    <span class="icon">
-                                                        <i class="fas fa-clipboard-list"></i>
-                                                    </span>
-                                                    <span>Results</span>
-                                                </a>
+                                                {% if qtest.order.finished_at %}
+                                                    {% if qtest.test_type == 'quan' %}
+                                                    <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=customer.id, recordset_id=qtest.order.result_record_set.id) }}"
+                                                    class="button is-info is-small is-rounded">
+                                                        <span class="icon">
+                                                            <i class="fas fa-clipboard-list"></i>
+                                                        </span>
+                                                        <span>Results</span>
+                                                    </a>
+                                                    {% else %}
+                                                    <a href="{{ url_for('lab.show_customer_qual_recordset', customer_id=customer.id, recordset_id=qtest.order.result_record_set.id) }}"
+                                                    class="button is-info is-small is-rounded">
+                                                        <span class="icon">
+                                                            <i class="fas fa-clipboard-list"></i>
+                                                        </span>
+                                                        <span>Results</span>
+                                                    </a>
+                                                    {% endif %}
                                                 {% endif %}
                                             </div>
                                         </td>
                                     </tr>
-                            {% endfor %}
-                            {% for qtest in customer.qual_test_orders|sort(attribute='ordered_at', reverse=True) %}
-                                {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
-                                    <tr>
-                                        <td>
-                                        <span class="icon">
-                                            <i class="fas fa-key"></i>
-                                        </span>
-                                            <span>{{ qtest.id }}</span>
-                                        </td>
-                                        <td>{{ qtest.ordered_at|humanizedt }}</td>
-                                        <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                            <span>{{ qtest.test.id }}</span>
-                                        </td>
-                                        <td>{{ qtest.test.name }}</td>
-                                        <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                            <span>{{ qtest.ordered_by_id }}</span>
-                                        </td>
-                                        <td>{{ qtest.ordered_by }}</td>
-                                        <td>
-                                            <div class="buttons is-centered">
-                                                <a href="{{ url_for('lab.show_customer_qual_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
-                                                   class="button is-info is-small is-rounded">
-                                                    <span class="icon">
-                                                        <i class="fas fa-clipboard-list"></i>
-                                                    </span>
-                                                    <span>Results</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endif %}
                             {% endfor %}
                             </tbody>
                         </table>

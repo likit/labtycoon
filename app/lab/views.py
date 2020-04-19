@@ -8,6 +8,9 @@ from .forms import *
 from .models import *
 from app.main.models import UserLabAffil
 from wtforms_alchemy.fields import QuerySelectField
+from collections import namedtuple
+
+TestOrder = namedtuple('TestOrder', ['order', 'ordered_at', 'type'])
 
 
 @lab.route('/<int:lab_id>')
@@ -311,7 +314,9 @@ def add_qual_test_order(lab_id, customer_id, test_id):
 @login_required
 def list_test_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
-    return render_template('lab/quan_test_order_list.html', lab=lab)
+    orders = [TestOrder(order, order.ordered_at, 'quan') for order in lab.quan_test_orders]
+    orders += [TestOrder(order, order.ordered_at, 'qual') for order in lab.qual_test_orders]
+    return render_template('lab/quan_test_order_list.html', lab=lab, orders=orders)
 
 
 @lab.route('/<int:lab_id>/orders/quan/<int:order_id>/cancel', methods=['GET', 'POST'])
@@ -416,8 +421,10 @@ def list_activities(lab_id):
 @login_required
 def show_customer_records(customer_id):
     customer = LabCustomer.query.get(customer_id)
+    orders = [TestOrder(order, order.ordered_at, 'quan') for order in customer.quan_test_orders]
+    orders += [TestOrder(order, order.ordered_at, 'qual') for order in customer.qual_test_orders]
     if customer:
-        return render_template('lab/customer_records.html', customer=customer)
+        return render_template('lab/customer_records.html', customer=customer, orders=orders)
 
 
 @lab.route('/customers/<int:customer_id>/quan/records/<int:recordset_id>')

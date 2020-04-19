@@ -16,7 +16,7 @@
         </div>
         <div class="columns">
             <div class="column">
-                <h1 class="title has-text-centered">All Orders</h1>
+                <h1 class="title has-text-centered">Order History</h1>
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                     <thead>
@@ -33,25 +33,25 @@
                     <th colspan="2"></th>
                     </thead>
                     <tbody>
-                        {% for qtest in lab.quan_test_orders|sort(attribute='ordered_at', reverse=True) %}
-                            <tr {% if qtest.cancelled_at %} class="has-text-danger" {% elif qtest.finished_at %} class="has-text-success" {% endif %}>
+                        {% for qtest in orders|sort(attribute='ordered_at', reverse=True) %}
+                            <tr {% if qtest.order.cancelled_at %} class="has-text-danger" {% elif qtest.order.finished_at %} class="has-text-success" {% endif %}>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-key"></i>
                                     </span>
-                                    <span>{{ qtest.id }}</span>
+                                    <span>{{ qtest.order.id }}</span>
                                 </td>
-                                <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                <td>{{ qtest.order.ordered_at|humanizedt }}</td>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
                                     </span>
-                                    <span>{{ qtest.ordered_by_id }}</span>
+                                    <span>{{ qtest.order.ordered_by_id }}</span>
                                 </td>
-                                <td>{{ qtest.ordered_by }}</td>
+                                <td>{{ qtest.order.ordered_by }}</td>
                                 <td>
-                                    {% if qtest.cancelled_at %}
-                                    {{ qtest.cancelled_at|humanizedt }}
+                                    {% if qtest.order.cancelled_at %}
+                                    {{ qtest.order.cancelled_at|humanizedt }}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -59,83 +59,44 @@
                                         <i class="fas fa-link"></i>
                                     </span>
                                     <span>
-                                        {{ qtest.customer.id }}
+                                        {{ qtest.order.customer.id }}
                                     </span>
                                 </td>
-                                <td>{{ qtest.customer }}</td>
+                                <td>{{ qtest.order.customer }}</td>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
                                     </span>
-                                    <span>{{ qtest.test.id }}</span>
+                                    <span>{{ qtest.order.test.id }}</span>
                                 </td>
-                                <td>{{ qtest.test.name }}</td>
+                                <td>{{ qtest.order.test.name }}</td>
                                 <td>
                                     <div class="buttons is-centered">
-                                        {% if not qtest.received_at and not qtest.cancelled_at and not qtest.finished_at %}
-                                        <a href="{{ url_for('lab.receive_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                           class="button is-small is-rounded is-success">
-                                            Receive
-                                        </a>
-                                        {% endif %}
-                                        {% if not qtest.cancelled_at and not qtest.finished_at %}
-                                        <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                           class="button is-small is-rounded is-danger">
-                                            Reject
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        {% for qtest in lab.qual_test_orders|sort(attribute='ordered_at', reverse=True) %}
-                            <tr {% if qtest.cancelled_at %} class="has-text-danger" {% elif qtest.finished_at %} class="has-text-success" {% endif %}>
-                                <td>
-                                    <span class="icon">
-                                        <i class="fas fa-key"></i>
-                                    </span>
-                                    <span>{{ qtest.id }}</span>
-                                </td>
-                                <td>{{ qtest.ordered_at|humanizedt }}</td>
-                                <td>
-                                    <span class="icon">
-                                        <i class="fas fa-link"></i>
-                                    </span>
-                                    <span>{{ qtest.ordered_by_id }}</span>
-                                </td>
-                                <td>{{ qtest.ordered_by }}</td>
-                                <td>
-                                    {% if qtest.cancelled_at %}
-                                    {{ qtest.cancelled_at|humanizedt }}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="icon">
-                                        <i class="fas fa-link"></i>
-                                    </span>
-                                    <span>{{ qtest.customer.id }}</span>
-                                </td>
-                                <td>{{ qtest.customer }}</td>
-                                <td>
-                                    <span class="icon">
-                                        <i class="fas fa-link"></i>
-                                    </span>
-                                    <span>{{ qtest.test.id }}</span>
-                                </td>
-                                <td>{{ qtest.test.name }}</td>
-                                <td>
-                                    <div class="buttons is-centered">
-                                        {% if not qtest.received_at and not qtest.cancelled_at and not qtest.finished_at %}
-                                        <a href="{{ url_for('lab.receive_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                        {% if not qtest.order.received_at and not qtest.order.cancelled_at and not qtest.order.finished_at %}
+                                            {% if qtest.test_type == 'quan' %}
+                                            <a href="{{ url_for('lab.receive_quan_test_order', order_id=qtest.order.id, lab_id=lab.id) }}"
                                             class="button is-small is-rounded is-success">
-                                            Receive
-                                        </a>
+                                                Receive
+                                            </a>
+                                            {% else %}
+                                            <a href="{{ url_for('lab.receive_qual_test_order', order_id=qtest.order.id, lab_id=lab.id) }}"
+                                            class="button is-small is-rounded is-success">
+                                                Receive
+                                            </a>
+                                            {% endif %}
                                         {% endif %}
-                                        {%if not qtest.cancelled_at and not qtest.finished_at %}
-                                        <a href="{{ url_for('lab.cancel_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                        {% if not qtest.order.cancelled_at and not qtest.order.finished_at %}
+                                            {% if qtest.test_type == 'quan' %}
+                                            <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.order.id, lab_id=lab.id) }}"
                                             class="button is-small is-rounded is-danger">
-                                            Reject
-                                        </a>
+                                                Reject
+                                            </a>
+                                            {% else %}
+                                            <a href="{{ url_for('lab.cancel_qual_test_order', order_id=qtest.order.id, lab_id=lab.id) }}"
+                                            class="button is-small is-rounded is-danger">
+                                                Reject
+                                            </a>
+                                            {% endif %}
                                         {% endif %}
                                     </div>
                                 </td>
