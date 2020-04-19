@@ -168,6 +168,19 @@ def edit_quan_test(lab_id, test_id):
     return render_template('lab/new_quan_test.html', form=form, lab_id=lab_id)
 
 
+@lab.route('/<int:lab_id>/quantests/<int:test_id>/remove', methods=['GET', 'POST'])
+@login_required
+def remove_quan_test(lab_id, test_id):
+    if not current_user.is_affiliated_with(lab_id):
+        flash('You do not have a permission to perform this task.', 'danger')
+
+    test = LabQuanTest.query.get(test_id)
+    db.session.delete(test)
+    db.session.commit()
+    flash('The record has been removed along with its associated records.', 'success')
+    return redirect(request.referrer)
+
+
 @lab.route('/<int:lab_id>/qualtests/add', methods=['GET', 'POST'])
 @login_required
 def add_qual_test(lab_id):
@@ -211,6 +224,19 @@ def edit_qual_test(lab_id, test_id):
         else:
             flash('An error occurred. Please contact the system administrator.', 'danger')
     return render_template('lab/new_qual_test.html', form=form, lab_id=lab_id)
+
+
+@lab.route('/<int:lab_id>/qualtests/<int:test_id>/remove', methods=['GET', 'POST'])
+@login_required
+def remove_qual_test(lab_id, test_id):
+    if not current_user.is_affiliated_with(lab_id):
+        flash('You do not have a permission to perform this task.', 'danger')
+
+    test = LabQualTest.query.get(test_id)
+    db.session.delete(test)
+    db.session.commit()
+    flash('The record has been removed along with its associated records.', 'success')
+    return redirect(request.referrer)
 
 
 @lab.route('/<int:lab_id>/customers')

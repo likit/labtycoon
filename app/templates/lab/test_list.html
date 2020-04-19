@@ -24,6 +24,13 @@
                     นักเรียนคิดว่าข้อมูลใดอีกบ้างที่ควรจัดเก็บลงไว้ในตารางการทดสอบดังตัวอย่างด้านล่าง
                 </span>
                 </p>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <p class="notification is-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
             </div>
         </div>
         <div class="columns">
@@ -51,7 +58,7 @@
                     <th>Ref. Max Value</th>
                     <th>Added at</th>
                     <th>Active</th>
-                    <th></th>
+                    <th colspan="2"></th>
                     </thead>
                     <tbody>
                     {% for test in lab.quant_tests %}
@@ -93,6 +100,13 @@
                                     </span>
                                 </a>
                             </td>
+                            <td>
+                                <a href="{{ url_for('lab.remove_quan_test', test_id=test.id, lab_id=test.lab.id) }}">
+                                    <span class="icon">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -124,7 +138,7 @@
                     <th>Choice Set</th>
                     <th>Added at</th>
                     <th>Active</th>
-                    <th></th>
+                    <th colspan="2"></th>
                     </thead>
                     <tbody>
                     {% for test in lab.qual_tests %}
@@ -158,6 +172,13 @@
                                 <a href="{{ url_for('lab.edit_qual_test', test_id=test.id, lab_id=test.lab.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-pencil-alt"></i>
+                                    </span>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('lab.remove_qual_test', test_id=test.id, lab_id=test.lab.id) }}">
+                                    <span class="icon">
+                                        <i class="fas fa-trash-alt"></i>
                                     </span>
                                 </a>
                             </td>
