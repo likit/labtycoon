@@ -64,12 +64,10 @@ class LabCustomerForm(ModelForm):
 class LabQuanTestRecordForm(ModelForm):
     class Meta:
         model = LabQuanTestRecord
-
-    result_choices = SelectField('choices', validators=[Optional()])
+        field_args = {'choice_sets': {'coerce': int}}
 
 
 class LabQualTestRecordForm(ModelForm):
     class Meta:
         model = LabQualTestRecord
-
-    result_choices = SelectField('choices', validators=[Optional()])
+        field_args = {'choice_sets': {'coerce': int}}

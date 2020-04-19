@@ -124,6 +124,7 @@ def remove_choice_set(lab_id, choice_set_id):
 def add_quan_test(lab_id):
     form = LabQuanTestForm(lab_id=lab_id)
     choice_sets = [(c.id, c.name) for c in LabResultChoiceSet.query.filter_by(lab_id=lab_id)]
+    choice_sets.insert(0, (-1, "ไม่มี"))
     form.choice_sets.choices = choice_sets
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -138,7 +139,7 @@ def add_quan_test(lab_id):
             max_value = float(max_value) if max_value else None
             min_ref_value = float(min_ref_value) if min_ref_value else None
             max_ref_value = float(max_ref_value) if max_ref_value else None
-            choice_set_id = request.form.get('choice_sets')
+            choice_set_id = form.choice_sets.data
             active = True if active else False
             new_test = LabQuanTest(
                 lab_id=lab_id,
@@ -149,9 +150,11 @@ def add_quan_test(lab_id):
                 min_ref_value=min_ref_value,
                 max_ref_value=max_ref_value,
                 active=active,
-                choice_set_id=choice_set_id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
+            if choice_set_id > -1:
+                new_test.choice_set_id = choice_set_id
+
             db.session.add(new_test)
             activity = LabActivity(
                 lab_id=lab_id,
@@ -174,6 +177,7 @@ def add_quan_test(lab_id):
 def add_qual_test(lab_id):
     form = LabQualTestForm(lab_id=lab_id)
     choice_sets = [(c.id, c.name) for c in LabResultChoiceSet.query.filter_by(lab_id=lab_id)]
+    choice_sets.insert(0, (-1, "ไม่มี"))
     form.choice_sets.choices = choice_sets
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -182,14 +186,17 @@ def add_qual_test(lab_id):
             choice_set_id = request.form.get('choice_sets')
             active = request.form.get('active')
             active = True if active else False
+            choice_set_id = form.choice_sets.data
             new_test = LabQualTest(
                 lab_id=lab_id,
                 name=name,
                 detail=detail,
                 active=active,
-                choice_set_id=choice_set_id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
+            if choice_set_id > -1:
+                new_test.choice_set_id = choice_set_id
+
             db.session.add(new_test)
             activity = LabActivity(
                 lab_id=lab_id,
