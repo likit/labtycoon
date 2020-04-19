@@ -79,3 +79,9 @@ class LabQualTestRecordForm(ModelForm):
                                   allow_blank=False,
                                   validators=[Optional()]
                                  )
+
+
+class LabOrderRejectRecordForm(ModelForm):
+    class Meta:
+        model = LabOrderRejectRecord
+        field_args = {'created_at': {'validators': [Optional()]}}

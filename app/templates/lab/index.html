@@ -58,6 +58,12 @@
                     </span>
                     ประวัติกิจกรรม (activity log)
                 </a>
+                <a class="panel-block" href="{{ url_for('lab.list_rejected_orders', lab_id=lab.id) }}">
+                    <span class="panel-icon">
+                        <i class="far fa-times-circle"></i>
+                    </span>
+                    รายการปฏิเสธสิ่งส่งตรวจ
+                </a>
                 <a class="panel-block" href="{{ url_for('main.index') }}">
                     <span class="panel-icon">
                        <i class="fas fa-sign-out-alt"></i>

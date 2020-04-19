@@ -367,6 +367,42 @@ def cancel_quan_test_order(lab_id, order_id):
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
 
 
+@lab.route('/<int:lab_id>/orders/quan/<int:order_id>/reject', methods=['GET', 'POST'])
+@login_required
+def reject_quan_test_order(lab_id, order_id):
+    order = LabQuanTestOrder.query.get(order_id)
+    form = LabOrderRejectRecordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabOrderRejectRecord()
+            form.populate_obj(new_record)
+            new_record.created_at = arrow.now('Asia/Bangkok').datetime
+            new_record.creator = current_user
+            order.reject_record = new_record
+            order.cancelled_at = arrow.now('Asia/Bangkok').datetime
+            order.cancelled_by = current_user
+            db.session.add(order)
+            db.session.add(new_record)
+            db.session.add(order)
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Rejected and cancelled the quantitative test order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(activity)
+            db.session.commit()
+            flash('The order has been rejected.', 'success')
+            if request.args.get('pending'):
+                return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
+            else:
+                return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+        else:
+            flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
+    return render_template('lab/order_reject.html', form=form)
+
+
 @lab.route('/<int:lab_id>/orders/quan/<int:order_id>/receive', methods=['GET', 'POST'])
 @login_required
 def receive_quan_test_order(lab_id, order_id):
@@ -407,6 +443,42 @@ def cancel_qual_test_order(lab_id, order_id):
     if request.args.get('pending'):
         return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+
+
+@lab.route('/<int:lab_id>/orders/qual/<int:order_id>/reject', methods=['GET', 'POST'])
+@login_required
+def reject_qual_test_order(lab_id, order_id):
+    order = LabQualTestOrder.query.get(order_id)
+    form = LabOrderRejectRecordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_record = LabOrderRejectRecord()
+            form.populate_obj(new_record)
+            new_record.created_at = arrow.now('Asia/Bangkok').datetime
+            new_record.creator = current_user
+            order.reject_record = new_record
+            order.cancelled_at = arrow.now('Asia/Bangkok').datetime
+            order.cancelled_by = current_user
+            db.session.add(order)
+            db.session.add(new_record)
+            db.session.add(order)
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Rejected and cancelled the qualitative test order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(activity)
+            db.session.commit()
+            flash('The order has been rejected.', 'success')
+            if request.args.get('pending'):
+                return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
+            else:
+                return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+        else:
+            flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
+    return render_template('lab/order_reject.html', form=form)
 
 
 @lab.route('/<int:lab_id>/orders/qual/<int:order_id>/receive', methods=['GET', 'POST'])
@@ -682,3 +754,12 @@ def edit_qual_record(customer_id, recordset_id):
             flash(form.errors, 'danger')
     return render_template('lab/edit_qual_test_record.html', form=form,
                            recordset=recordset, cur_record=cur_record)
+
+
+@lab.route('/<int:lab_id>/orders/rejects')
+@login_required
+def list_rejected_orders(lab_id):
+    lab = Laboratory.query.get(lab_id)
+    orders = [TestOrder(order, order.ordered_at, 'quan') for order in lab.quan_test_orders]
+    orders += [TestOrder(order, order.ordered_at, 'qual') for order in lab.qual_test_orders]
+    return render_template('lab/reject_records.html', orders=orders, lab=lab)

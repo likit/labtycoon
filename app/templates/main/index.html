@@ -29,14 +29,17 @@
                         <div class="card-footer">
                             <div class="card-footer-item">
                                 <div class="buttons is-centered">
+                                    {% if not current_user.is_affiliated_with(lab.id) %}
                                     <a class="button is-info is-rounded"
                                        href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
                                         Request to join
                                     </a>
+                                    {% else %}
                                     <a class="button is-success is-rounded"
                                        href="{{ url_for('lab.landing', lab_id=lab.id) }}">
                                         Enter
                                     </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
