@@ -22,18 +22,19 @@
                     <thead>
                     <th>Order No.</th>
                     <th>Ordered At</th>
+                    <th>Ordered By FK (User FK)</th>
+                    <th>Ordered By</th>
+                    <th>Cancelled At</th>
                     <th>H.N.</th>
                     <th>Customer</th>
                     <th>Test FK</th>
                     <th>Test Name</th>
-                    <th>Ordered By FK (User FK)</th>
-                    <th>Ordered By</th>
+                    <th>Results</th>
                     <th colspan="2"></th>
                     </thead>
                     <tbody>
-                        {% for qtest in lab.quan_test_orders %}
-                            {% if not qtest.cancelled_at and not qtest.received_at %}
-                            <tr>
+                        {% for qtest in lab.quan_test_orders|sort(attribute='ordered_at', reverse=True) %}
+                            <tr {% if qtest.cancelled_at %} class="has-text-danger" {% elif qtest.finished_at %} class="has-text-success" {% endif %}>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-key"></i>
@@ -41,6 +42,18 @@
                                     <span>{{ qtest.id }}</span>
                                 </td>
                                 <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                <td>
+                                    <span class="icon">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                    <span>{{ qtest.ordered_by_id }}</span>
+                                </td>
+                                <td>{{ qtest.ordered_by }}</td>
+                                <td>
+                                    {% if qtest.cancelled_at %}
+                                    {{ qtest.cancelled_at|humanizedt }}
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
@@ -58,6 +71,33 @@
                                 </td>
                                 <td>{{ qtest.test.name }}</td>
                                 <td>
+                                    <div class="buttons is-centered">
+                                        {% if not qtest.received_at and not qtest.cancelled_at and not qtest.finished_at %}
+                                        <a href="{{ url_for('lab.receive_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                           class="button is-small is-rounded is-success">
+                                            Receive
+                                        </a>
+                                        {% endif %}
+                                        {% if not qtest.cancelled_at and not qtest.finished_at %}
+                                        <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                           class="button is-small is-rounded is-danger">
+                                            Reject
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for qtest in lab.qual_test_orders|sort(attribute='ordered_at', reverse=True) %}
+                            <tr {% if qtest.cancelled_at %} class="has-text-danger" {% elif qtest.finished_at %} class="has-text-success" {% endif %}>
+                                <td>
+                                    <span class="icon">
+                                        <i class="fas fa-key"></i>
+                                    </span>
+                                    <span>{{ qtest.id }}</span>
+                                </td>
+                                <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                <td>
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
                                     </span>
@@ -65,65 +105,41 @@
                                 </td>
                                 <td>{{ qtest.ordered_by }}</td>
                                 <td>
+                                    {% if qtest.cancelled_at %}
+                                    {{ qtest.cancelled_at|humanizedt }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="icon">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                    <span>{{ qtest.customer.id }}</span>
+                                </td>
+                                <td>{{ qtest.customer }}</td>
+                                <td>
+                                    <span class="icon">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                    <span>{{ qtest.test.id }}</span>
+                                </td>
+                                <td>{{ qtest.test.name }}</td>
+                                <td>
                                     <div class="buttons is-centered">
-                                        <a href="{{ url_for('lab.receive_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                           class="button is-small is-rounded is-success">
+                                        {% if not qtest.received_at and not qtest.cancelled_at and not qtest.finished_at %}
+                                        <a href="{{ url_for('lab.receive_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                            class="button is-small is-rounded is-success">
                                             Receive
                                         </a>
-                                        <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                           class="button is-small is-rounded is-danger">
+                                        {% endif %}
+                                        {%if not qtest.cancelled_at and not qtest.finished_at %}
+                                        <a href="{{ url_for('lab.cancel_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
+                                            class="button is-small is-rounded is-danger">
                                             Reject
                                         </a>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
-                            {% endif %}
-                        {% endfor %}
-                        {% for qtest in lab.qual_test_orders %}
-                            {% if not qtest.cancelled_at and not qtest.received_at %}
-                                <tr>
-                                    <td>
-                                        <span class="icon">
-                                            <i class="fas fa-key"></i>
-                                        </span>
-                                        <span>{{ qtest.id }}</span>
-                                    </td>
-                                    <td>{{ qtest.ordered_at|humanizedt }}</td>
-                                    <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                        <span>{{ qtest.customer.id }}</span>
-                                    </td>
-                                    <td>{{ qtest.customer }}</td>
-                                    <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                        <span>{{ qtest.test.id }}</span>
-                                    </td>
-                                    <td>{{ qtest.test.name }}</td>
-                                    <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                        <span>{{ qtest.ordered_by_id }}</span>
-                                    </td>
-                                    <td>{{ qtest.ordered_by }}</td>
-                                    <td>
-                                        <div class="buttons is-centered">
-                                            <a href="{{ url_for('lab.receive_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                               class="button is-small is-rounded is-success">
-                                                Receive
-                                            </a>
-                                            <a href="{{ url_for('lab.cancel_qual_test_order', order_id=qtest.id, lab_id=lab.id) }}"
-                                               class="button is-small is-rounded is-danger">
-                                                Reject
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endif %}
                         {% endfor %}
                     </tbody>
                     </table>

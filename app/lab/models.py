@@ -30,6 +30,14 @@ class LabCustomer(db.Model):
     def __str__(self):
         return self.fullname
 
+    @property
+    def pending_qual_test_orders(self):
+        return [order for order in self.qual_test_orders if not order.finished_at and not order.cancelled_at]
+
+    @property
+    def pending_quan_test_orders(self):
+        return [order for order in self.quan_test_orders if not order.finished_at and not order.cancelled_at]
+
 
 class LabActivity(db.Model):
     __tablename__ = 'lab_activities'
@@ -74,13 +82,13 @@ class LabResultChoiceItem(db.Model):
 class LabQuanTest(db.Model):
     __tablename__ = 'lab_quan_tests'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column('name', db.String(), nullable=False)
-    detail = db.Column('detail', db.Text())
+    name = db.Column('name', db.String(), nullable=False, info={'label': 'Name'})
+    detail = db.Column('detail', db.Text(), info={'label': 'Detail'})
     # for numeric results
-    min_value = db.Column('min_value', db.Numeric(), default=0.0)
-    max_value = db.Column('max_value', db.Numeric())
-    min_ref_value = db.Column('min_ref_value', db.Numeric())
-    max_ref_value = db.Column('max_ref_value', db.Numeric())
+    min_value = db.Column('min_value', db.Numeric(), default=0.0, info={'label': 'Min value'})
+    max_value = db.Column('max_value', db.Numeric(), info={'label': 'Max value'})
+    min_ref_value = db.Column('min_ref_value', db.Numeric(), info={'label': 'Min ref value'})
+    max_ref_value = db.Column('max_ref_value', db.Numeric(), info={'label': 'Max ref value'})
     # choices for results in text
     choice_set_id = db.Column('choice_set', db.ForeignKey('lab_result_choice_set.id'))
     choice_set = db.relationship(LabResultChoiceSet)
@@ -142,8 +150,8 @@ class LabQuanTestOrder(db.Model):
 class LabQualTest(db.Model):
     __tablename__ = 'lab_qual_tests'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column('name', db.String(), nullable=False)
-    detail = db.Column('detail', db.Text())
+    name = db.Column('name', db.String(), nullable=False, info={'label': 'Name'})
+    detail = db.Column('detail', db.Text(), info={'label': 'Detail'})
     # choices for results in text
     choice_set_id = db.Column('choice_set', db.ForeignKey('lab_result_choice_set.id'))
     choice_set = db.relationship(LabResultChoiceSet)

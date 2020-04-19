@@ -506,10 +506,9 @@ def finish_qual_test_order(lab_id, order_id):
 
     form = LabQualTestRecordForm()
     if order.test.choice_set:
-        choices = [(c.result, c.result) for c in order.test.choice_set.choice_items]
+        form.choice.query = order.test.choice_set.choice_items
     else:
-        choices = []
-    form.result_choices.choices = choices
+        form.choice.query = []
     if request.method == 'POST':
         if form.validate_on_submit():
             new_record = LabQualTestRecord()
@@ -517,8 +516,8 @@ def finish_qual_test_order(lab_id, order_id):
             new_record.record_set = record_set
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
             new_record.updator = current_user
-            if not new_record.text_result and choices:
-                new_record.text_result = form.result_choices.data
+            if not new_record.text_result and form.choice.query:
+                new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,

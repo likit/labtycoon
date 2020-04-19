@@ -23,6 +23,7 @@
                         <th>Last Name</th>
                         <th>Gender</th>
                         <th>Date of Birth</th>
+                        <th>Pending Orders</th>
                         <th></th>
                         </thead>
                         <tbody>
@@ -39,6 +40,7 @@
                             <td>{{ customer.lastname }}</td>
                             <td>{{ customer.gender }}</td>
                             <td>{{ customer.dob }}</td>
+                            <td>{{ customer.pending_qual_test_orders|length + customer.pending_quan_test_orders|length }}</td>
                             <td>
                                 <a class="button is-rounded is-small is-info"
                                     href="{{ url_for('lab.add_test_order_menu', lab_id=lab.id, customer_id=customer.id) }}">
@@ -76,6 +78,13 @@
                     <i class="fas fa-list-ol"></i>
                 </span>
                 <span>Orders</span>
+            </a>
+            <a href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}"
+               class="button is-info is-rounded">
+                <span class="icon">
+                    <i class="far fa-clock"></i>
+                </span>
+                <span>Pending orders</span>
             </a>
         </div>
     </div>

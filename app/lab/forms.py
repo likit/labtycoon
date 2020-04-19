@@ -40,6 +40,8 @@ class LabQuanTestForm(ModelForm):
     choice_set = QuerySelectField('Choice Set',
                                   widget=Select(),
                                   allow_blank=True,
+                                  blank_text='เลือกชุดคำตอบ',
+                                  validators=[Optional()]
                                  )
 
 
@@ -49,6 +51,8 @@ class LabQualTestForm(ModelForm):
     choice_set = QuerySelectField('Choice Set',
                                   widget=Select(),
                                   allow_blank=True,
+                                  blank_text='เลือกชุดคำตอบ',
+                                  validators=[Optional()]
                                  )
 
 
@@ -60,8 +64,18 @@ class LabCustomerForm(ModelForm):
 class LabQuanTestRecordForm(ModelForm):
     class Meta:
         model = LabQuanTestRecord
+    choice = QuerySelectField('Result choices',
+                                  widget=Select(),
+                                  allow_blank=False,
+                                  validators=[Optional()]
+                                 )
 
 
 class LabQualTestRecordForm(ModelForm):
     class Meta:
         model = LabQualTestRecord
+    choice = QuerySelectField('Result choices',
+                                  widget=Select(),
+                                  allow_blank=False,
+                                  validators=[Optional()]
+                                 )

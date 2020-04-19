@@ -30,8 +30,7 @@
                             </thead>
                             <tbody>
                             {% for qtest in customer.quan_test_orders|sort(attribute='ordered_at', reverse=True) %}
-                                {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
-                                    <tr>
+                                    <tr {% if qtest.cancelled_at %} class="has-text-danger" {% endif %}>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-key"></i>
@@ -55,6 +54,7 @@
                                         <td>{{ qtest.ordered_by }}</td>
                                         <td>
                                             <div class="buttons is-centered">
+                                                {% if qtest.finished_at %}
                                                 <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=qtest.customer.id, recordset_id=qtest.result_record_set.id) }}"
                                                    class="button is-info is-small is-rounded">
                                                     <span class="icon">
@@ -62,10 +62,10 @@
                                                     </span>
                                                     <span>Results</span>
                                                 </a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>
-                                {% endif %}
                             {% endfor %}
                             {% for qtest in customer.qual_test_orders|sort(attribute='ordered_at', reverse=True) %}
                                 {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished %}
