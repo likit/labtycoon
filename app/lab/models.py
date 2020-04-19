@@ -142,6 +142,8 @@ class LabQuanTestOrder(db.Model):
                                  backref=db.backref('quan_test_orders'),
                                  foreign_keys=[ordered_by_id])
     cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
+    reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
+    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('quan_orders'))
     received_at = db.Column('received_at', db.DateTime(timezone=True))
     finished_at = db.Column('finished_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
@@ -182,6 +184,8 @@ class LabQualTestOrder(db.Model):
                                  backref=db.backref('qual_test_orders'),
                                  foreign_keys=[ordered_by_id])
     cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
+    reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
+    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('qual_orders'))
     received_at = db.Column('received_at', db.DateTime(timezone=True))
     finished_at = db.Column('finished_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
@@ -213,3 +217,20 @@ class LabQualTestRecord(db.Model):
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
     updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
     updator = db.relationship(User, backref=db.backref('updated_qual_result_records'))
+
+
+class LabOrderRejectRecord(db.Model):
+    __tablename__ = 'lab_order_reject_records'
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column('created_at', db.DateTime(timezone=True), nullable=False)
+    creator_id = db.Column('creator_id', db.ForeignKey('user.id'))
+    reason = db.Column('reason', db.String(), nullable=False, info={'label': 'สาเหตุ',
+                        'choices': [(c, c) for c in ['สิ่งส่งตรวจไม่เหมาะสมกับการทดสอบ',
+                                                        'สิ่งส่งตรวจไม่เพียงพอ',
+                                                        'คุณภาพของสิ่งส่งตรวจไม่ดี',
+                                                        'ภาชนะรั่วหรือแตก',
+                                                        'ไม่มีรายการตรวจ',
+                                                        'ข้อมูลคนไข้ไม่ตรงกัน', 'อื่นๆ']
+                                                        ]
+                                                    })
+    detail = db.Column('detail', db.Text(), info={'label': 'รายละเอียด โปรดระบุ'})
