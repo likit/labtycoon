@@ -67,7 +67,7 @@
                             </div>
                         </div>
                     </div>
-                    {% if form.result_choices.choices %}
+                    {% if form.choice.choices %}
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
                             <label class="label">Choices</label>
@@ -76,7 +76,7 @@
                             <div class="field">
                                 <div class="control">
                                     <div class="select">
-                                        {{ form.result_choices() }}
+                                        {{ form.choice() }}
                                     </div>
                                 </div>
                             </div>

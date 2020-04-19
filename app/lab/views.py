@@ -7,6 +7,7 @@ from . import lab_blueprint as lab
 from .forms import *
 from .models import *
 from app.main.models import UserLabAffil
+from wtforms_alchemy.fields import QuerySelectField
 
 
 @lab.route('/<int:lab_id>')
@@ -455,11 +456,11 @@ def finish_quan_test_order(lab_id, order_id):
         db.session.commit()
 
     form = LabQuanTestRecordForm()
-    if order.test.choice_set:
-        choices = [(c.result, c.result) for c in order.test.choice_set.choice_items]
-    else:
-        choices = []
-    form.result_choices.choices = choices
+    try:
+        form.choice.query = order.test.choice_set.choice_items
+    except AttributeError:
+        form.choice.query = []
+
     if request.method == 'POST':
         if form.validate_on_submit():
             new_record = LabQuanTestRecord()
@@ -467,7 +468,8 @@ def finish_quan_test_order(lab_id, order_id):
             new_record.record_set = record_set
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
             new_record.updator = current_user
-            new_record.text_result = form.result_choices.data
+            if form.choice.data:
+                new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,
@@ -540,14 +542,27 @@ def finish_qual_test_order(lab_id, order_id):
 @login_required
 def edit_quan_record(customer_id, recordset_id):
     recordset = LabQuanTestRecordSet.query.get(recordset_id)
-    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
+    def edit_quan_form_factory(choice_set_id, choice_item):
+        class EditQuanForm(LabQuanTestRecordForm):
+            choice = QuerySelectField('Choices',
+                            query_factory=lambda:
+                                LabResultChoiceItem.query.filter_by(choice_set_id=choice_set_id),
+                            default=choice_item,
+                            widget=Select(), validators=[Optional()])
+        return EditQuanForm
 
-    form = LabQuanTestRecordForm(obj=cur_record)
-    if recordset.order.test.choice_set:
-        choices = [(c.result, c.result) for c in recordset.order.test.choice_set.choice_items]
+    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
+    choice_set_id = recordset.order.test.choice_set_id
+    choice_item = None
+    if choice_set_id:
+        for item in recordset.order.test.choice_set.choice_items:
+            if item.result == cur_record.text_result:
+                choice_item = item
+
+        EditQuanForm = edit_quan_form_factory(choice_set_id, choice_item)
+        form = EditQuanForm(obj=cur_record)
     else:
-        choices = []
-    form.result_choices.choices = choices
+        form = LabQuanTestRecordForm(obj=cur_record)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -557,8 +572,8 @@ def edit_quan_record(customer_id, recordset_id):
             new_record.updator = current_user
             new_record.record_set = recordset
             cur_record.cancelled = True
-            if choices:
-                new_record.text_result = form.result_choices.data
+            if hasattr(form, 'choice'):
+                new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=recordset.order.lab.id,
                 actor=current_user,
@@ -583,14 +598,28 @@ def edit_quan_record(customer_id, recordset_id):
 @login_required
 def edit_qual_record(customer_id, recordset_id):
     recordset = LabQualTestRecordSet.query.get(recordset_id)
+    choice_set_id = recordset.order.test.choice_set_id
     cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
 
-    form = LabQualTestRecordForm(obj=cur_record)
-    if recordset.order.test.choice_set:
-        choices = [(c.result, c.result) for c in recordset.order.test.choice_set.choice_items]
+    def edit_qual_form_factory(choice_set_id, choice_item):
+        class EditQualForm(LabQualTestRecordForm):
+            choice = QuerySelectField('Choices',
+                            query_factory=lambda:
+                                LabResultChoiceItem.query.filter_by(choice_set_id=choice_set_id),
+                            default=choice_item,
+                            widget=Select(), validators=[Optional()])
+        return EditQualForm
+
+    choice_item = None
+    if choice_set_id:
+        for item in recordset.order.test.choice_set.choice_items:
+            if item.result == cur_record.text_result:
+                choice_item = item
+                break
+        EditQualForm = edit_qual_form_factory(choice_set_id, choice_item)
+        form = EditQualForm(obj=cur_record)
     else:
-        choices = []
-    form.result_choices.choices = choices
+        form = LabQualTestRecordForm(obj=cur_record)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -600,8 +629,8 @@ def edit_qual_record(customer_id, recordset_id):
             new_record.updator = current_user
             new_record.record_set = recordset
             cur_record.cancelled = True
-            if choices:
-                new_record.text_result = form.result_choices.data
+            if hasattr(form, 'choice'):
+                new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=recordset.order.lab.id,
                 actor=current_user,
@@ -619,4 +648,5 @@ def edit_qual_record(customer_id, recordset_id):
                                     recordset_id=recordset.id))
         else:
             flash(form.errors, 'danger')
-    return render_template('lab/edit_qual_test_record.html', form=form, recordset=recordset)
+    return render_template('lab/edit_qual_test_record.html', form=form,
+                           recordset=recordset, cur_record=cur_record)
