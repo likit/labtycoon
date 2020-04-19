@@ -42,3 +42,6 @@ class User(db.Model):
 
     def get_id(self):
         return self.id
+
+    def is_affiliated_with(self, lab_id):
+        return lab_id in [affil.lab.id for affil in self.lab_affils]
