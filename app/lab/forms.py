@@ -34,26 +34,22 @@ class ChoiceItemForm(FlaskForm):
     ref = BooleanField('Is this a reference value?')
 
 
-class LabQuanTestForm(FlaskForm):
-    name = StringField('Name', validators=[
-        InputRequired()
-    ])
-    detail = TextField('Detail')
-    min_value = DecimalField('Min Value', default=0.0)
-    max_value = DecimalField('Max Value', validators=[Optional()])
-    min_ref_value = DecimalField('Min Reference Value', validators=[Optional()])
-    max_ref_value = DecimalField('Max Reference Value', validators=[Optional()])
-    choice_sets = SelectField('Choice Sets', coerce=int)
-    active = BooleanField('Active', default='checked')
+class LabQuanTestForm(ModelForm):
+    class Meta:
+        model = LabQuanTest
+    choice_set = QuerySelectField('Choice Set',
+                                  widget=Select(),
+                                  allow_blank=True,
+                                 )
 
 
-class LabQualTestForm(FlaskForm):
-    name = StringField('Name', validators=[
-        InputRequired()
-    ])
-    detail = TextField('Detail')
-    choice_sets = SelectField('Choice Sets', coerce=int)
-    active = BooleanField('Active', default='checked')
+class LabQualTestForm(ModelForm):
+    class Meta:
+        model = LabQualTest
+    choice_set = QuerySelectField('Choice Set',
+                                  widget=Select(),
+                                  allow_blank=True,
+                                 )
 
 
 class LabCustomerForm(ModelForm):
