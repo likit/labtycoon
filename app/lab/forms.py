@@ -60,10 +60,8 @@ class LabCustomerForm(ModelForm):
 class LabQuanTestRecordForm(ModelForm):
     class Meta:
         model = LabQuanTestRecord
-        field_args = {'choice_sets': {'coerce': int}}
 
 
 class LabQualTestRecordForm(ModelForm):
     class Meta:
         model = LabQualTestRecord
-        field_args = {'choice_sets': {'coerce': int}}
