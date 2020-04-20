@@ -55,7 +55,7 @@
                                         <td>
                                             <div class="buttons is-centered">
                                                 {% if qtest.order.finished_at %}
-                                                    {% if qtest.test_type == 'quan' %}
+                                                    {% if qtest.type == 'quan' %}
                                                     <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=customer.id, recordset_id=qtest.order.result_record_set.id) }}"
                                                     class="button is-info is-small is-rounded">
                                                         <span class="icon">
