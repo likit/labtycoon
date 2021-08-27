@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bulmaswatch.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
+          integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous"/>
     {% block styles %}
     {% endblock %}
     <title>Title</title>
@@ -17,7 +18,7 @@
 <footer class="footer">
     <div class="container has-text-centered">
         <p>
-            <h1 class="title is-size-4">Lab Tycoon</h1>
+        <h1 class="title is-size-4">Lab Tycoon</h1>
         </p>
         <p>
             <strong>
@@ -34,9 +35,20 @@
             Faculty of Medical Technology, Mahidol University
         </p>
     </div>
+    {% if config['DEBUG'] %}
+        <article class="message is-warning">
+            <div class="message-header">
+                DEBUG MODE Only
+            </div>
+            <div class="message-body">
+                <strong>Template file:</strong> {{ self._TemplateReference__context.name }}
+            </div>
+        </article>
+    {% endif %}
 </footer>
 {% block scripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"
+            integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
 {% endblock %}
 </body>
 </html>

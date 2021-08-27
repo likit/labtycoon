@@ -24,17 +24,16 @@
                     <th>Ordered At</th>
                     <th>Ordered By FK (User FK)</th>
                     <th>Ordered By</th>
-                    <th>Cancelled At</th>
+                    <th>Finished/Cancelled At</th>
                     <th>H.N.</th>
                     <th>Customer</th>
                     <th>Test FK</th>
                     <th>Test Name</th>
-                    <th>Results</th>
                     <th colspan="2"></th>
                     </thead>
                     <tbody>
                         {% for qtest in orders|sort(attribute='ordered_at', reverse=True) %}
-                            <tr {% if qtest.order.cancelled_at %} class="has-text-danger" {% elif qtest.order.finished_at %} class="has-text-success" {% endif %}>
+                            <tr>
                                 <td>
                                     <span class="icon">
                                         <i class="fas fa-key"></i>
@@ -51,7 +50,14 @@
                                 <td>{{ qtest.order.ordered_by }}</td>
                                 <td>
                                     {% if qtest.order.cancelled_at %}
-                                    {{ qtest.order.cancelled_at|humanizedt }}
+                                        <span class="tag is-light is-danger">
+                                            {{ qtest.order.cancelled_at|humanizedt }}
+                                        </span>
+                                    {% endif %}
+                                    {% if qtest.order.finished_at %}
+                                        <span class="tag is-light is-success">
+                                            {{ qtest.order.finished_at|humanizedt }}
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td>
