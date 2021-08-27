@@ -367,6 +367,7 @@ def cancel_quan_test_order(lab_id, order_id):
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
 
 
+# TODO: deprecated
 @lab.route('/<int:lab_id>/orders/quan/<int:order_id>/reject', methods=['GET', 'POST'])
 @login_required
 def reject_quan_test_order(lab_id, order_id):
@@ -445,10 +446,12 @@ def cancel_qual_test_order(lab_id, order_id):
     return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
 
 
-@lab.route('/<int:lab_id>/orders/qual/<int:order_id>/reject', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/orders/<int:order_id>/reject', methods=['GET', 'POST'])
 @login_required
 def reject_qual_test_order(lab_id, order_id):
     order = LabQualTestOrder.query.get(order_id)
+    if not order:
+        order = LabQuanTestOrder.query.get(order_id)
     form = LabOrderRejectRecordForm()
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -465,7 +468,7 @@ def reject_qual_test_order(lab_id, order_id):
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,
-                message='Rejected and cancelled the qualitative test order.',
+                message='Rejected and cancelled the order.',
                 detail=order.id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
@@ -478,7 +481,7 @@ def reject_qual_test_order(lab_id, order_id):
                 return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
         else:
             flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
-    return render_template('lab/order_reject.html', form=form)
+    return render_template('lab/order_reject.html', form=form, order=order)
 
 
 @lab.route('/<int:lab_id>/orders/qual/<int:order_id>/receive', methods=['GET', 'POST'])
@@ -572,7 +575,7 @@ def finish_quan_test_order(lab_id, order_id):
             form.populate_obj(new_record)
             new_record.record_set = record_set
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updator = current_user
+            new_record.updater = current_user
             if form.choice.data:
                 new_record.text_result = form.choice.data.result
             activity = LabActivity(
@@ -620,7 +623,7 @@ def finish_qual_test_order(lab_id, order_id):
             form.populate_obj(new_record)
             new_record.record_set = record_set
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updator = current_user
+            new_record.updater = current_user
             if not new_record.text_result and form.choice.query:
                 new_record.text_result = form.choice.data.result
             activity = LabActivity(
@@ -673,11 +676,12 @@ def edit_quan_record(customer_id, recordset_id):
             new_record = LabQuanTestRecord()
             form.populate_obj(new_record)
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updator = current_user
+            new_record.updater = current_user
             new_record.record_set = recordset
             cur_record.cancelled = True
             if hasattr(form, 'choice'):
-                new_record.text_result = form.choice.data.result
+                if form.choice.data:
+                    new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=recordset.order.lab.id,
                 actor=current_user,
@@ -730,11 +734,12 @@ def edit_qual_record(customer_id, recordset_id):
             new_record = LabQualTestRecord()
             form.populate_obj(new_record)
             new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updator = current_user
+            new_record.updater = current_user
             new_record.record_set = recordset
             cur_record.cancelled = True
             if hasattr(form, 'choice'):
-                new_record.text_result = form.choice.data.result
+                if form.choice.data:
+                    new_record.text_result = form.choice.data.result
             activity = LabActivity(
                 lab_id=recordset.order.lab.id,
                 actor=current_user,
