@@ -8,20 +8,21 @@ class LabCustomer(db.Model):
     # id is used as an HN
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     title = db.Column('title', db.String(), info={'label': 'Title',
-                                                  'choices': [(t,t) for t in ['นาย',
-                                                                              'นาง',
-                                                                              'นางสาว',
-                                                                              'เด็กหญิง',
-                                                                              'เด็กชาย',
-                                                                              'พระภิกษุ',
-                                                                              'สามเณร']]})
+                                                  'choices': [(t, t) for t in ['นาย',
+                                                                               'นาง',
+                                                                               'นางสาว',
+                                                                               'เด็กหญิง',
+                                                                               'เด็กชาย',
+                                                                               'พระภิกษุ',
+                                                                               'สามเณร']]})
     firstname = db.Column('firstname', db.String(), info={'label': 'First Name'})
     lastname = db.Column('lastname', db.String(), info={'label': 'Last Name'})
     dob = db.Column('dob', db.Date(), info={'label': 'Date of Birth'})
     gender = db.Column('gender', db.String(), info={'label': 'Gender',
                                                     'choices': [(g, g) for g in ['ชาย', 'หญิง']]})
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('customers'))
+    lab = db.relationship(Laboratory, backref=db.backref('customers',
+                                                         cascade='all, delete-orphan'))
 
     @property
     def fullname(self):
@@ -43,7 +44,8 @@ class LabActivity(db.Model):
     __tablename__ = 'lab_activities'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     actor_id = db.Column('actor_id', db.ForeignKey('user.id'))
-    actor = db.relationship(User, backref=db.backref('activities'))
+    actor = db.relationship(User, backref=db.backref('activities',
+                                                     cascade='all, delete-orphan'))
     message = db.Column('message', db.String(), nullable=False)
     detail = db.Column('detail', db.String())
     added_at = db.Column('added_at', db.DateTime(timezone=True))
@@ -56,7 +58,8 @@ class LabResultChoiceSet(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     name = db.Column('name', db.String())
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('choice_sets'))
+    lab = db.relationship(Laboratory, backref=db.backref('choice_sets',
+                                                         cascade='all, delete-orphan'))
     reference = db.Column('reference', db.String())
 
     def __str__(self):
@@ -94,7 +97,8 @@ class LabQuanTest(db.Model):
     active = db.Column('active', db.Boolean(), default=True)
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('quant_tests'))
+    lab = db.relationship(Laboratory, backref=db.backref('quant_tests',
+                                                         cascade='all, delete-orphan'))
 
     def __str__(self):
         return self.name
@@ -105,9 +109,9 @@ class LabQuanTestRecordSet(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     order_id = db.Column('order_id', db.ForeignKey('lab_quan_test_orders.id'))
     order = db.relationship('LabQuanTestOrder',
-                                backref=db.backref('result_record_set',
-                                                    uselist=False,
-                                                    cascade='all, delete-orphan'))
+                            backref=db.backref('result_record_set',
+                                               uselist=False,
+                                               cascade='all, delete-orphan'))
 
 
 class LabQuanTestRecord(db.Model):
@@ -115,7 +119,7 @@ class LabQuanTestRecord(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     record_set_id = db.Column('record_set_id', db.ForeignKey('lab_quan_result_sets.id'))
     record_set = db.relationship(LabQuanTestRecordSet,
-                        backref=db.backref('records', cascade='all, delete-orphan'))
+                                 backref=db.backref('records', cascade='all, delete-orphan'))
     num_result = db.Column('num_result', db.Numeric(),
                            info={'label': 'Numeric Result'})
     text_result = db.Column('text_result', db.String())
@@ -123,19 +127,22 @@ class LabQuanTestRecord(db.Model):
                         info={'label': 'Comment'})
     updated_at = db.Column('updated_at', db.DateTime(timezone=True))
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
-    updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
-    updator = db.relationship(User, backref=db.backref('updated_quan_result_records'))
+    updater_id = db.Column('updator_id', db.ForeignKey('user.id'))
+    updater = db.relationship(User, backref=db.backref('updated_quan_result_records'))
 
 
 class LabQuanTestOrder(db.Model):
     __tablename__ = 'lab_quan_test_orders'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('quan_test_orders'))
+    lab = db.relationship(Laboratory, backref=db.backref('quan_test_orders',
+                                                         cascade='all, delete-orphan'))
     customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
-    customer = db.relationship(LabCustomer, backref=db.backref('quan_test_orders'))
+    customer = db.relationship(LabCustomer, backref=db.backref('quan_test_orders',
+                                                               cascade='all, delete-orphan'))
     test_id = db.Column('test_id', db.ForeignKey('lab_quan_tests.id'))
-    test = db.relationship(LabQuanTest, backref=db.backref('orders', cascade='all, delete-orphan'))
+    test = db.relationship(LabQuanTest, backref=db.backref('orders',
+                                                           cascade='all, delete-orphan'))
     ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
     ordered_by_id = db.Column('ordered_by_id', db.ForeignKey('user.id'))
     ordered_by = db.relationship(User,
@@ -163,7 +170,8 @@ class LabQualTest(db.Model):
     active = db.Column('active', db.Boolean(), default=True)
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('qual_tests'))
+    lab = db.relationship(Laboratory, backref=db.backref('qual_tests',
+                                                         cascade='all, delete-orphan'))
 
     def __str__(self):
         return self.name
@@ -173,9 +181,11 @@ class LabQualTestOrder(db.Model):
     __tablename__ = 'lab_qual_test_orders'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('qual_test_orders'))
+    lab = db.relationship(Laboratory, backref=db.backref('qual_test_orders',
+                                                         cascade='all, delete-orphan'))
     customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
-    customer = db.relationship(LabCustomer, backref=db.backref('qual_test_orders'))
+    customer = db.relationship(LabCustomer, backref=db.backref('qual_test_orders',
+                                                               cascade='all, delete-orphan'))
     test_id = db.Column('test_id', db.ForeignKey('lab_qual_tests.id'))
     test = db.relationship(LabQualTest, backref=db.backref('orders', cascade='all, delete-orphan'))
     ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
@@ -199,9 +209,9 @@ class LabQualTestRecordSet(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     order_id = db.Column('order_id', db.ForeignKey('lab_qual_test_orders.id'))
     order = db.relationship(LabQualTestOrder,
-                    backref=db.backref('result_record_set',
-                                    uselist=False,
-                                    cascade='all, delete-orphan'))
+                            backref=db.backref('result_record_set',
+                                               uselist=False,
+                                               cascade='all, delete-orphan'))
 
 
 class LabQualTestRecord(db.Model):
@@ -209,14 +219,14 @@ class LabQualTestRecord(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     record_set_id = db.Column('record_set_id', db.ForeignKey('lab_qual_result_sets.id'))
     record_set = db.relationship(LabQualTestRecordSet,
-                                    backref=db.backref('records', cascade='all, delete-orphan'))
+                                 backref=db.backref('records', cascade='all, delete-orphan'))
     text_result = db.Column('text_result', db.String())
     comment = db.Column('comment', db.Text(),
                         info={'label': 'Comment'})
     updated_at = db.Column('updated_at', db.DateTime(timezone=True))
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
-    updator_id = db.Column('updator_id', db.ForeignKey('user.id'))
-    updator = db.relationship(User, backref=db.backref('updated_qual_result_records'))
+    updater_id = db.Column('updator_id', db.ForeignKey('user.id'))
+    updater = db.relationship(User, backref=db.backref('updated_qual_result_records'))
 
 
 class LabOrderRejectRecord(db.Model):
@@ -225,12 +235,13 @@ class LabOrderRejectRecord(db.Model):
     created_at = db.Column('created_at', db.DateTime(timezone=True), nullable=False)
     creator_id = db.Column('creator_id', db.ForeignKey('user.id'))
     reason = db.Column('reason', db.String(), nullable=False, info={'label': 'สาเหตุ',
-                        'choices': [(c, c) for c in ['สิ่งส่งตรวจไม่เหมาะสมกับการทดสอบ',
-                                                        'สิ่งส่งตรวจไม่เพียงพอ',
-                                                        'คุณภาพของสิ่งส่งตรวจไม่ดี',
-                                                        'ภาชนะรั่วหรือแตก',
-                                                        'ไม่มีรายการตรวจ',
-                                                        'ข้อมูลคนไข้ไม่ตรงกัน', 'อื่นๆ']
-                                                        ]
-                                                    })
+                                                                    'choices': [(c, c) for c in
+                                                                                ['สิ่งส่งตรวจไม่เหมาะสมกับการทดสอบ',
+                                                                                 'สิ่งส่งตรวจไม่เพียงพอ',
+                                                                                 'คุณภาพของสิ่งส่งตรวจไม่ดี',
+                                                                                 'ภาชนะรั่วหรือแตก',
+                                                                                 'ไม่มีรายการตรวจ',
+                                                                                 'ข้อมูลคนไข้ไม่ตรงกัน', 'อื่นๆ']
+                                                                                ]
+                                                                    })
     detail = db.Column('detail', db.Text(), info={'label': 'รายละเอียด โปรดระบุ'})

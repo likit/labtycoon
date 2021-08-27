@@ -30,8 +30,11 @@ class UserLabAffil(db.Model):
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'), primary_key=True)
     joined_at = db.Column('joined_at', db.DateTime(timezone=True))
     approved = db.Column('approved', db.Boolean(), default=False)
-    user = db.relationship(User, backref=db.backref('lab_affils', lazy=True))
-    lab = db.relationship(Laboratory, backref=db.backref('lab_members'))
+    user = db.relationship(User, backref=db.backref('lab_affils',
+                                                    lazy=True,
+                                                    cascade='all, delete-orphan'))
+    lab = db.relationship(Laboratory, backref=db.backref('lab_members',
+                                                         cascade='all, delete-orphan'))
 
 
 class Announcement(db.Model):
