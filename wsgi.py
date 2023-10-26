@@ -17,14 +17,9 @@ from app.main.models import *
 admin.add_view(ModelView(Laboratory, db.session, category='Labs'))
 
 from app.lab.models import *
-admin.add_view(ModelView(LabQuanTest, db.session, category='Tests'))
-admin.add_view(ModelView(LabQuanTestOrder, db.session, category='Tests'))
-admin.add_view(ModelView(LabQuanTestRecordSet, db.session, category='Tests'))
-admin.add_view(ModelView(LabQuanTestRecord, db.session, category='Tests'))
-admin.add_view(ModelView(LabQualTest, db.session, category='Tests'))
-admin.add_view(ModelView(LabQualTestOrder, db.session, category='Tests'))
-admin.add_view(ModelView(LabQualTestRecordSet, db.session, category='Tests'))
-admin.add_view(ModelView(LabQualTestRecord, db.session, category='Tests'))
+admin.add_view(ModelView(LabTest, db.session, category='Tests'))
+admin.add_view(ModelView(LabTestOrder, db.session, category='Tests'))
+admin.add_view(ModelView(LabTestRecord, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceSet, db.session, category='Tests'))
 admin.add_view(ModelView(LabResultChoiceItem, db.session, category='Tests'))
 admin.add_view(ModelView(LabActivity, db.session, category='Activities'))
@@ -41,5 +36,8 @@ def index():
 
 @app.template_filter('humanizedt')
 def humanize_datetime(dt):
-    dt = arrow.get(dt)
-    return dt.humanize()
+    if dt:
+        dt = arrow.get(dt)
+        return dt.humanize()
+    else:
+        return ''

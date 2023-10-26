@@ -5,90 +5,73 @@
         <div class="container">
             <div class="columns">
                 <div class="column">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <p class="notification is-{{ category }}">{{ message }}</p>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+                    {% include "messages.html" %}
                 </div>
             </div>
             <div class="columns">
                 <div class="column">
                     <h1 class="title is-size-4 has-text-centered">All Orders</h1>
+                    <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}</h1>
                     <div class="box">
+                        <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบให้ผู้ใช้แล้ว<button class="delete"></button></p>
                         <table class="table is-striped is-fullwidth">
                             <thead>
                             <th>Order No.</th>
                             <th>Ordered At</th>
-                            <th>Test FK</th>
-                            <th>Test Name</th>
+                            <th>Tests</th>
                             <th>Ordered By FK</th>
                             <th>Ordered By</th>
-                            <th></th>
+                            <th>Approved</th>
                             </thead>
                             <tbody>
-                            {% for qtest in orders|sort(attribute='ordered_at', reverse=True) %}
-                                    <tr {% if qtest.order.cancelled_at %} class="has-text-danger" {% endif %}>
+                            {% for order in customer.test_orders|sort(attribute='ordered_at', reverse=True) %}
+                                    <tr {% if order.cancelled_at %} class="has-text-danger" {% endif %}>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-key"></i>
                                         </span>
-                                            <span>{{ qtest.order.id }}</span>
+                                            <span>{{ order.id }}</span>
                                         </td>
-                                        <td>{{ qtest.order.ordered_at|humanizedt }}</td>
+                                        <td>{{ order.ordered_at|humanizedt }}</td>
+                                        <td>
+                                            <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
+                                                <span class="tag is-warning is-rounded">
+                                                    {{ order.test_records|length }}
+                                                </span>
+                                            </a>
+                                        </td>
                                         <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                            <span>{{ qtest.order.test.id }}</span>
+                                            <span>{{ order.ordered_by_id }}</span>
                                         </td>
-                                        <td>{{ qtest.order.test.name }}</td>
+                                        <td>{{ order.ordered_by }}</td>
                                         <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
-                                            <span>{{ qtest.order.ordered_by_id }}</span>
-                                        </td>
-                                        <td>{{ qtest.order.ordered_by }}</td>
-                                        <td>
-                                            <div class="buttons is-centered">
-                                                {% if qtest.order.finished_at %}
-                                                    {% if qtest.type == 'quan' %}
-                                                    <a href="{{ url_for('lab.show_customer_quan_recordset', customer_id=customer.id, recordset_id=qtest.order.result_record_set.id) }}"
-                                                    class="button is-info is-small is-rounded">
-                                                        <span class="icon">
-                                                            <i class="fas fa-clipboard-list"></i>
-                                                        </span>
-                                                        <span>Results</span>
-                                                    </a>
-                                                    {% else %}
-                                                    <a href="{{ url_for('lab.show_customer_qual_recordset', customer_id=customer.id, recordset_id=qtest.order.result_record_set.id) }}"
-                                                    class="button is-info is-small is-rounded">
-                                                        <span class="icon">
-                                                            <i class="fas fa-clipboard-list"></i>
-                                                        </span>
-                                                        <span>Results</span>
-                                                    </a>
-                                                    {% endif %}
-                                                {% endif %}
-                                            </div>
+                                            {% if order.approved_at %}
+                                            <span class="tag is-success is-rounded">
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span>
+                                                    {{ order.approved_at|humanizedt }}
+                                                </span>
+                                            </span>
+                                            {% endif %}
                                         </td>
                                     </tr>
                             {% endfor %}
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
             <div class="buttons is-centered">
                 <a href="{{ url_for('lab.list_patients', lab_id=customer.lab.id) }}"
                    class="button is-light is-rounded">
-                <span class="icon">
-                    <i class="fas fa-chevron-left"></i>
-                </span>
+                    <span class="icon">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
                     <span>Back</span>
                 </a>
             </div>

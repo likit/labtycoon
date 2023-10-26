@@ -5,13 +5,7 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
@@ -50,7 +44,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
-                                    <input type="text" class="input" disabled value="{{ order.test.name }}">
+                                    <input type="text" class="input" disabled value="{{ rec.test.name }}">
                                 </div>
                             </div>
                         </div>
@@ -67,22 +61,21 @@
                             </div>
                         </div>
                     </div>
-                    {% if form.choice.choices %}
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
-                            <label class="label">{{ form.choice.label }}</label>
+                            <label class="label">{{ form.choice_set.label }}</label>
                         </div>
                         <div class="field-body">
-                            <div class="field">
-                                <div class="control">
+                            <div class="field is-expanded">
+                                <div class="control is-expanded">
                                     <div class="select">
-                                        {{ form.choice() }}
+                                        {{ form.choice_set() }}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% else %}
+                    {% if rec.test.data_type == 'Numeric' %}
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
                             <label class="label">{{ form.num_result.label }}</label>
@@ -95,6 +88,19 @@
                             </div>
                         </div>
                     </div>
+                    {% elif rec.test.data_type == 'Text' %}
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label">{{ form.text_result.label }}</label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        {{ form.text_result(class="input") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% endif %}
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
@@ -115,10 +121,10 @@
                         <div class="field-body">
                             <div class="field is-grouped">
                                 <div class="control">
-                                    <button class="button is-success" type="submit">Save</button>
+                                    <a class="button is-light" href="{{ url_for('lab.show_customer_test_records', customer_id=order.customer.id, order_id=order.id) }}">Cancel</a>
                                 </div>
                                 <div class="control">
-                                    <a class="button is-danger" href="{{ url_for('lab.list_pending_orders', lab_id=order.lab.id) }}">Cancel</a>
+                                    <button class="button is-success" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>

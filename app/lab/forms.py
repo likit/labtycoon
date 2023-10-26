@@ -11,6 +11,7 @@ from app import db
 
 BaseModelForm = model_form_factory(FlaskForm)
 
+
 class ModelForm(BaseModelForm):
     @classmethod
     def get_session(self):
@@ -34,26 +35,16 @@ class ChoiceItemForm(FlaskForm):
     ref = BooleanField('Is this a reference value?')
 
 
-class LabQuanTestForm(ModelForm):
+class LabTestForm(ModelForm):
     class Meta:
-        model = LabQuanTest
+        model = LabTest
+
     choice_set = QuerySelectField('Choice Set',
                                   widget=Select(),
                                   allow_blank=True,
                                   blank_text='ไม่ใช้ชุดคำตอบ',
                                   validators=[Optional()]
-                                 )
-
-
-class LabQualTestForm(ModelForm):
-    class Meta:
-        model = LabQualTest
-    choice_set = QuerySelectField('Choice Set',
-                                  widget=Select(),
-                                  allow_blank=True,
-                                  blank_text='ไม่ใช้ชุดคำตอบ',
-                                  validators=[Optional()]
-                                 )
+                                  )
 
 
 class LabCustomerForm(ModelForm):
@@ -61,27 +52,30 @@ class LabCustomerForm(ModelForm):
         model = LabCustomer
 
 
-class LabQuanTestRecordForm(ModelForm):
-    class Meta:
-        model = LabQuanTestRecord
-    choice = QuerySelectField('Result choices',
-                                  widget=Select(),
-                                  allow_blank=False,
-                                  validators=[Optional()]
-                                 )
+def create_lab_test_record_form(test, default=None):
+    default_choice = LabResultChoiceItem.query.filter_by(choice_set_id=test.choice_set_id, result=default).first()
+    if default_choice:
+        default_choice = lambda: LabResultChoiceItem.query.filter_by(choice_set_id=test.choice_set_id, result=default).first()
 
+    class LabTestRecordForm(ModelForm):
+        class Meta:
+            model = LabTestRecord
 
-class LabQualTestRecordForm(ModelForm):
-    class Meta:
-        model = LabQualTestRecord
-    choice = QuerySelectField('Result choices',
-                                  widget=Select(),
-                                  allow_blank=False,
-                                  validators=[Optional()]
-                                 )
+        choice_set = QuerySelectField('Result choices',
+                                      query_factory=lambda: [] if not test.choice_set else test.choice_set.choice_items,
+                                      allow_blank=False,
+                                      default=default_choice,
+                                      validators=[Optional()])
+
+    return LabTestRecordForm
 
 
 class LabOrderRejectRecordForm(ModelForm):
     class Meta:
         model = LabOrderRejectRecord
         field_args = {'created_at': {'validators': [Optional()]}}
+
+
+class LabForm(ModelForm):
+    class Meta:
+        model = Laboratory

@@ -5,8 +5,8 @@ from app.auth.models import User
 class Laboratory(db.Model):
     __tablename__ = 'labs'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column('name', db.String(), nullable=False)
-    desc = db.Column('description', db.Text())
+    name = db.Column('name', db.String(), nullable=False, info={'label': 'Lab Name'})
+    desc = db.Column('description', db.Text(), info={'label': 'Description'})
     created_at = db.Column('created_at', db.DateTime(timezone=True))
     active = db.Column('active', db.Boolean(), default=True)
     creator_id = db.Column('creator_id', db.ForeignKey('user.id'))

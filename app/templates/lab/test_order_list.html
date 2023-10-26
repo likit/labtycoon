@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    {% include "messages.html" %}
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title has-text-centered">Order History</h1>
+                    <div class="box">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                            <th>Order No.</th>
+                            <th>Ordered At</th>
+                            <th>Ordered By FK (User FK)</th>
+                            <th>Ordered By</th>
+                            <th>Finished/Cancelled At</th>
+                            <th>H.N.</th>
+                            <th>Customer</th>
+                            <th colspan="2"></th>
+                            </thead>
+                            <tbody>
+                            {% for order in lab.test_orders|sort(attribute='ordered_at', reverse=True) %}
+                                <tr>
+                                    <td>
+                                    <span class="icon">
+                                        <i class="fas fa-key"></i>
+                                    </span>
+                                        <span>{{ order.id }}</span>
+                                    </td>
+                                    <td>{{ order.ordered_at|humanizedt }}</td>
+                                    <td>
+                                    <span class="icon">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                        <span>{{ order.ordered_by_id }}</span>
+                                    </td>
+                                    <td>{{ order.ordered_by }}</td>
+                                    <td>
+                                        {% if order.cancelled_at %}
+                                            <span class="tag is-light is-danger">
+                                            {{ order.cancelled_at|humanizedt }}
+                                        </span>
+                                        {% endif %}
+                                        {% if order.approved_at %}
+                                            <span class="tag is-light is-success">
+                                            {{ order.approved_at|humanizedt }}
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                    <span class="icon">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                        <span>
+                                        {{ order.customer.id }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.customer }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons is-centered">
+                <a href="{{ url_for('lab.list_patients', lab_id=lab.id) }}"
+                   class="button is-light is-rounded">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                    <span>Back</span>
+                </a>
+                <a href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}"
+                   class="button is-info is-rounded">
+                <span class="icon">
+                    <i class="far fa-clock"></i>
+                </span>
+                    <span>Pending orders</span>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

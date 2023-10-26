@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    {% include "messages.html" %}
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title is-size-4 has-text-centered">All Result Records</h1>
+                    <div class="box">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                            <th>Recordset ID</th>
+                            <th>Record ID</th>
+                            <th>Updated at</th>
+                            <th>Updated by ID</th>
+                            <th>Updated by</th>
+                            {% if quan %}
+                                <th>Numeric Result</th>
+                            {% endif %}
+                            <th>Text Result</th>
+                            <th>Status</th>
+                            </thead>
+                            <tbody>
+                            {% for rec in records|sort(attribute='updated_at', reverse=True) %}
+                                <tr>
+                                    <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                        <span>{{ recordset.id }}</span>
+                                    </td>
+                                    <td>
+                                <span class="icon">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                        <span>{{ rec.id }}</span>
+                                    </td>
+                                    <td>{{ rec.updated_at|humanizedt }}</td>
+                                    <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                        <span>{{ rec.updater_id }}</span>
+                                    </td>
+                                    <td>{{ rec.updater }}</td>
+                                    {% if quan %}
+                                        <td>{{ rec.num_result or '' }}</td>
+                                    {% endif %}
+                                    <td>{{ rec.text_result or '' }}</td>
+                                    <td>
+                                <span class="icon">
+                                {% if rec.cancelled %}
+                                    <i class="fas fa-minus-circle has-text-danger"></i>
+                                {% else %}
+                                    <i class="fas fa-check-circle has-text-success"></i>
+                                {% endif %}
+                                </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons is-centered">
+                <a href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}"
+                   class="button is-light is-rounded">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                    <span>Back</span>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

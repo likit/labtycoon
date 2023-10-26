@@ -47,7 +47,8 @@
                             <button class="button is-success is-rounded" type="submit">Add</button>
                         </div>
                         <div class="control">
-                            <a href="" class="button is-rounded is-danger">Cancel</a>
+                            <a href="{{ url_for('lab.list_patients', lab_id=lab_id) }}"
+                               class="button is-rounded is-danger">Cancel</a>
                         </div>
                     </div>
                 </form>

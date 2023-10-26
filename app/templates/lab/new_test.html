@@ -4,13 +4,7 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
@@ -27,6 +21,14 @@
                         <label class="label">{{ form.detail.label }}</label>
                         <div class="control">
                             {{ form.detail(class="textarea") }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">{{ form.data_type.label }}</label>
+                        <div class="control">
+                            <div class="select">
+                                {{ form.data_type() }}
+                            </div>
                         </div>
                     </div>
                     <div class="field">

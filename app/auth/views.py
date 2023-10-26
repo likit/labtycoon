@@ -25,7 +25,10 @@ def login():
             else:
                 if existing_user.check_password(password):
                     login_user(existing_user)
+                    flash('You have logged in.', 'success')
                     return redirect(url_for('main.index'))
+                else:
+                    flash('Wrong password.', 'danger')
         else:
             flash(form.errors, 'danger')
     return render_template('/auth/login.html', form=form)
@@ -35,6 +38,7 @@ def login():
 def logout():
     if current_user.is_authenticated:
         logout_user()
+        flash('You have logged out.', 'success')
     return redirect(url_for('main.index'))
 
 

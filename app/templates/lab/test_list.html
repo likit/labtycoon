@@ -35,11 +35,11 @@
         </div>
         <div class="columns">
             <div class="column">
-            <p class="title is-size-5 has-text-centered">Quantitative</p>
+            <p class="title is-size-5 has-text-centered">Test</p>
             <div class="box">
                 <div class="buttons is-right">
                     <a class="button is-success is-rounded"
-                       href="{{ url_for('lab.add_quan_test', lab_id=lab.id) }}">
+                       href="{{ url_for('lab.add_test', lab_id=lab.id) }}">
                         <span class="icon">
                             <i class="fas fa-plus-circle"></i>
                         </span>
@@ -61,7 +61,7 @@
                     <th colspan="2"></th>
                     </thead>
                     <tbody>
-                    {% for test in lab.quant_tests %}
+                    {% for test in lab.tests %}
                         <tr>
                             <td>
                                 <span class="icon">
@@ -94,7 +94,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ url_for('lab.edit_quan_test', test_id=test.id, lab_id=test.lab.id) }}">
+                                <a href="{{ url_for('lab.edit_test', test_id=test.id, lab_id=test.lab.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-pencil-alt"></i>
                                     </span>
@@ -102,81 +102,6 @@
                             </td>
                             <td>
                                 <a href="{{ url_for('lab.remove_quan_test', test_id=test.id, lab_id=test.lab.id) }}">
-                                    <span class="icon">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            </div>
-        </div>
-        <div class="columns">
-            <div class="column">
-                <p class="title is-size-5 has-text-centered">Qualitative</p>
-            </div>
-        </div>
-        <div class="columns">
-            <div class="column">
-            <div class="box">
-                <div class="buttons is-right">
-                    <a class="button is-success is-rounded" href="{{ url_for('lab.add_qual_test', lab_id=lab.id) }}">
-                        <span class="icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </span>
-                        <span>Add</span>
-                    </a>
-                </div>
-                <table class="table is-striped is-fullwidth">
-                    <thead>
-                    <th>Primary Key</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Choice Set</th>
-                    <th>Added at</th>
-                    <th>Active</th>
-                    <th colspan="2"></th>
-                    </thead>
-                    <tbody>
-                    {% for test in lab.qual_tests %}
-                        <tr>
-                            <td>
-                                <span class="icon">
-                                    <i class="fas fa-key"></i>
-                                </span>
-                                <span>{{ test.id }}</span>
-                            </td>
-                            <td>{{ test.name }}</td>
-                            <td>{{ test.detail }}</td>
-                            <td>
-                                <span class="icon">
-                                    <i class="fas fa-link"></i>
-                                </span>
-                                <span>{{ test.choice_set.id }} {{ test.choice_set }}</span></td>
-                            <td>{{ test.added_at|humanizedt }}</td>
-                            <td>
-                                {% if test.active %}
-                                    <span class="icon">
-                                    <i class="fas fa-check-circle has-text-success"></i>
-                                </span>
-                                {% else %}
-                                    <span class="icon">
-                                    <i class="fas fa-minus-circle has-text-danger"></i>
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{{ url_for('lab.edit_qual_test', test_id=test.id, lab_id=test.lab.id) }}">
-                                    <span class="icon">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </span>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ url_for('lab.remove_qual_test', test_id=test.id, lab_id=test.lab.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-trash-alt"></i>
                                     </span>

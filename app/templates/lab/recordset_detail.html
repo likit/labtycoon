@@ -5,13 +5,7 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
@@ -20,33 +14,39 @@
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                         <thead>
-                        <th>Recordset ID</th>
+                        <th>Order ID</th>
+                        <th>Test Name</th>
                         <th>Record ID</th>
                         <th>Updated at</th>
                         <th>Updated by ID</th>
                         <th>Updated by</th>
-                        {% if quan %}
                         <th>Numeric Result</th>
-                        {% endif %}
                         <th>Text Result</th>
                         <th>Status</th>
+                        <th>Approved At</th>
+                        <th></th>
                         </thead>
                         <tbody>
-                        {% for rec in recordset.records|sort(attribute='updated_at', reverse=True) %}
+                        {% for rec in order.test_records %}
                             <tr>
                             <td>
                                 <span class="icon">
                                     <i class="fas fa-link"></i>
                                 </span>
-                                <span>{{ recordset.id }}</span>
+                                <span>{{ order.id }}</span>
                             </td>
+                            <td>{{ rec.test.name }}</td>
                             <td>
                                 <span class="icon">
                                     <i class="fas fa-key"></i>
                                 </span>
                                 <span>{{ rec.id }}</span>
                             </td>
-                            <td>{{ rec.updated_at|humanizedt }}</td>
+                            <td>
+                                {% if rec.updated_at %}
+                                {{ rec.updated_at|humanizedt }}
+                                {% endif %}
+                            </td>
                             <td>
                                 <span class="icon">
                                     <i class="fas fa-link"></i>
@@ -54,18 +54,40 @@
                                 <span>{{ rec.updater_id }}</span>
                             </td>
                             <td>{{ rec.updater }}</td>
-                            {% if quan %}
                             <td>{{ rec.num_result or '' }}</td>
-                            {% endif %}
                             <td>{{ rec.text_result or '' }}</td>
                             <td>
                                 <span class="icon">
-                                {% if rec.cancelled %}
+                                {% if rec.reject_record or rec.order.cancelled_at %}
                                     <i class="fas fa-minus-circle has-text-danger"></i>
                                 {% else %}
                                     <i class="fas fa-check-circle has-text-success"></i>
                                 {% endif %}
                                 </span>
+                            </td>
+                            <td>
+                                {% if order.approved_at %}
+                                {{ order.approved_at|humanizedt }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not order.approved_at and rec.received_at %}
+                                <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
+                                   class="button is-small is-outlined is-rounded is-success">
+                                    <span class="icon"><i class="fas fa-pencil-alt"></i></span>
+                                    <span>report</span>
+                                </a>
+                                {% endif %}
+                                {% if not rec.received_at and not rec.reject_record %}
+                                    <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
+                                       class="button is-small is-rounded is-success">
+                                        receive
+                                    </a>
+                                    <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
+                                       class="button is-small is-rounded is-danger">
+                                        reject
+                                    </a>
+                                {% endif %}
                             </td>
                             </tr>
                         {% endfor %}
@@ -82,19 +104,24 @@
                 </span>
                 <span>Back</span>
             </a>
-            <a
-                {% if quan %}
-                    href="{{ url_for('lab.edit_quan_record', customer_id=customer.id, recordset_id=recordset.id) }}"
-                {% else %}
-                    href="{{ url_for('lab.edit_qual_record', customer_id=customer.id, recordset_id=recordset.id) }}"
-                {% endif %}
-               class="button is-danger is-rounded">
+            {% if not order.approved_at %}
+            <a hx-confirm="Are you sure?" hx-get="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
+               class="button is-success is-rounded" id="approve-btn">
                 <span class="icon">
-                    <i class="fas fa-pencil-alt"></i>
+                    <i class="fas fa-check"></i>
                 </span>
-                <span>Edit</span>
+                <span>Approve</span>
             </a>
+            {% endif %}
         </div>
     </div>
 </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('htmx:beforeSend', function () {
+            htmx.addClass(htmx.find('#approve-btn'), 'is-loading')
+        })
+    </script>
 {% endblock %}

@@ -32,8 +32,7 @@
                     <th>Detail</th>
                     </thead>
                     <tbody>
-                        {% for qtest in orders|sort(attribute='ordered_at', reverse=True) %}
-                        {% if qtest.order.reject_record %}
+                        {% for qtest in records %}
                             <tr>
                                 <td>
                                     <span class="icon">
@@ -44,9 +43,9 @@
                                 <td>{{ qtest.order.ordered_at|humanizedt }}</td>
                                 <td>{{ qtest.order.ordered_by }}</td>
                                 <td>
-                                    {% if qtest.order.reject_record.created_at %}
-                                    {{ qtest.order.cancelled_at|humanizedt }}
-                                    {% endif %}
+                                    <span class="tag is-danger is-rounded">
+                                        {{ qtest.reject_record.created_at|humanizedt }}
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="icon">
@@ -61,13 +60,12 @@
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
                                     </span>
-                                    <span>{{ qtest.order.test.id }}</span>
+                                    <span>{{ qtest.test.id }}</span>
                                 </td>
-                                <td>{{ qtest.order.test.name }}</td>
-                                <td>{{ qtest.order.reject_record.reason }}</td>
-                                <td>{{ qtest.order.reject_record.detail }}</td>
+                                <td>{{ qtest.test.name }}</td>
+                                <td>{{ qtest.reject_record.reason }}</td>
+                                <td>{{ qtest.reject_record.detail }}</td>
                             </tr>
-                        {% endif %}
                         {% endfor %}
                     </tbody>
                     </table>

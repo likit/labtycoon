@@ -1,6 +1,11 @@
+from sqlalchemy_continuum import make_versioned
+import sqlalchemy as sa
+
 from app import db
 from app.main.models import Laboratory
 from app.auth.models import User
+
+make_versioned(user_cls=None)
 
 
 class LabCustomer(db.Model):
@@ -32,12 +37,12 @@ class LabCustomer(db.Model):
         return self.fullname
 
     @property
-    def pending_qual_test_orders(self):
-        return [order for order in self.qual_test_orders if not order.finished_at and not order.cancelled_at]
+    def all_test_orders(self):
+        return len(self.qual_test_orders) + len(self.quan_test_orders)
 
     @property
-    def pending_quan_test_orders(self):
-        return [order for order in self.quan_test_orders if not order.finished_at and not order.cancelled_at]
+    def pending_test_orders(self):
+        return [order for order in self.test_orders if not order.approved_at and not order.cancelled_at]
 
 
 class LabActivity(db.Model):
@@ -81,8 +86,9 @@ class LabResultChoiceItem(db.Model):
         return self.result
 
 
-class LabQuanTest(db.Model):
-    __tablename__ = 'lab_quan_tests'
+class LabTest(db.Model):
+    __versioned__ = {}
+    __tablename__ = 'lab_tests'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     name = db.Column('name', db.String(), nullable=False, info={'label': 'Name'})
     detail = db.Column('detail', db.Text(), info={'label': 'Detail'})
@@ -97,136 +103,61 @@ class LabQuanTest(db.Model):
     active = db.Column('active', db.Boolean(), default=True)
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('quant_tests',
+    lab = db.relationship(Laboratory, backref=db.backref('tests',
                                                          cascade='all, delete-orphan'))
+    data_type = db.Column('data_type', db.String(), info={'label': 'Data Type',
+                                                          'choices': [(c, c) for c in ['Numeric', 'Text']]})
 
     def __str__(self):
         return self.name
 
 
-class LabQuanTestRecordSet(db.Model):
-    __tablename__ = 'lab_quan_result_sets'
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    order_id = db.Column('order_id', db.ForeignKey('lab_quan_test_orders.id'))
-    order = db.relationship('LabQuanTestOrder',
-                            backref=db.backref('result_record_set',
-                                               uselist=False,
-                                               cascade='all, delete-orphan'))
-
-
-class LabQuanTestRecord(db.Model):
-    __tablename__ = 'lab_quan_result_records'
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    record_set_id = db.Column('record_set_id', db.ForeignKey('lab_quan_result_sets.id'))
-    record_set = db.relationship(LabQuanTestRecordSet,
-                                 backref=db.backref('records', cascade='all, delete-orphan'))
-    num_result = db.Column('num_result', db.Numeric(),
-                           info={'label': 'Numeric Result'})
-    text_result = db.Column('text_result', db.String())
-    comment = db.Column('comment', db.Text(),
-                        info={'label': 'Comment'})
-    updated_at = db.Column('updated_at', db.DateTime(timezone=True))
-    cancelled = db.Column('cancelled', db.Boolean(), default=False)
-    updater_id = db.Column('updator_id', db.ForeignKey('user.id'))
-    updater = db.relationship(User, backref=db.backref('updated_quan_result_records'))
-
-
-class LabQuanTestOrder(db.Model):
-    __tablename__ = 'lab_quan_test_orders'
+class LabTestOrder(db.Model):
+    __tablename__ = 'lab_test_orders'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('quan_test_orders',
+    lab = db.relationship(Laboratory, backref=db.backref('test_orders',
                                                          cascade='all, delete-orphan'))
     customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
-    customer = db.relationship(LabCustomer, backref=db.backref('quan_test_orders',
-                                                               cascade='all, delete-orphan'))
-    test_id = db.Column('test_id', db.ForeignKey('lab_quan_tests.id'))
-    test = db.relationship(LabQuanTest, backref=db.backref('orders',
-                                                           cascade='all, delete-orphan'))
+    customer = db.relationship(LabCustomer, backref=db.backref('test_orders', cascade='all, delete-orphan'))
     ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
     ordered_by_id = db.Column('ordered_by_id', db.ForeignKey('user.id'))
     ordered_by = db.relationship(User,
                                  backref=db.backref('quan_test_orders'),
                                  foreign_keys=[ordered_by_id])
     cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
-    reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
-    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('quan_orders'))
-    received_at = db.Column('received_at', db.DateTime(timezone=True))
-    finished_at = db.Column('finished_at', db.DateTime(timezone=True))
-    receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
-    receiver = db.relationship(User,
-                               backref=db.backref('received_quan_orders'),
-                               foreign_keys=[receiver_id])
+    approved_at = db.Column('approved_at', db.DateTime(timezone=True))
+    approver_id = db.Column('approver_id', db.ForeignKey('user.id'))
+    approver = db.relationship(User, backref=db.backref('approved_quan_orders'), foreign_keys=[approver_id])
+
+    @property
+    def pending_tests(self):
+        return len([test for test in self.test_orders if test.finished_at is None])
 
 
-class LabQualTest(db.Model):
-    __tablename__ = 'lab_qual_tests'
+class LabTestRecord(db.Model):
+    __versioned__ = {}
+    __tablename__ = 'lab_test_records'
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column('name', db.String(), nullable=False, info={'label': 'Name'})
-    detail = db.Column('detail', db.Text(), info={'label': 'Detail'})
-    # choices for results in text
-    choice_set_id = db.Column('choice_set', db.ForeignKey('lab_result_choice_set.id'))
-    choice_set = db.relationship(LabResultChoiceSet)
-    active = db.Column('active', db.Boolean(), default=True)
-    added_at = db.Column('added_at', db.DateTime(timezone=True))
-    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('qual_tests',
-                                                         cascade='all, delete-orphan'))
-
-    def __str__(self):
-        return self.name
-
-
-class LabQualTestOrder(db.Model):
-    __tablename__ = 'lab_qual_test_orders'
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('qual_test_orders',
-                                                         cascade='all, delete-orphan'))
-    customer_id = db.Column('customer_id', db.ForeignKey('lab_customers.id'))
-    customer = db.relationship(LabCustomer, backref=db.backref('qual_test_orders',
-                                                               cascade='all, delete-orphan'))
-    test_id = db.Column('test_id', db.ForeignKey('lab_qual_tests.id'))
-    test = db.relationship(LabQualTest, backref=db.backref('orders', cascade='all, delete-orphan'))
-    ordered_at = db.Column('ordered_at', db.DateTime(timezone=True))
-    ordered_by_id = db.Column('ordered_by_id', db.ForeignKey('user.id'))
-    ordered_by = db.relationship(User,
-                                 backref=db.backref('qual_test_orders'),
-                                 foreign_keys=[ordered_by_id])
-    cancelled_at = db.Column('cancelled_at', db.DateTime(timezone=True))
-    reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
-    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('qual_orders'))
-    received_at = db.Column('received_at', db.DateTime(timezone=True))
-    finished_at = db.Column('finished_at', db.DateTime(timezone=True))
-    receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
-    receiver = db.relationship(User,
-                               backref=db.backref('received_qual_orders'),
-                               foreign_keys=[receiver_id])
-
-
-class LabQualTestRecordSet(db.Model):
-    __tablename__ = 'lab_qual_result_sets'
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    order_id = db.Column('order_id', db.ForeignKey('lab_qual_test_orders.id'))
-    order = db.relationship(LabQualTestOrder,
-                            backref=db.backref('result_record_set',
-                                               uselist=False,
-                                               cascade='all, delete-orphan'))
-
-
-class LabQualTestRecord(db.Model):
-    __tablename__ = 'lab_qual_result_records'
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    record_set_id = db.Column('record_set_id', db.ForeignKey('lab_qual_result_sets.id'))
-    record_set = db.relationship(LabQualTestRecordSet,
-                                 backref=db.backref('records', cascade='all, delete-orphan'))
-    text_result = db.Column('text_result', db.String())
-    comment = db.Column('comment', db.Text(),
-                        info={'label': 'Comment'})
+    num_result = db.Column('num_result', db.Numeric(),
+                           info={'label': 'Numeric Result'})
+    text_result = db.Column('text_result', db.String(), info={'label': 'Text Result'})
+    comment = db.Column('comment', db.Text(), info={'label': 'Comment'})
     updated_at = db.Column('updated_at', db.DateTime(timezone=True))
     cancelled = db.Column('cancelled', db.Boolean(), default=False)
     updater_id = db.Column('updator_id', db.ForeignKey('user.id'))
-    updater = db.relationship(User, backref=db.backref('updated_qual_result_records'))
+    updater = db.relationship(User, backref=db.backref('updated_quan_result_records'), foreign_keys=[updater_id])
+    test_id = db.Column('test_id', db.ForeignKey('lab_tests.id'))
+    test = db.relationship(LabTest, backref=db.backref('test_records', cascade='all, delete-orphan'))
+    order_id = db.Column('order_id', db.ForeignKey('lab_test_orders.id'))
+    order = db.relationship(LabTestOrder, backref=db.backref('test_records', cascade='all, delete-orphan'))
+    reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
+    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('test_records'))
+    received_at = db.Column('received_at', db.DateTime(timezone=True))
+    receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
+    receiver = db.relationship(User,
+                               backref=db.backref('received_test_records'),
+                               foreign_keys=[receiver_id])
 
 
 class LabOrderRejectRecord(db.Model):
@@ -245,3 +176,6 @@ class LabOrderRejectRecord(db.Model):
                                                                                 ]
                                                                     })
     detail = db.Column('detail', db.Text(), info={'label': 'รายละเอียด โปรดระบุ'})
+
+
+sa.orm.configure_mappers()

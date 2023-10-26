@@ -5,13 +5,27 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <p class="notification is-info">
+                    สร้างห้องปฏิบัติการใหม่หรือส่งคำขอเพื่อเข้าร่วมห้องปฏิบัติการอื่นโดยคลิกที่ชื่อห้องปฏิบัติการ
+                    <button class="delete"></button>
+                </p>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column has-text-centered">
+                <a class="button primary" href="{{ url_for('lab.create_lab') }}">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>
+                        Create New Lab
+                    </span>
+                </a>
             </div>
         </div>
         <div class="columns">

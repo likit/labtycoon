@@ -4,37 +4,27 @@
     <section class="section">
     <div class="container">
         <div class="columns">
-            <div class="column is-one-third is-offset-4">
-                <div class="panel">
-                    <div class="panel-heading">
-                        Select Quantitative Test
-                    </div>
-                    {% for test in lab.quant_tests %}
-                        <a class="panel-block" href="{{ url_for('lab.add_quan_test_order', lab_id=lab.id, customer_id=customer_id, test_id=test.id) }}">
-                            <span class="panel-icon">
-                                <i class="fas fa-plus-circle"></i>
-                            </span>
-                            {{ test.name }}
-                        </a>
-                    {% endfor %}
-                </div>
+            <div class="column has-text-centered">
+                <h1 class="title">New Test Order</h1>
             </div>
         </div>
         <div class="columns">
-            <div class="column is-one-third is-offset-4">
-                <div class="panel">
-                    <div class="panel-heading">
-                        Select Qualitative Test
-                    </div>
-                    {% for test in lab.qual_tests %}
-                        <a class="panel-block" href="{{ url_for('lab.add_qual_test_order', lab_id=lab.id, customer_id=customer_id, test_id=test.id) }}">
-                            <span class="panel-icon">
-                                <i class="fas fa-plus-circle"></i>
-                            </span>
-                            {{ test.name }}
-                        </a>
+            <div class="column box is-one-third is-offset-4">
+                <h1 class="title is-size-4">Select Tests</h1>
+                <form method="post">
+                    {% for test in lab.tests %}
+                        <div class="field">
+                            <label class="checkbox">
+                                <input type="checkbox" name="test_ids" value="{{ test.id }}">
+                                {{ test.name }}
+                            </label>
+                        </div>
                     {% endfor %}
-                </div>
+                    <div class="buttons is-centered">
+                        <a class="button is-light">Cancel</a>
+                        <button class="button is-primary" type="submit">Submit</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

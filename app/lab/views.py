@@ -1,5 +1,5 @@
 import arrow
-from flask import render_template, url_for, request, flash, redirect
+from flask import render_template, url_for, request, flash, redirect, make_response
 from flask_login import login_required, current_user
 from app.main.models import Laboratory
 from app import db
@@ -7,10 +7,9 @@ from . import lab_blueprint as lab
 from .forms import *
 from .models import *
 from app.main.models import UserLabAffil
-from wtforms_alchemy.fields import QuerySelectField
 from collections import namedtuple
 
-TestOrder = namedtuple('TestOrder', ['order', 'ordered_at', 'type'])
+TestOrder = namedtuple('TestOrder', ['order', 'ordered_at', 'type', 'approved_at'])
 
 
 @lab.route('/<int:lab_id>')
@@ -22,6 +21,24 @@ def landing(lab_id):
         return redirect(url_for('main.index'))
     lab = Laboratory.query.get(lab_id)
     return render_template('lab/index.html', lab=lab)
+
+
+@lab.route('/labs', methods=['GET', 'POST'])
+@login_required
+def create_lab():
+    form = LabForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            lab = Laboratory()
+            form.populate_obj(lab)
+            lab.creator = current_user
+            db.session.add(lab)
+            db.session.commit()
+            flash('Your new lab has been created.', 'success')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Error happened.', 'danger')
+    return render_template('lab/lab_form.html', form=form)
 
 
 @lab.route('/<int:lab_id>/tests')
@@ -39,27 +56,26 @@ def list_choice_sets(lab_id):
 
 
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/items', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/items/<int:choice_item_id>', methods=['GET', 'POST'])
 @login_required
-def add_choice_item(lab_id, choice_set_id):
-    form = ChoiceItemForm()
+def add_choice_item(lab_id, choice_set_id, choice_item_id=None):
+    if choice_item_id:
+        item = LabResultChoiceItem.query.get(choice_item_id)
+        form = ChoiceItemForm(obj=item)
+    else:
+        form = ChoiceItemForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            result = request.form.get('result')
-            interpret = request.form.get('interpretation')
-            is_ref = request.form.get('ref')
-            ref = True if is_ref else False
-            new_item = LabResultChoiceItem(
-                choice_set_id=choice_set_id,
-                result=result,
-                interpretation=interpret,
-                ref=ref,
-            )
-            db.session.add(new_item)
+            if not choice_item_id:
+                item = LabResultChoiceItem()
+            form.populate_obj(item)
+            item.choice_set_id = choice_set_id
+            db.session.add(item)
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,
                 message='Added result choice item',
-                detail=result,
+                detail=item.result,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
             db.session.add(activity)
@@ -71,33 +87,39 @@ def add_choice_item(lab_id, choice_set_id):
     return render_template('lab/new_choice_item.html', form=form)
 
 
-@lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/items/<int:choice_item_id>/remove')
+@lab.route('/result-sets/items/<int:choice_item_id>', methods=['DELETE'])
 @login_required
-def remove_choice_item(lab_id, choice_set_id, choice_item_id):
+def remove_choice_item(choice_item_id):
     item = LabResultChoiceItem.query.get(choice_item_id)
+    resp = make_response()
     if item:
         db.session.delete(item)
         db.session.commit()
-        flash('Choice has been deleted.', 'success')
     else:
-        flash('Choice not found.', 'danger')
-    return redirect(url_for('lab.list_choice_sets', lab_id=lab_id))
+        resp.headers['HX-Reswap'] = 'none'
+    return resp
 
 
 @lab.route('/<int:lab_id>/choice_sets/add', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>', methods=['GET', 'POST'])
 @login_required
-def add_choice_set(lab_id):
-    form = ChoiceSetForm()
+def add_choice_set(lab_id, choice_set_id=None):
+    if choice_set_id:
+        choice_set = LabResultChoiceSet.query.get(choice_set_id)
+        form = ChoiceSetForm(obj=choice_set)
+    else:
+        form = ChoiceSetForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            name = request.form.get('name')
-            reference = request.form.get('reference')
-            new_choice_set = LabResultChoiceSet(lab_id=lab_id, name=name, reference=reference)
-            db.session.add(new_choice_set)
+            if not choice_set_id:
+                choice_set = LabResultChoiceSet()
+            form.populate_obj(choice_set)
+            choice_set.lab_id = lab_id
+            db.session.add(choice_set)
             activity = LabActivity(
                 lab_id=lab_id,
                 message='Added a new choice set',
-                detail=name,
+                detail=choice_set.name,
                 added_at=arrow.now('Asia/Bangkok').datetime,
                 actor=current_user
             )
@@ -125,14 +147,15 @@ def remove_choice_set(lab_id, choice_set_id):
 
 @lab.route('/<int:lab_id>/quantests/add', methods=['GET', 'POST'])
 @login_required
-def add_quan_test(lab_id):
-    form = LabQuanTestForm(lab_id=lab_id)
+def add_test(lab_id):
+    form = LabTestForm(lab_id=lab_id)
     form.choice_set.query = LabResultChoiceSet.query.filter_by(lab_id=lab_id)
     if request.method == 'POST':
         if form.validate_on_submit():
-            new_test = LabQuanTest()
+            new_test = LabTest()
             form.populate_obj(new_test)
             new_test.lab_id = lab_id
+            new_test.added_at = arrow.now('Asia/Bangkok').datetime
             db.session.add(new_test)
             activity = LabActivity(
                 lab_id=lab_id,
@@ -147,14 +170,14 @@ def add_quan_test(lab_id):
             return redirect(url_for('lab.list_tests', lab_id=lab_id))
         else:
             flash(form.errors, 'danger')
-    return render_template('lab/new_quan_test.html', form=form)
+    return render_template('lab/new_test.html', form=form)
 
 
 @lab.route('/<int:lab_id>/quantests/<int:test_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_quan_test(lab_id, test_id):
-    test = LabQuanTest.query.get(test_id)
-    form = LabQuanTestForm(obj=test)
+def edit_test(lab_id, test_id):
+    test = LabTest.query.get(test_id)
+    form = LabTestForm(obj=test)
     form.choice_set.query = LabResultChoiceSet.query.filter_by(lab_id=lab_id)
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -165,7 +188,7 @@ def edit_quan_test(lab_id, test_id):
             return redirect(url_for('lab.list_tests', lab_id=lab_id))
         else:
             flash('An error occurred. Please contact the system administrator.', 'danger')
-    return render_template('lab/new_quan_test.html', form=form, lab_id=lab_id)
+    return render_template('lab/new_test.html', form=form, lab_id=lab_id)
 
 
 @lab.route('/<int:lab_id>/quantests/<int:test_id>/remove', methods=['GET', 'POST'])
@@ -174,65 +197,7 @@ def remove_quan_test(lab_id, test_id):
     if not current_user.is_affiliated_with(lab_id):
         flash('You do not have a permission to perform this task.', 'danger')
 
-    test = LabQuanTest.query.get(test_id)
-    db.session.delete(test)
-    db.session.commit()
-    flash('The record has been removed along with its associated records.', 'success')
-    return redirect(request.referrer)
-
-
-@lab.route('/<int:lab_id>/qualtests/add', methods=['GET', 'POST'])
-@login_required
-def add_qual_test(lab_id):
-    form = LabQualTestForm()
-    form.choice_set.query = LabResultChoiceSet.query.filter_by(lab_id=lab_id)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_test = LabQualTest()
-            form.populate_obj(new_test)
-            new_test.lab_id = lab_id
-            db.session.add(new_test)
-            activity = LabActivity(
-                lab_id=lab_id,
-                actor=current_user,
-                message='Added a new qualitative test',
-                detail=form.name.data,
-                added_at=arrow.now('Asia/Bangkok').datetime,
-            )
-            db.session.add(activity)
-            db.session.commit()
-            flash('New qualitative test has been added.')
-            return redirect(url_for('lab.list_tests', lab_id=lab_id))
-        else:
-            flash(form.errors, 'danger')
-    return render_template('lab/new_qual_test.html', form=form)
-
-
-@lab.route('/<int:lab_id>/qualtests/<int:test_id>/edit', methods=['GET', 'POST'])
-@login_required
-def edit_qual_test(lab_id, test_id):
-    test = LabQualTest.query.get(test_id)
-    form = LabQualTestForm(obj=test)
-    form.choice_set.query = LabResultChoiceSet.query.filter_by(lab_id=lab_id)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            form.populate_obj(test)
-            db.session.add(test)
-            db.session.commit()
-            flash('Data have been saved.', 'success')
-            return redirect(url_for('lab.list_tests', lab_id=lab_id))
-        else:
-            flash('An error occurred. Please contact the system administrator.', 'danger')
-    return render_template('lab/new_qual_test.html', form=form, lab_id=lab_id)
-
-
-@lab.route('/<int:lab_id>/qualtests/<int:test_id>/remove', methods=['GET', 'POST'])
-@login_required
-def remove_qual_test(lab_id, test_id):
-    if not current_user.is_affiliated_with(lab_id):
-        flash('You do not have a permission to perform this task.', 'danger')
-
-    test = LabQualTest.query.get(test_id)
+    test = LabTest.query.get(test_id)
     db.session.delete(test)
     db.session.commit()
     flash('The record has been removed along with its associated records.', 'success')
@@ -270,85 +235,50 @@ def add_patient(lab_id):
             return render_template('lab/customer_list.html', lab=lab)
         else:
             flash('Failed to add a new patient.', 'danger')
-    return render_template('lab/new_customer.html', form=form)
+    return render_template('lab/new_customer.html', form=form, lab_id=lab_id)
 
 
-@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/menu', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders', methods=['GET', 'POST'])
 @login_required
-def add_test_order_menu(lab_id, customer_id):
+def add_test_order(lab_id, customer_id):
     lab = Laboratory.query.get(lab_id)
-    return render_template('lab/new_test_order.html', lab=lab, customer_id=customer_id)
-
-
-@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/quant/tests/<int:test_id>/add', methods=['GET', 'POST'])
-@login_required
-def add_quan_test_order(lab_id, customer_id, test_id):
-    test = LabQuanTest.query.get(test_id)
-    if test:
-        order = LabQuanTestOrder(
+    if request.method == 'POST':
+        form = request.form
+        test_ids = form.getlist('test_ids')
+        print(test_ids)
+        order = LabTestOrder(
             lab_id=lab_id,
             customer_id=customer_id,
-            test_id=test.id,
             ordered_at=arrow.now('Asia/Bangkok').datetime,
-            ordered_by=current_user
+            ordered_by=current_user,
+            test_records=[LabTestRecord(test_id=tid) for tid in test_ids],
         )
         db.session.add(order)
         activity = LabActivity(
             lab_id=lab_id,
             actor=current_user,
             message='Added an order for a quantitative test.',
-            detail=test.name,
+            detail=order.id,
             added_at=arrow.now('Asia/Bangkok').datetime
         )
         db.session.add(activity)
         db.session.commit()
         flash('New order has been added.', 'success')
         return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
-    flash('Test does not exists.', 'danger')
-    return redirect(request.referrer)
-
-
-@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/qual/tests/<int:test_id>/add', methods=['GET', 'POST'])
-@login_required
-def add_qual_test_order(lab_id, customer_id, test_id):
-    test = LabQualTest.query.get(test_id)
-    if test:
-        order = LabQualTestOrder(
-            lab_id=lab_id,
-            customer_id=customer_id,
-            test_id=test.id,
-            ordered_at=arrow.now('Asia/Bangkok').datetime,
-            ordered_by=current_user
-        )
-        db.session.add(order)
-        activity = LabActivity(
-            lab_id=lab_id,
-            actor=current_user,
-            message='Added an order for a qualitative test.',
-            detail=test.name,
-            added_at=arrow.now('Asia/Bangkok').datetime
-        )
-        db.session.add(activity)
-        db.session.commit()
-        flash('New order has been added.', 'success')
-        return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
-    flash('Test does not exists.', 'danger')
-    return redirect(request.referrer)
+    return render_template('lab/new_test_order.html', lab=lab, customer_id=customer_id)
 
 
 @lab.route('/<int:lab_id>/orders', methods=['GET', 'POST'])
 @login_required
 def list_test_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
-    orders = [TestOrder(order, order.ordered_at, 'quan') for order in lab.quan_test_orders]
-    orders += [TestOrder(order, order.ordered_at, 'qual') for order in lab.qual_test_orders]
-    return render_template('lab/quan_test_order_list.html', lab=lab, orders=orders)
+    return render_template('lab/test_order_list.html', lab=lab)
 
 
 @lab.route('/<int:lab_id>/orders/quan/<int:order_id>/cancel', methods=['GET', 'POST'])
 @login_required
-def cancel_quan_test_order(lab_id, order_id):
-    order = LabQuanTestOrder.query.get(order_id)
+def cancel_test_order(lab_id, order_id):
+    order = LabTestOrder.query.get(order_id)
     order.cancelled_at = arrow.now('Asia/Bangkok').datetime
     order.cancelled_by = current_user
     db.session.add(order)
@@ -368,10 +298,10 @@ def cancel_quan_test_order(lab_id, order_id):
 
 
 # TODO: deprecated
-@lab.route('/<int:lab_id>/orders/quan/<int:order_id>/reject', methods=['GET', 'POST'])
+@lab.route('/records/<int:record_id>/reject', methods=['GET', 'POST'])
 @login_required
-def reject_quan_test_order(lab_id, order_id):
-    order = LabQuanTestOrder.query.get(order_id)
+def reject_test_order(record_id):
+    record = LabTestRecord.query.get(record_id)
     form = LabOrderRejectRecordForm()
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -379,136 +309,54 @@ def reject_quan_test_order(lab_id, order_id):
             form.populate_obj(new_record)
             new_record.created_at = arrow.now('Asia/Bangkok').datetime
             new_record.creator = current_user
-            order.reject_record = new_record
-            order.cancelled_at = arrow.now('Asia/Bangkok').datetime
-            order.cancelled_by = current_user
-            db.session.add(order)
+            record.reject_record = new_record
+            record.cancelled_at = True
+            db.session.add(record)
             db.session.add(new_record)
-            db.session.add(order)
             activity = LabActivity(
-                lab_id=lab_id,
+                lab_id=record.order.lab_id,
                 actor=current_user,
-                message='Rejected and cancelled the quantitative test order.',
-                detail=order.id,
+                message='Rejected and cancelled the test order.',
+                detail=record.id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
             db.session.add(activity)
             db.session.commit()
-            flash('The order has been rejected.', 'success')
-            if request.args.get('pending'):
-                return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
-            else:
-                return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+            flash('The test has been rejected.', 'success')
+            return redirect(url_for('lab.list_test_orders', lab_id=record.order.lab_id))
         else:
             flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
     return render_template('lab/order_reject.html', form=form)
 
 
-@lab.route('/<int:lab_id>/orders/quan/<int:order_id>/receive', methods=['GET', 'POST'])
+@lab.route('/records/<int:record_id>/receive', methods=['GET', 'POST'])
 @login_required
-def receive_quan_test_order(lab_id, order_id):
-    order = LabQuanTestOrder.query.get(order_id)
-    order.received_at = arrow.now('Asia/Bangkok').datetime
-    order.receiver = current_user
-    db.session.add(order)
+def receive_test_order(record_id):
+    record = LabTestRecord.query.get(record_id)
+    record.received_at = arrow.now('Asia/Bangkok').datetime
+    record.receiver = current_user
+    db.session.add(record)
     activity = LabActivity(
-        lab_id=lab_id,
+        lab_id=record.order.lab_id,
         actor=current_user,
-        message='Received the quantitative test order.',
-        detail=order.id,
+        message='Received the test.',
+        detail=record.id,
         added_at=arrow.now('Asia/Bangkok').datetime
     )
     db.session.add(activity)
     db.session.commit()
     flash('The order has been received.', 'success')
-    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
-
-
-@lab.route('/<int:lab_id>/orders/qual/<int:order_id>/cancel', methods=['GET', 'POST'])
-@login_required
-def cancel_qual_test_order(lab_id, order_id):
-    order = LabQualTestOrder.query.get(order_id)
-    order.cancelled_at = arrow.now('Asia/Bangkok').datetime
-    order.cancelled_by = current_user
-    db.session.add(order)
-    activity = LabActivity(
-        lab_id=lab_id,
-        actor=current_user,
-        message='Cancelled the qualitative test order.',
-        detail=order.id,
-        added_at=arrow.now('Asia/Bangkok').datetime
-    )
-    db.session.add(activity)
-    db.session.commit()
-    flash('The order has been cancelled.', 'success')
-    if request.args.get('pending'):
-        return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
-    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
-
-
-@lab.route('/<int:lab_id>/orders/<int:order_id>/reject', methods=['GET', 'POST'])
-@login_required
-def reject_qual_test_order(lab_id, order_id):
-    order = LabQualTestOrder.query.get(order_id)
-    if not order:
-        order = LabQuanTestOrder.query.get(order_id)
-    form = LabOrderRejectRecordForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_record = LabOrderRejectRecord()
-            form.populate_obj(new_record)
-            new_record.created_at = arrow.now('Asia/Bangkok').datetime
-            new_record.creator = current_user
-            order.reject_record = new_record
-            order.cancelled_at = arrow.now('Asia/Bangkok').datetime
-            order.cancelled_by = current_user
-            db.session.add(order)
-            db.session.add(new_record)
-            db.session.add(order)
-            activity = LabActivity(
-                lab_id=lab_id,
-                actor=current_user,
-                message='Rejected and cancelled the order.',
-                detail=order.id,
-                added_at=arrow.now('Asia/Bangkok').datetime
-            )
-            db.session.add(activity)
-            db.session.commit()
-            flash('The order has been rejected.', 'success')
-            if request.args.get('pending'):
-                return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
-            else:
-                return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
-        else:
-            flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
-    return render_template('lab/order_reject.html', form=form, order=order)
-
-
-@lab.route('/<int:lab_id>/orders/qual/<int:order_id>/receive', methods=['GET', 'POST'])
-@login_required
-def receive_qual_test_order(lab_id, order_id):
-    order = LabQualTestOrder.query.get(order_id)
-    order.received_at = arrow.now('Asia/Bangkok').datetime
-    order.receiver = current_user
-    db.session.add(order)
-    activity = LabActivity(
-        lab_id=lab_id,
-        actor=current_user,
-        message='Received the qualitative test order.',
-        detail=order.id,
-        added_at=arrow.now('Asia/Bangkok').datetime
-    )
-    db.session.add(activity)
-    db.session.commit()
-    flash('The order has been received.', 'success')
-    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+    return redirect(url_for('lab.show_customer_test_records',
+                            order_id=record.order_id, customer_id=record.order.customer.id))
 
 
 @lab.route('/<int:lab_id>/orders/pending', methods=['GET', 'POST'])
 @login_required
 def list_pending_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
-    return render_template('lab/pending_orders.html', lab=lab)
+    pendings = LabTestRecord.query.filter_by(updated_at=None)
+    pendings = [r for r in pendings if r.order.lab_id==lab_id]
+    return render_template('lab/pending_orders.html', lab=lab, pendings=pendings)
 
 
 @lab.route('/<int:lab_id>/activities')
@@ -522,249 +370,76 @@ def list_activities(lab_id):
 @login_required
 def show_customer_records(customer_id):
     customer = LabCustomer.query.get(customer_id)
-    orders = [TestOrder(order, order.ordered_at, 'quan') for order in customer.quan_test_orders]
-    orders += [TestOrder(order, order.ordered_at, 'qual') for order in customer.qual_test_orders]
     if customer:
-        return render_template('lab/customer_records.html', customer=customer, orders=orders)
+        return render_template('lab/customer_records.html', customer=customer)
 
 
-@lab.route('/customers/<int:customer_id>/quan/records/<int:recordset_id>')
+@lab.route('/customers/<int:customer_id>/orders/<int:order_id>/records')
 @login_required
-def show_customer_quan_recordset(customer_id, recordset_id):
+def show_customer_test_records(customer_id, order_id):
     customer = LabCustomer.query.get(customer_id)
-    recordset = LabQuanTestRecordSet.query.get(recordset_id)
-    if customer and recordset:
-        return render_template('lab/recordset_detail.html',
-                               customer=customer, recordset=recordset, quan=True)
+    order = LabTestOrder.query.get(order_id)
+    return render_template('lab/recordset_detail.html', customer=customer, order=order)
 
 
-@lab.route('/customers/<int:customer_id>/qual/records/<int:recordset_id>')
+@lab.route('/orders/<int:order_id>/records/<int:record_id>', methods=['POST', 'GET'])
 @login_required
-def show_customer_qual_recordset(customer_id, recordset_id):
-    customer = LabCustomer.query.get(customer_id)
-    recordset = LabQualTestRecordSet.query.get(recordset_id)
-    if customer and recordset:
-        return render_template('lab/recordset_detail.html',
-                               customer=customer, recordset=recordset, quan=False)
-
-
-@lab.route('/<int:lab_id>/quan/orders/<int:order_id>/finish', methods=['POST', 'GET'])
-@login_required
-def finish_quan_test_order(lab_id, order_id):
-    order = LabQuanTestOrder.query.get(order_id)
-    if not order:
-        flash('Order no longer exists.', 'danger')
+def finish_test_record(order_id, record_id):
+    order = LabTestOrder.query.get(order_id)
+    rec = LabTestRecord.query.get(record_id)
+    if not order or not rec:
+        flash('The order or the test record no longer exists.', 'danger')
         return redirect(request.referrer)
 
-    record_set = LabQuanTestRecordSet.query.filter_by(order_id=order_id).first()
-    if not record_set:
-        record_set = LabQuanTestRecordSet(order_id=order_id)
-        flash('New result record set has been created for the order.', 'success')
-        db.session.add(record_set)
-        db.session.commit()
-
-    form = LabQuanTestRecordForm()
-    try:
-        form.choice.query = order.test.choice_set.choice_items
-    except AttributeError:
-        form.choice.query = []
+    LabTestRecordForm = create_lab_test_record_form(rec.test, default=rec.text_result)
+    form = LabTestRecordForm(obj=rec)
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            new_record = LabQuanTestRecord()
-            form.populate_obj(new_record)
-            new_record.record_set = record_set
-            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updater = current_user
-            if form.choice.data:
-                new_record.text_result = form.choice.data.result
+            form.populate_obj(rec)
+            rec.updated_at = arrow.now('Asia/Bangkok').datetime
+            rec.updater = current_user
+            if form.choice_set.data:
+                rec.text_result = form.choice_set.data.result
             activity = LabActivity(
-                lab_id=lab_id,
+                lab_id=order.lab_id,
                 actor=current_user,
-                message='Added the result for a test order.',
-                detail=order.id,
+                message='Added the result for a test record.',
+                detail=rec.id,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
             order.finished_at = arrow.now('Asia/Bangkok').datetime
-            db.session.add(order)
-            db.session.add(new_record)
+            db.session.add(rec)
             db.session.add(activity)
             db.session.commit()
             flash('New result record has been saved.', 'success')
-            return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
+            return redirect(url_for('lab.show_customer_test_records', order_id=order_id, customer_id=order.customer.id))
         else:
             flash(form.errors, 'danger')
-    return render_template('lab/new_quan_test_record.html', form=form, order=order)
+    return render_template('lab/new_test_record.html', form=form, order=order, rec=rec)
 
 
-@lab.route('/<int:lab_id>/qual/orders/<int:order_id>/finish', methods=['POST', 'GET'])
+
+@lab.route('/orders/<int:order_id>/approve')
 @login_required
-def finish_qual_test_order(lab_id, order_id):
-    order = LabQualTestOrder.query.get(order_id)
-    if not order:
-        flash('Order no longer exists.', 'danger')
-        return redirect(request.referrer)
-
-    record_set = LabQualTestRecordSet.query.filter_by(order_id=order_id).first()
-    if not record_set:
-        record_set = LabQualTestRecordSet(order_id=order_id)
-        flash('New result record set has been created for the order.', 'success')
-        db.session.add(record_set)
-        db.session.commit()
-
-    form = LabQualTestRecordForm()
-    if order.test.choice_set:
-        form.choice.query = order.test.choice_set.choice_items
-    else:
-        form.choice.query = []
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_record = LabQualTestRecord()
-            form.populate_obj(new_record)
-            new_record.record_set = record_set
-            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updater = current_user
-            if not new_record.text_result and form.choice.query:
-                new_record.text_result = form.choice.data.result
-            activity = LabActivity(
-                lab_id=lab_id,
-                actor=current_user,
-                message='Added the result for a test order.',
-                detail=order.id,
-                added_at=arrow.now('Asia/Bangkok').datetime
-            )
-            db.session.add(new_record)
-            db.session.add(activity)
-            order.finished_at = arrow.now('Asia/Bangkok').datetime
-            db.session.add(order)
-            db.session.commit()
-            flash('New result record has been saved.', 'success')
-            return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
-        else:
-            flash(form.errors, 'danger')
-    return render_template('lab/new_qual_test_record.html', form=form, order=order)
+def approve_test_order(order_id):
+    order = LabTestOrder.query.get(order_id)
+    order.approved_at = arrow.now('Asia/Bangkok').datetime
+    order.approver = current_user
+    db.session.add(order)
+    db.session.commit()
+    resp = make_response()
+    resp.headers['HX-Refresh'] = 'true'
+    return resp
 
 
-@lab.route('/customers/<int:customer_id>/quan/recordsets/<int:recordset_id>/edit', methods=['POST', 'GET'])
-@login_required
-def edit_quan_record(customer_id, recordset_id):
-    recordset = LabQuanTestRecordSet.query.get(recordset_id)
-    def edit_quan_form_factory(choice_set_id, choice_item):
-        class EditQuanForm(LabQuanTestRecordForm):
-            choice = QuerySelectField('Choices',
-                            query_factory=lambda:
-                                LabResultChoiceItem.query.filter_by(choice_set_id=choice_set_id),
-                            default=choice_item,
-                            widget=Select(), validators=[Optional()])
-        return EditQuanForm
-
-    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
-    choice_set_id = recordset.order.test.choice_set_id
-    choice_item = None
-    if choice_set_id:
-        for item in recordset.order.test.choice_set.choice_items:
-            if item.result == cur_record.text_result:
-                choice_item = item
-
-        EditQuanForm = edit_quan_form_factory(choice_set_id, choice_item)
-        form = EditQuanForm(obj=cur_record)
-    else:
-        form = LabQuanTestRecordForm(obj=cur_record)
-
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_record = LabQuanTestRecord()
-            form.populate_obj(new_record)
-            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updater = current_user
-            new_record.record_set = recordset
-            cur_record.cancelled = True
-            if hasattr(form, 'choice'):
-                if form.choice.data:
-                    new_record.text_result = form.choice.data.result
-            activity = LabActivity(
-                lab_id=recordset.order.lab.id,
-                actor=current_user,
-                message='Edited the result for a test order.',
-                detail=new_record.id,
-                added_at=arrow.now('Asia/Bangkok').datetime
-            )
-            db.session.add(cur_record)
-            db.session.add(new_record)
-            db.session.add(activity)
-            db.session.commit()
-            flash('New result record has been saved.', 'success')
-            return redirect(url_for('lab.show_customer_quan_recordset',
-                                    customer_id=customer_id,
-                                    recordset_id=recordset.id))
-        else:
-            flash(form.errors, 'danger')
-    return render_template('lab/edit_quan_test_record.html', form=form, recordset=recordset)
-
-
-@lab.route('/customers/<int:customer_id>/qual/recordsets/<int:recordset_id>/edit', methods=['POST', 'GET'])
-@login_required
-def edit_qual_record(customer_id, recordset_id):
-    recordset = LabQualTestRecordSet.query.get(recordset_id)
-    choice_set_id = recordset.order.test.choice_set_id
-    cur_record = sorted(recordset.records, key=lambda x: x.updated_at, reverse=True)[0]
-
-    def edit_qual_form_factory(choice_set_id, choice_item):
-        class EditQualForm(LabQualTestRecordForm):
-            choice = QuerySelectField('Choices',
-                            query_factory=lambda:
-                                LabResultChoiceItem.query.filter_by(choice_set_id=choice_set_id),
-                            default=choice_item,
-                            widget=Select(), validators=[Optional()])
-        return EditQualForm
-
-    choice_item = None
-    if choice_set_id:
-        for item in recordset.order.test.choice_set.choice_items:
-            if item.result == cur_record.text_result:
-                choice_item = item
-                break
-        EditQualForm = edit_qual_form_factory(choice_set_id, choice_item)
-        form = EditQualForm(obj=cur_record)
-    else:
-        form = LabQualTestRecordForm(obj=cur_record)
-
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_record = LabQualTestRecord()
-            form.populate_obj(new_record)
-            new_record.updated_at = arrow.now('Asia/Bangkok').datetime
-            new_record.updater = current_user
-            new_record.record_set = recordset
-            cur_record.cancelled = True
-            if hasattr(form, 'choice'):
-                if form.choice.data:
-                    new_record.text_result = form.choice.data.result
-            activity = LabActivity(
-                lab_id=recordset.order.lab.id,
-                actor=current_user,
-                message='Edited the result for a test order.',
-                detail=new_record.id,
-                added_at=arrow.now('Asia/Bangkok').datetime
-            )
-            db.session.add(cur_record)
-            db.session.add(new_record)
-            db.session.add(activity)
-            db.session.commit()
-            flash('New result record has been saved.', 'success')
-            return redirect(url_for('lab.show_customer_qual_recordset',
-                                    customer_id=customer_id,
-                                    recordset_id=recordset.id))
-        else:
-            flash(form.errors, 'danger')
-    return render_template('lab/edit_qual_test_record.html', form=form,
-                           recordset=recordset, cur_record=cur_record)
-
-
-@lab.route('/<int:lab_id>/orders/rejects')
+@lab.route('/labs/<int:lab_id>/rejects')
 @login_required
 def list_rejected_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
-    orders = [TestOrder(order, order.ordered_at, 'quan') for order in lab.quan_test_orders]
-    orders += [TestOrder(order, order.ordered_at, 'qual') for order in lab.qual_test_orders]
-    return render_template('lab/reject_records.html', orders=orders, lab=lab)
+    records = []
+    for order in lab.test_orders:
+        for record in order.test_records:
+            if record.reject_record:
+                records.append(record)
+    return render_template('lab/reject_records.html', records=records, lab=lab)

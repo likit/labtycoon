@@ -19,13 +19,7 @@
         </div>
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
@@ -46,7 +40,8 @@
             {% for cs in lab.choice_sets %}
                 <h1 class="title is-size-5 is-link">
                     <span class="title is-size-5">PK={{ cs.id }} {{ cs.name }}</span>
-                    <a>
+                    <span class="subtitle is-size-5">Ref.= {{ cs.reference }}</span>
+                    <a href="{{ url_for('lab.add_choice_set', choice_set_id=cs.id, lab_id=lab.id) }}">
                         <span class="icon">
                             <i class="fas fa-pencil-alt"></i>
                         </span>
@@ -84,12 +79,16 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="icon">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </span>
+                                <a href="{{ url_for('lab.add_choice_item', lab_id=lab.id, choice_item_id=ci.id, choice_set_id=cs.id) }}">
+                                    <span class="icon">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </span>
+                                </a>
                             </td>
                             <td>
-                                <a href="{{ url_for('lab.remove_choice_item', lab_id=lab.id, choice_set_id=cs.id, choice_item_id=ci.id) }}">
+                                <a hx-confirm="Are you sure?"
+                                   hx-target="closest tr"
+                                   hx-delete="{{ url_for('lab.remove_choice_item', lab_id=lab.id, choice_set_id=cs.id, choice_item_id=ci.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-trash"></i>
                                     </span>

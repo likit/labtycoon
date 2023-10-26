@@ -5,12 +5,13 @@
     <div class="container">
         <div class="columns">
             <div class="column">
+                <h1 class="title has-text-centered">Customers</h1>
                 <div class="box">
                 <div class="buttons is-right">
                     <a class="button is-success is-rounded"
                         href="{{ url_for('lab.add_patient', lab_id=lab.id) }}">
                         <span class="icon">
-                            <i class="fas fa-plus-circle"></i>
+                            <i class="fas fa-user-plus"></i>
                         </span>
                         <span>New Customer</span>
                     </a>
@@ -40,21 +41,27 @@
                             <td>{{ customer.lastname }}</td>
                             <td>{{ customer.gender }}</td>
                             <td>{{ customer.dob }}</td>
-                            <td>{{ customer.pending_qual_test_orders|length + customer.pending_quan_test_orders|length }}</td>
+                            <td>
+                                <a href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}">
+                                    <span class="tag is-warning is-rounded">
+                                    {{ customer.pending_test_orders|length }}
+                                </span>
+                                </a>
+                            </td>
                             <td>
                                 <a class="button is-rounded is-small is-info"
-                                    href="{{ url_for('lab.add_test_order_menu', lab_id=lab.id, customer_id=customer.id) }}">
+                                    href="{{ url_for('lab.add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-plus-circle"></i>
                                     </span>
-                                    <span>New Test</span>
+                                    <span>New Order</span>
                                 </a>
                                 <a class="button is-rounded is-small is-primary"
                                     href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-clipboard-list"></i>
                                     </span>
-                                    <span>Records</span>
+                                    <span>Orders</span>
                                 </a>
                             </td>
                             </tr>
@@ -80,7 +87,7 @@
                 <span>Orders</span>
             </a>
             <a href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}"
-               class="button is-info is-rounded">
+               class="button is-warning is-rounded">
                 <span class="icon">
                     <i class="far fa-clock"></i>
                 </span>

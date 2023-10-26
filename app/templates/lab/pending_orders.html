@@ -5,18 +5,13 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
             <div class="column">
             <h1 class="title is-size-4 has-text-centered">Pending Orders</h1>
+                <p class="notification is-light">แสดงรายการทดสอบที่รับเข้าระบบแล้วและยังไม่ได้รายงานผลการทดสอบเท่านั้น <button class="delete"></button></p>
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                         <thead>
@@ -28,10 +23,11 @@
                         <th>Test Name</th>
                         <th>Ordered By FK</th>
                         <th>Ordered By</th>
+                        <th>Received At</th>
                         <th></th>
                         </thead>
                         <tbody>
-                        {% for qtest in lab.quan_test_orders %}
+                        {% for qtest in pendings %}
                             {% if not qtest.cancelled_at and qtest.received_at and not qtest.finished_at %}
                                 <tr>
                                     <td>
@@ -40,14 +36,16 @@
                                         </span>
                                         <span>{{ qtest.id }}</span>
                                     </td>
-                                    <td>{{ qtest.ordered_at|humanizedt }}</td>
+                                    <td>
+                                        {{ qtest.ordered_at|humanizedt }}
+                                    </td>
                                     <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                        <span>{{ qtest.customer.id }}</span>
+                                        <span>{{ qtest.order.customer.id }}</span>
                                     </td>
-                                    <td>{{ qtest.customer }}</td>
+                                    <td>{{ qtest.order.customer }}</td>
                                     <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
@@ -62,13 +60,16 @@
                                         <span>{{ qtest.ordered_by_id }}</span>
                                     </td>
                                     <td>{{ qtest.ordered_by }}</td>
+                                    <td>{{ qtest.received_at|humanizedt }}</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <a href="{{ url_for('lab.finish_quan_test_order', order_id=qtest.id, lab_id=qtest.lab.id) }}"
+                                            {% if qtest.received_at and not qtest.order.approved_at %}
+                                            <a href="{{ url_for('lab.finish_test_record', order_id=qtest.order.id, record_id=qtest.id) }}"
                                                 class="button is-small is-rounded is-success">
                                                 Finish
                                             </a>
-                                            <a href="{{ url_for('lab.cancel_quan_test_order', order_id=qtest.id, lab_id=lab.id, pending=True) }}"
+                                            {% endif %}
+                                            <a href="{{ url_for('lab.cancel_test_order', order_id=qtest.id, lab_id=qtest.order.lab.id, pending=True) }}"
                                                class="button is-small is-rounded is-danger">
                                                 Cancel
                                             </a>
@@ -91,9 +92,9 @@
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                        <span>{{ qtest.customer.id }}</span>
+                                        <span>{{ qtest.order.customer.id }}</span>
                                     </td>
-                                    <td>{{ qtest.customer }}</td>
+                                    <td>{{ qtest.order.customer }}</td>
                                     <td>
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
@@ -130,8 +131,7 @@
             </div>
         </div>
         <div class="buttons is-centered">
-            <a href="{{ url_for('lab.landing', lab_id=lab.id) }}"
-               class="button is-light is-rounded">
+            <a href="{{ url_for('lab.list_patients', lab_id=lab.id) }}" class="button is-light is-rounded">
                 <span class="icon">
                     <i class="fas fa-chevron-left"></i>
                 </span>
