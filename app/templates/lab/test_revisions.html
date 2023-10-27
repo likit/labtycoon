@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                {% include "messages.html" %}
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <h1 class="title is-size-4 has-text-centered">Audit Trail: Test Record Revisions</h1>
+                <p class="notification">ระบบ audit trail เป็นสิ่งสำคัญมากในการเก็บบันทึกการแก้ไขผลการตรวจทางห้องปฏิบัติเพื่อการทวนสอบ</p>
+                <div class="box">
+                    <table class="table is-striped is-fullwidth">
+                        <thead>
+                        <th>Order ID</th>
+                        <th>Test Name</th>
+                        <th>Record ID</th>
+                        <th>Updated at</th>
+                        <th>Updated by ID</th>
+                        <th>Updated by</th>
+                        <th>Numeric Result</th>
+                        <th>Text Result</th>
+                        <th>Status</th>
+                        </thead>
+                        <tbody>
+                        {% for rec in record.versions %}
+                            <tr>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <span>{{ rec.order.id }}</span>
+                            </td>
+                            <td>{{ rec.test.name }}</td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <span>{{ rec.id }}</span>
+                            </td>
+                            <td>
+                                {% if rec.updated_at %}
+                                {{ rec.updated_at|localdatetime }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="icon">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <span>{{ rec.updater_id }}</span>
+                            </td>
+                            <td>{{ rec.updater_id }}</td>
+                            <td>{{ rec.num_result or '' }}</td>
+                            <td>{{ rec.text_result or '' }}</td>
+                            <td>
+                                <span class="icon">
+                                {% if rec.reject_record or rec.order.cancelled_at %}
+                                    <i class="fas fa-minus-circle has-text-danger"></i>
+                                {% else %}
+                                    <i class="fas fa-check-circle has-text-success"></i>
+                                {% endif %}
+                                </span>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="buttons is-centered">
+            <a class="button is-light is-rounded"
+               href="{{ url_for('lab.show_customer_test_records', customer_id=record.order.customer_id, order_id=record.order_id) }}">
+                <span class="icon">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('htmx:beforeSend', function () {
+            htmx.addClass(htmx.find('#approve-btn'), 'is-loading')
+        })
+    </script>
+{% endblock %}

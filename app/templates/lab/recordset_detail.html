@@ -24,7 +24,8 @@
                         <th>Text Result</th>
                         <th>Status</th>
                         <th>Approved At</th>
-                        <th></th>
+                        <th>Specimens</th>
+                        <th>Audit Trail</th>
                         </thead>
                         <tbody>
                         {% for rec in order.test_records %}
@@ -44,7 +45,7 @@
                             </td>
                             <td>
                                 {% if rec.updated_at %}
-                                {{ rec.updated_at|humanizedt }}
+                                {{ rec.updated_at|localdatetime }}
                                 {% endif %}
                             </td>
                             <td>
@@ -67,7 +68,7 @@
                             </td>
                             <td>
                                 {% if order.approved_at %}
-                                {{ order.approved_at|humanizedt }}
+                                {{ order.approved_at|localdatetime }}
                                 {% endif %}
                             </td>
                             <td>
@@ -80,14 +81,32 @@
                                 {% endif %}
                                 {% if not rec.received_at and not rec.reject_record %}
                                     <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
-                                       class="button is-small is-rounded is-success">
-                                        receive
+                                       class="tag is-rounded is-success">
+                                        <span class="icon">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                        <span>
+                                            accept
+                                        </span>
                                     </a>
                                     <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
-                                       class="button is-small is-rounded is-danger">
-                                        reject
+                                       class="tag is-rounded is-danger">
+                                        <span class="icon">
+                                            <i class="fas fa-times"></i>
+                                        </span>
+                                        <span>
+                                            reject
+                                        </span>
                                     </a>
                                 {% endif %}
+                            </td>
+                            <td>
+                                <a class="tag is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
+                                <span class="icon">
+                                    <i class="fas fa-history"></i>
+                                </span>
+                                    <span>view</span>
+                                </a>
                             </td>
                             </tr>
                         {% endfor %}

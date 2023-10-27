@@ -264,7 +264,7 @@ def add_test_order(lab_id, customer_id):
         db.session.add(activity)
         db.session.commit()
         flash('New order has been added.', 'success')
-        return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+        return redirect(url_for('lab.show_customer_test_records', customer_id=customer_id, order_id=order.id))
     return render_template('lab/new_test_order.html', lab=lab, customer_id=customer_id)
 
 
@@ -443,3 +443,10 @@ def list_rejected_orders(lab_id):
             if record.reject_record:
                 records.append(record)
     return render_template('lab/reject_records.html', records=records, lab=lab)
+
+
+@lab.route('/records/<int:record_id>/revisions')
+@login_required
+def test_record_revisions(record_id):
+    record = LabTestRecord.query.get(record_id)
+    return render_template('lab/test_revisions.html', record=record)

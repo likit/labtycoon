@@ -1,3 +1,5 @@
+from pytz import timezone
+
 from app import create_app, db, admin
 from dotenv import load_dotenv
 from flask import render_template
@@ -5,18 +7,20 @@ from flask_admin.contrib.sqla import ModelView
 from app.main.models import Announcement
 import arrow
 
-
 load_dotenv()
 
 app = create_app()
 
 from app.auth.models import *
+
 admin.add_view(ModelView(User, db.session, category='Users'))
 
 from app.main.models import *
+
 admin.add_view(ModelView(Laboratory, db.session, category='Labs'))
 
 from app.lab.models import *
+
 admin.add_view(ModelView(LabTest, db.session, category='Tests'))
 admin.add_view(ModelView(LabTestOrder, db.session, category='Tests'))
 admin.add_view(ModelView(LabTestRecord, db.session, category='Tests'))
@@ -41,3 +45,14 @@ def humanize_datetime(dt):
         return dt.humanize()
     else:
         return ''
+
+
+@app.template_filter("localdatetime")
+def local_datetime(dt):
+    bangkok = timezone('Asia/Bangkok')
+    datetime_format = '%d/%m/%Y %X'
+    if dt:
+        if dt.tzinfo:
+            return dt.astimezone(bangkok).strftime(datetime_format)
+    else:
+        return None
