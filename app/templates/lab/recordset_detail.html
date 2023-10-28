@@ -71,34 +71,36 @@
                                 {{ order.approved_at|localdatetime }}
                                 {% endif %}
                             </td>
-                            <td class="tags">
-                                {% if not order.approved_at and rec.received_at %}
-                                <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
-                                   class="button is-small is-outlined is-rounded is-success">
-                                    <span class="icon"><i class="fas fa-pencil-alt"></i></span>
-                                    <span>report</span>
-                                </a>
-                                {% endif %}
-                                {% if not rec.received_at and not rec.reject_record %}
-                                    <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
-                                       class="tag is-rounded is-success">
+                            <td>
+                                <div class="tags">
+                                    {% if not order.approved_at and rec.received_at %}
+                                        <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
+                                           class="tag is-small is-rounded is-info">
+                                            <span class="icon"><i class="fas fa-pencil-alt"></i></span>
+                                            <span>report</span>
+                                        </a>
+                                    {% endif %}
+                                    {% if not rec.received_at and not rec.reject_record and not rec.cancelled %}
+                                        <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
+                                           class="tag is-rounded is-success">
                                         <span class="icon">
                                             <i class="fas fa-check-square"></i>
                                         </span>
-                                        <span>
+                                            <span>
                                             accept
                                         </span>
-                                    </a>
-                                    <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
-                                       class="tag is-rounded is-danger">
+                                        </a>
+                                        <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
+                                           class="tag is-rounded is-danger">
                                         <span class="icon">
                                             <i class="fas fa-times"></i>
                                         </span>
-                                        <span>
+                                            <span>
                                             reject
                                         </span>
-                                    </a>
-                                {% endif %}
+                                        </a>
+                                    {% endif %}
+                                </div>
                             </td>
                             <td>
                                 <a class="tag is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">

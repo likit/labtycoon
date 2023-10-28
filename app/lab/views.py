@@ -257,6 +257,9 @@ def add_test_order(lab_id, customer_id, order_id=None):
         selected_test_ids = [record.test.id for record in order.test_records]
     if request.method == 'DELETE':
         order.cancelled_at = arrow.now('Asia/Bangkok').datetime
+        for rec in order.test_records:
+            rec.cancelled = True
+            db.session.add(rec)
         activity = LabActivity(
             lab_id=lab_id,
             actor=current_user,
@@ -264,6 +267,7 @@ def add_test_order(lab_id, customer_id, order_id=None):
             detail=order.id,
             added_at=arrow.now('Asia/Bangkok').datetime
         )
+        db.session.add(order)
         db.session.add(activity)
         db.session.commit()
         resp = make_response()
