@@ -14,7 +14,7 @@
                     <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}</h1>
                     <div class="box">
                         <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบให้ผู้ใช้แล้ว<button class="delete"></button></p>
-                        <table class="table is-striped is-fullwidth">
+                        <table class="table is-fullwidth">
                             <thead>
                             <th>Order No.</th>
                             <th>Ordered At</th>
@@ -22,6 +22,7 @@
                             <th>Ordered By FK</th>
                             <th>Ordered By</th>
                             <th>Approved</th>
+                            <th>Action</th>
                             </thead>
                             <tbody>
                             {% for order in customer.test_orders|sort(attribute='ordered_at', reverse=True) %}
@@ -57,6 +58,19 @@
                                                     {{ order.approved_at|humanizedt }}
                                                 </span>
                                             </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not order.approved_at and not order.cancelled_at %}
+                                            <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
+                                               hx-target="closest tr"
+                                               hx-confirm="Are you sure want to cancel this order?"
+                                               class="tag is-rounded is-danger">
+                                                <span class="icon">
+                                                    <i class="fas fa-times"></i>
+                                                </span>
+                                                <span>cancel</span>
+                                            </a>
                                             {% endif %}
                                         </td>
                                     </tr>

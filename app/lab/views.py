@@ -246,7 +246,7 @@ def add_patient(lab_id, customer_id=None):
 
 
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/orders', methods=['GET', 'POST'])
-@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/<int:order_id>', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/<int:order_id>', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def add_test_order(lab_id, customer_id, order_id=None):
     lab = Laboratory.query.get(lab_id)
@@ -255,6 +255,20 @@ def add_test_order(lab_id, customer_id, order_id=None):
     if order_id:
         order = LabTestOrder.query.get(order_id)
         selected_test_ids = [record.test.id for record in order.test_records]
+    if request.method == 'DELETE':
+        order.cancelled_at = arrow.now('Asia/Bangkok').datetime
+        activity = LabActivity(
+            lab_id=lab_id,
+            actor=current_user,
+            message='Cancelled an order.',
+            detail=order.id,
+            added_at=arrow.now('Asia/Bangkok').datetime
+        )
+        db.session.add(activity)
+        db.session.commit()
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
     if request.method == 'POST':
         form = request.form
         test_ids = form.getlist('test_ids')
