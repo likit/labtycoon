@@ -10,7 +10,8 @@
         </div>
         <div class="columns">
             <div class="column">
-                <h1 class="title is-size-4 has-text-centered">All Result Records</h1>
+                <h1 class="title is-size-4 has-text-centered">Result Records</h1>
+                <h1 class="subtitle has-text-centered">Order ID: {{ order.id }}, By {{ order.ordered_by }}, At {{ order.ordered_at|localdatetime }}</h1>
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                         <thead>
@@ -72,26 +73,22 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="tags">
-                                    {% if not order.approved_at and rec.received_at %}
-                                        <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
-                                           class="tag is-small is-rounded is-info">
-                                            <span class="icon"><i class="fas fa-pencil-alt"></i></span>
-                                            <span>report</span>
-                                        </a>
-                                    {% endif %}
-                                    {% if not rec.received_at and not rec.reject_record and not rec.cancelled %}
+                                {% if not rec.received_at and not rec.reject_record and not rec.cancelled %}
+                                <div class="field has-addons">
+                                    <div class="control">
                                         <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
-                                           class="tag is-rounded is-success">
+                                           class="button is-small is-rounded is-success">
                                         <span class="icon">
-                                            <i class="fas fa-check-square"></i>
+                                            <i class="fas fa-check"></i>
                                         </span>
                                             <span>
                                             accept
                                         </span>
                                         </a>
+                                    </div>
+                                    <div class="control">
                                         <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
-                                           class="tag is-rounded is-danger">
+                                           class="button is-small is-rounded is-danger">
                                         <span class="icon">
                                             <i class="fas fa-times"></i>
                                         </span>
@@ -99,11 +96,19 @@
                                             reject
                                         </span>
                                         </a>
-                                    {% endif %}
+                                    </div>
+                                {% endif %}
                                 </div>
+                                {% if not order.approved_at and rec.received_at %}
+                                    <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
+                                       class="button is-outlined is-small is-rounded is-link">
+                                        <span class="icon"><i class="fas fa-pencil-alt"></i></span>
+                                        <span>report</span>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
-                                <a class="tag is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
+                                <a class="button is-small is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-history"></i>
                                     </span>

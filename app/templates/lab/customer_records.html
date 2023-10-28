@@ -50,14 +50,14 @@
                                         <td>{{ order.ordered_by }}</td>
                                         <td>
                                             {% if order.approved_at %}
-                                            <span class="tag is-success is-rounded">
-                                                <span class="icon">
-                                                    <i class="fas fa-check"></i>
+                                                <span class="tag is-success">
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                    <span>
+                                                        {{ order.approved_at|humanizedt }}
+                                                    </span>
                                                 </span>
-                                                <span>
-                                                    {{ order.approved_at|humanizedt }}
-                                                </span>
-                                            </span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -65,7 +65,7 @@
                                             <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
                                                hx-target="closest tr"
                                                hx-confirm="Are you sure want to cancel this order?"
-                                               class="tag is-rounded is-danger">
+                                               class="button is-small is-rounded is-danger">
                                                 <span class="icon">
                                                     <i class="fas fa-times"></i>
                                                 </span>
