@@ -387,7 +387,7 @@ def reject_test_order(record_id):
             db.session.add(activity)
             db.session.commit()
             flash('The test has been rejected.', 'success')
-            return redirect(url_for('lab.list_test_orders', lab_id=record.order.lab_id))
+            return redirect(url_for('lab.show_customer_test_records', customer_id=record.order.customer.id, order_id=record.order.id))
         else:
             flash('{}. Please contact the system admin.'.format(form.errors), 'danger')
     return render_template('lab/order_reject.html', form=form)
