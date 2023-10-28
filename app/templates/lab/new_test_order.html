@@ -5,7 +5,12 @@
     <div class="container">
         <div class="columns">
             <div class="column has-text-centered">
-                <h1 class="title">New Test Order</h1>
+                {% if order %}
+                    <h1 class="title">Edit Test Order</h1>
+                    <h1 class="subtitle">Order ID: {{ order.id }}, Created by {{ order.ordered_by }}</h1>
+                {% else %}
+                    <h1 class="title">New Test Order</h1>
+                {% endif %}
             </div>
         </div>
         <div class="columns">
@@ -15,13 +20,27 @@
                     {% for test in lab.tests %}
                         <div class="field">
                             <label class="checkbox">
-                                <input type="checkbox" name="test_ids" value="{{ test.id }}">
+                                <input type="checkbox" name="test_ids" value="{{ test.id }}"
+                                       {% if test.id in selected_test_ids %}
+                                        checked
+                                       {% endif %}
+                                >
                                 {{ test.name }}
                             </label>
                         </div>
                     {% endfor %}
                     <div class="buttons is-centered">
-                        <a class="button is-light">Cancel</a>
+                        {% if order %}
+                            <a class="button is-light"
+                               href="{{ url_for('lab.show_customer_test_records', customer_id=customer_id, order_id=order.id) }}">
+                                Cancel
+                            </a>
+                        {% else %}
+                            <a class="button is-light"
+                               href="{{ url_for('lab.list_patients', lab_id=lab.id) }}">
+                                Cancel
+                            </a>
+                        {% endif %}
                         <button class="button is-primary" type="submit">Submit</button>
                     </div>
                 </form>

@@ -1,8 +1,6 @@
 import arrow
 from flask import render_template, url_for, request, flash, redirect, make_response
 from flask_login import login_required, current_user
-from app.main.models import Laboratory
-from app import db
 from . import lab_blueprint as lab
 from .forms import *
 from .models import *
@@ -248,33 +246,76 @@ def add_patient(lab_id, customer_id=None):
 
 
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/orders', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/<int:order_id>', methods=['GET', 'POST'])
 @login_required
-def add_test_order(lab_id, customer_id):
+def add_test_order(lab_id, customer_id, order_id=None):
     lab = Laboratory.query.get(lab_id)
+    selected_test_ids = []
+    order = None
+    if order_id:
+        order = LabTestOrder.query.get(order_id)
+        selected_test_ids = [record.test.id for record in order.test_records]
     if request.method == 'POST':
         form = request.form
         test_ids = form.getlist('test_ids')
-        print(test_ids)
-        order = LabTestOrder(
-            lab_id=lab_id,
-            customer_id=customer_id,
-            ordered_at=arrow.now('Asia/Bangkok').datetime,
-            ordered_by=current_user,
-            test_records=[LabTestRecord(test_id=tid) for tid in test_ids],
-        )
+        if not order_id:
+            order = LabTestOrder(
+                lab_id=lab_id,
+                customer_id=customer_id,
+                ordered_at=arrow.now('Asia/Bangkok').datetime,
+                ordered_by=current_user,
+                test_records=[LabTestRecord(test_id=tid) for tid in test_ids],
+            )
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Added an order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            flash('New order has been added.', 'success')
+        else:
+            updated_test_records = []
+            for test_id in test_ids:
+                if test_id not in selected_test_ids:
+                    updated_test_records.append(LabTestRecord(test_id=test_id))
+                else:
+                    test_record = LabTestRecord.query.filter_by(order_id=order_id, test_id=test_id).one()
+                    updated_test_records.append(test_record)
+            for test_id in selected_test_ids:
+                if test_id not in test_ids:
+                    test_record = LabTestRecord.query.filter_by(order_id=order_id, test_id=test_id).one()
+                    test_record.cancelled = True
+                    db.session.add(test_record)
+                    activity = LabActivity(
+                        lab_id=lab_id,
+                        actor=current_user,
+                        message='Cancelled a test order.',
+                        detail=test_record.id,
+                        added_at=arrow.now('Asia/Bangkok').datetime
+                    )
+                    db.session.add(activity)
+
+            order.test_records = updated_test_records
+            activity = LabActivity(
+                lab_id=lab_id,
+                actor=current_user,
+                message='Updated an order.',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            flash('The order has been updated.', 'success')
+
         db.session.add(order)
-        activity = LabActivity(
-            lab_id=lab_id,
-            actor=current_user,
-            message='Added an order for a quantitative test.',
-            detail=order.id,
-            added_at=arrow.now('Asia/Bangkok').datetime
-        )
         db.session.add(activity)
         db.session.commit()
-        flash('New order has been added.', 'success')
-        return redirect(url_for('lab.show_customer_test_records', customer_id=customer_id, order_id=order.id))
-    return render_template('lab/new_test_order.html', lab=lab, customer_id=customer_id)
+        return redirect(url_for('lab.show_customer_test_records',
+                                customer_id=customer_id, order_id=order.id))
+    return render_template('lab/new_test_order.html',
+                           lab=lab,
+                           order=order,
+                           customer_id=customer_id,
+                           selected_test_ids=selected_test_ids)
 
 
 @lab.route('/<int:lab_id>/orders', methods=['GET', 'POST'])

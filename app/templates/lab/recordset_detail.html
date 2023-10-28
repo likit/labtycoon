@@ -71,7 +71,7 @@
                                 {{ order.approved_at|localdatetime }}
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="tags">
                                 {% if not order.approved_at and rec.received_at %}
                                 <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
                                    class="button is-small is-outlined is-rounded is-success">
@@ -102,9 +102,9 @@
                             </td>
                             <td>
                                 <a class="tag is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
-                                <span class="icon">
-                                    <i class="fas fa-history"></i>
-                                </span>
+                                    <span class="icon">
+                                        <i class="fas fa-history"></i>
+                                    </span>
                                     <span>view</span>
                                 </a>
                             </td>
@@ -130,6 +130,13 @@
                     <i class="fas fa-check"></i>
                 </span>
                 <span>Approve</span>
+            </a>
+            <a href="{{ url_for('lab.add_test_order', order_id=order.id, customer_id=customer.id, lab_id=order.lab.id) }}"
+                    class="button is-outlined is-rounded is-link">
+                <span class="icon">
+                    <i class="fas fa-pencil-alt"></i>
+                </span>
+                <span>Edit</span>
             </a>
             {% endif %}
         </div>
