@@ -15,6 +15,15 @@
                         </span>
                         <span>New Customer</span>
                     </a>
+                    <!--
+                    <a class="button is-primary is-rounded"
+                       href="{{ url_for('lab.add_patient', lab_id=lab.id) }}">
+                        <span class="icon">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                        <span>Random Customers</span>
+                    </a>
+                    -->
                 </div>
                     <table class="table is-fullwidth is-striped">
                         <thead>
@@ -49,7 +58,7 @@
                                 </a>
                             </td>
                             <td>
-                                <a class="button is-rounded is-small is-info"
+                                <a class="button is-rounded is-small is-success"
                                     href="{{ url_for('lab.add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-plus-circle"></i>
@@ -62,6 +71,13 @@
                                         <i class="fas fa-clipboard-list"></i>
                                     </span>
                                     <span>Orders</span>
+                                </a>
+                                <a class="button is-rounded is-small is-outlined is-warning"
+                                   href="{{ url_for('lab.add_patient', lab_id=lab.id, customer_id=customer.id) }}">
+                                    <span class="icon">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </span>
+                                    <span>Edit Info</span>
                                 </a>
                             </td>
                             </tr>

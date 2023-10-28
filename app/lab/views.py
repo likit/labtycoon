@@ -212,29 +212,38 @@ def list_patients(lab_id):
 
 
 @lab.route('/<int:lab_id>/patients/add', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/patients/<int:customer_id>', methods=['GET', 'POST'])
 @login_required
-def add_patient(lab_id):
-    form = LabCustomerForm()
+def add_patient(lab_id, customer_id=None):
+    if customer_id:
+        customer = LabCustomer.query.get(customer_id)
+        form = LabCustomerForm(obj=customer)
+    else:
+        form = LabCustomerForm()
     lab = Laboratory.query.get(lab_id)
     if request.method == 'POST':
         if form.validate_on_submit():
-            new_customer = LabCustomer()
-            form.populate_obj(new_customer)
-            new_customer.lab_id = lab_id
-            db.session.add(new_customer)
+            if not customer:
+                customer = LabCustomer()
+            form.populate_obj(customer)
+            customer.lab_id = lab_id
+            db.session.add(customer)
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,
                 message='Added a new patient',
-                detail=new_customer.fullname,
+                detail=customer.fullname,
                 added_at=arrow.now('Asia/Bangkok').datetime
             )
             db.session.add(activity)
             db.session.commit()
-            flash('New patient has been added.', 'success')
+            if customer_id:
+                flash('Customer info has been updated.', 'success')
+            else:
+                flash('New customer has been added.', 'success')
             return render_template('lab/customer_list.html', lab=lab)
         else:
-            flash('Failed to add a new patient.', 'danger')
+            flash('Failed to add a new customer.', 'danger')
     return render_template('lab/new_customer.html', form=form, lab_id=lab_id)
 
 
