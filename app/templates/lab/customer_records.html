@@ -62,15 +62,24 @@
                                         </td>
                                         <td>
                                             {% if not order.approved_at and not order.cancelled_at %}
-                                            <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
-                                               hx-target="closest tr"
-                                               hx-confirm="Are you sure want to cancel this order?"
-                                               class="button is-small is-rounded is-danger">
-                                                <span class="icon">
-                                                    <i class="fas fa-times"></i>
-                                                </span>
-                                                <span>cancel</span>
-                                            </a>
+                                                <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
+                                                   hx-target="closest tr"
+                                                   hx-confirm="Are you sure want to cancel this order?"
+                                                   class="button is-small is-rounded is-danger">
+                                                    <span class="icon">
+                                                        <i class="fas fa-times"></i>
+                                                    </span>
+                                                    <span>Cancel</span>
+                                                </a>
+                                            {% elif order.approved_at and not order.cancelled_at %}
+                                                <a hx-patch="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
+                                                   hx-confirm="Are you sure want to unapprove this order?"
+                                                   class="button is-small is-rounded is-danger">
+                                                    <span class="icon">
+                                                        <i class="fas fa-undo"></i>
+                                                    </span>
+                                                    <span>Unapprove</span>
+                                                </a>
                                             {% endif %}
                                         </td>
                                     </tr>

@@ -12,6 +12,9 @@
             <div class="column">
                 <h1 class="title is-size-4 has-text-centered">Result Records</h1>
                 <h1 class="subtitle has-text-centered">Order ID: {{ order.id }}, By {{ order.ordered_by }}, At {{ order.ordered_at|localdatetime }}</h1>
+                {% if order.cancelled_at %}
+                    <p class="notification is-danger">This order has been cancelled at {{ order.cancelled_at|localdatetime }}</p>
+                {% endif %}
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                         <thead>
@@ -25,7 +28,7 @@
                         <th>Text Result</th>
                         <th>Status</th>
                         <th>Approved At</th>
-                        <th>Specimens</th>
+                        <th>Actions</th>
                         <th>Audit Trail</th>
                         </thead>
                         <tbody>
@@ -60,7 +63,7 @@
                             <td>{{ rec.text_result or '' }}</td>
                             <td>
                                 <span class="icon">
-                                {% if rec.reject_record or rec.order.cancelled_at %}
+                                {% if rec.reject_record or rec.cancelled or rec.order.cancelled_at %}
                                     <i class="fas fa-minus-circle has-text-danger"></i>
                                 {% else %}
                                     <i class="fas fa-check-circle has-text-success"></i>
@@ -73,42 +76,60 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if not rec.received_at and not rec.reject_record and not rec.cancelled %}
-                                <div class="field has-addons">
-                                    <div class="control">
-                                        <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
-                                           class="button is-small is-rounded is-success">
-                                        <span class="icon">
-                                            <i class="fas fa-check"></i>
-                                        </span>
-                                            <span>
-                                            accept
-                                        </span>
-                                        </a>
-                                    </div>
-                                    <div class="control">
-                                        <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
-                                           class="button is-small is-rounded is-danger">
-                                        <span class="icon">
-                                            <i class="fas fa-times"></i>
-                                        </span>
-                                            <span>
-                                            reject
-                                        </span>
-                                        </a>
-                                    </div>
+                                {% if rec.reject_record %}
+                                    <span class="tag is-danger">rejected</span>
                                 {% endif %}
-                                </div>
-                                {% if not order.approved_at and rec.received_at %}
-                                    <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
-                                       class="button is-outlined is-small is-rounded is-link">
-                                        <span class="icon"><i class="fas fa-pencil-alt"></i></span>
-                                        <span>report</span>
-                                    </a>
+                                {% if rec.is_active %}
+                                    <div class="field has-addons">
+                                        {% if not rec.received_at %}
+                                            <div class="control">
+                                                <a href="{{ url_for('lab.receive_test_order', record_id=rec.id) }}"
+                                                   class="button is-small is-rounded is-success is-outlined">
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                    <span>
+                                                    accept
+                                                </span>
+                                                </a>
+                                            </div>
+                                            <div class="control">
+                                                <a href="{{ url_for('lab.reject_test_order', record_id=rec.id) }}"
+                                                   class="button is-small is-rounded is-warning is-outlined">
+                                                <span class="icon">
+                                                    <i class="fas fa-times"></i>
+                                                </span>
+                                                    <span>
+                                                    reject
+                                                </span>
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            {% if not order.approved_at %}
+                                            <div class="control">
+                                                <a href="{{ url_for('lab.finish_test_record', record_id=rec.id, order_id=rec.order_id) }}"
+                                                   class="button is-outlined is-small is-rounded is-link">
+                                                    <span class="icon"><i class="fas fa-pencil-alt"></i></span>
+                                                    <span>report</span>
+                                                </a>
+                                            </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% if not order.approved_at %}
+                                    <div class="control">
+                                        <a hx-post="{{ url_for('lab.cancel_test_record', record_id=rec.id) }}"
+                                           hx-confirm="Are you sure want to cancel?"
+                                           class="button is-small is-rounded is-danger is-outlined">
+                                            Cancel
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                    </div>
                                 {% endif %}
                             </td>
                             <td>
-                                <a class="button is-small is-rounded is-link" href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
+                                <a class="button is-small is-rounded is-link"
+                                   href="{{ url_for('lab.test_record_revisions', record_id=rec.id) }}">
                                     <span class="icon">
                                         <i class="fas fa-history"></i>
                                     </span>
@@ -130,7 +151,7 @@
                 </span>
                 <span>Back</span>
             </a>
-            {% if not order.approved_at %}
+            {% if not order.approved_at and order.active_test_records %}
             <a hx-confirm="Are you sure?" hx-get="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
                class="button is-success is-rounded" id="approve-btn">
                 <span class="icon">
@@ -138,6 +159,14 @@
                 </span>
                 <span>Approve</span>
             </a>
+            {% endif %}
+            {% if not order.approved_at and not order.cancelled_at %}
+                <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
+                   hx-confirm="Are you sure want to cancel this order?"
+                   class="button is-rounded is-danger">
+                    <span class="icon"><i class="fas fa-times"></i></span>
+                    <span>Cancel</span>
+                </a>
             <a href="{{ url_for('lab.add_test_order', order_id=order.id, customer_id=customer.id, lab_id=order.lab.id) }}"
                     class="button is-outlined is-rounded is-link">
                 <span class="icon">

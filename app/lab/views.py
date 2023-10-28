@@ -221,7 +221,7 @@ def add_patient(lab_id, customer_id=None):
     lab = Laboratory.query.get(lab_id)
     if request.method == 'POST':
         if form.validate_on_submit():
-            if not customer:
+            if not customer_id:
                 customer = LabCustomer()
             form.populate_obj(customer)
             customer.lab_id = lab_id
@@ -254,7 +254,7 @@ def add_test_order(lab_id, customer_id, order_id=None):
     order = None
     if order_id:
         order = LabTestOrder.query.get(order_id)
-        selected_test_ids = [record.test.id for record in order.test_records]
+        selected_test_ids = [record.test.id for record in order.active_test_records]
     if request.method == 'DELETE':
         order.cancelled_at = arrow.now('Asia/Bangkok').datetime
         for rec in order.test_records:
@@ -276,6 +276,8 @@ def add_test_order(lab_id, customer_id, order_id=None):
     if request.method == 'POST':
         form = request.form
         test_ids = form.getlist('test_ids')
+        if test_ids:
+            test_ids = [int(test_id) for test_id in test_ids]
         if not order_id:
             order = LabTestOrder(
                 lab_id=lab_id,
@@ -293,16 +295,12 @@ def add_test_order(lab_id, customer_id, order_id=None):
             )
             flash('New order has been added.', 'success')
         else:
-            updated_test_records = []
             for test_id in test_ids:
                 if test_id not in selected_test_ids:
-                    updated_test_records.append(LabTestRecord(test_id=test_id))
-                else:
-                    test_record = LabTestRecord.query.filter_by(order_id=order_id, test_id=test_id).one()
-                    updated_test_records.append(test_record)
+                    order.test_records.append(LabTestRecord(test_id=test_id))
             for test_id in selected_test_ids:
+                test_record = LabTestRecord.query.filter_by(test_id=test_id, order_id=order_id).first()
                 if test_id not in test_ids:
-                    test_record = LabTestRecord.query.filter_by(order_id=order_id, test_id=test_id).one()
                     test_record.cancelled = True
                     db.session.add(test_record)
                     activity = LabActivity(
@@ -314,7 +312,6 @@ def add_test_order(lab_id, customer_id, order_id=None):
                     )
                     db.session.add(activity)
 
-            order.test_records = updated_test_records
             activity = LabActivity(
                 lab_id=lab_id,
                 actor=current_user,
@@ -343,26 +340,25 @@ def list_test_orders(lab_id):
     return render_template('lab/test_order_list.html', lab=lab)
 
 
-@lab.route('/<int:lab_id>/orders/quan/<int:order_id>/cancel', methods=['GET', 'POST'])
+@lab.route('/records/<int:record_id>/cancel', methods=['POST'])
 @login_required
-def cancel_test_order(lab_id, order_id):
-    order = LabTestOrder.query.get(order_id)
-    order.cancelled_at = arrow.now('Asia/Bangkok').datetime
-    order.cancelled_by = current_user
-    db.session.add(order)
+def cancel_test_record(record_id):
+    record = LabTestRecord.query.get(record_id)
     activity = LabActivity(
-        lab_id=lab_id,
+        lab_id=record.order.lab_id,
         actor=current_user,
-        message='Cancelled the quantitative test order.',
-        detail=order.id,
+        message='Cancelled the test order.',
+        detail=record.id,
         added_at=arrow.now('Asia/Bangkok').datetime
     )
+    record.cancelled = True
     db.session.add(activity)
     db.session.commit()
-    flash('The order has been cancelled.', 'success')
-    if request.args.get('pending'):
-        return redirect(url_for('lab.list_pending_orders', lab_id=lab_id))
-    return redirect(url_for('lab.list_test_orders', lab_id=lab_id))
+    flash('The test has been cancelled.', 'success')
+
+    resp = make_response()
+    resp.headers['HX-Refresh'] = 'true'
+    return resp
 
 
 # TODO: deprecated
@@ -378,7 +374,7 @@ def reject_test_order(record_id):
             new_record.created_at = arrow.now('Asia/Bangkok').datetime
             new_record.creator = current_user
             record.reject_record = new_record
-            record.cancelled_at = True
+            record.cancelled = True
             db.session.add(record)
             db.session.add(new_record)
             activity = LabActivity(
@@ -422,9 +418,7 @@ def receive_test_order(record_id):
 @login_required
 def list_pending_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
-    pendings = LabTestRecord.query.filter_by(updated_at=None)
-    pendings = [r for r in pendings if r.order.lab_id==lab_id]
-    return render_template('lab/pending_orders.html', lab=lab, pendings=pendings)
+    return render_template('lab/pending_orders.html', lab=lab)
 
 
 @lab.route('/<int:lab_id>/activities')
@@ -447,6 +441,10 @@ def show_customer_records(customer_id):
 def show_customer_test_records(customer_id, order_id):
     customer = LabCustomer.query.get(customer_id)
     order = LabTestOrder.query.get(order_id)
+
+    # if order.cancelled_at:
+    #     flash('The order has been cancelled.', 'danger')
+    #     return redirect(url_for('lab.show_customer_records', customer_id=customer_id))
     return render_template('lab/recordset_detail.html', customer=customer, order=order)
 
 
@@ -487,17 +485,30 @@ def finish_test_record(order_id, record_id):
     return render_template('lab/new_test_record.html', form=form, order=order, rec=rec)
 
 
-
-@lab.route('/orders/<int:order_id>/approve')
+@lab.route('/orders/<int:order_id>/approve', methods=['GET', 'PATCH'])
 @login_required
 def approve_test_order(order_id):
     order = LabTestOrder.query.get(order_id)
-    order.approved_at = arrow.now('Asia/Bangkok').datetime
-    order.approver = current_user
+    if request.method == 'PATCH':
+        if order.approved_at:
+            order.approved_at = None
+            order.approver = None
+            activity = LabActivity(
+                lab_id=order.lab_id,
+                actor=current_user,
+                message='Cancelled the approval for an order',
+                detail=order.id,
+                added_at=arrow.now('Asia/Bangkok').datetime
+            )
+            db.session.add(activity)
+    else:
+        order.approved_at = arrow.now('Asia/Bangkok').datetime
+        order.approver = current_user
     db.session.add(order)
     db.session.commit()
     resp = make_response()
     resp.headers['HX-Refresh'] = 'true'
+    # flash('The order approval has been updated.', 'success')
     return resp
 
 

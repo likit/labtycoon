@@ -20,6 +20,14 @@ class Laboratory(db.Model):
     def num_approved_members(self):
         return len([m for m in self.lab_members if m.approved])
 
+    @property
+    def pending_test_records(self):
+        records = []
+        for order in self.test_orders:
+            if not order.approved_at:
+                records += [r for r in order.active_test_records if r.updated_at is None and not r.reject_record]
+        return records
+
     def __str__(self):
         return self.name
 

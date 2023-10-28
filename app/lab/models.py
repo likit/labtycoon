@@ -134,6 +134,10 @@ class LabTestOrder(db.Model):
     def pending_tests(self):
         return len([test for test in self.test_orders if test.finished_at is None])
 
+    @property
+    def active_test_records(self):
+        return [record for record in self.test_records if record.is_active]
+
 
 class LabTestRecord(db.Model):
     __versioned__ = {}
@@ -158,6 +162,13 @@ class LabTestRecord(db.Model):
     receiver = db.relationship(User,
                                backref=db.backref('received_test_records'),
                                foreign_keys=[receiver_id])
+
+    @property
+    def is_active(self):
+        return not self.cancelled and \
+            not self.reject_record and \
+            not self.order.cancelled_at and \
+            not self.order.approved_at
 
 
 class LabOrderRejectRecord(db.Model):
