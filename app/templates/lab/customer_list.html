@@ -6,6 +6,7 @@
         <div class="columns">
             <div class="column">
                 <h1 class="title has-text-centered">Customers</h1>
+                {% include "messages.html" %}
                 <div class="box">
                 <div class="buttons is-right">
                     <a class="button is-success is-rounded"
@@ -24,7 +25,7 @@
                         <span>Random Customers</span>
                     </a>
                 </div>
-                    <table class="table is-fullwidth is-striped">
+                    <table id="table" class="table is-fullwidth is-striped">
                         <thead>
                         <th>HN</th>
                         <th>Title</th>
@@ -117,6 +118,9 @@
     <script>
         document.addEventListener('htmx:beforeSend', function (data) {
             htmx.addClass(htmx.find('#' + data.target.id), 'is-loading')
+        })
+        $(document).ready(function () {
+            $('#table').DataTable();
         })
     </script>
 {% endblock %}

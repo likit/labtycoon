@@ -288,7 +288,7 @@ def add_random_patients(lab_id):
         )
         db.session.add(activity)
         db.session.commit()
-        flash('New random customers has been added.', 'success')
+        flash('New random customers have been added.', 'success')
         resp = make_response()
         resp.headers['HX-Refresh'] = 'true'
         return resp
