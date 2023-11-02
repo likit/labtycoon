@@ -15,15 +15,14 @@
                         </span>
                         <span>New Customer</span>
                     </a>
-                    <!--
-                    <a class="button is-primary is-rounded"
-                       href="{{ url_for('lab.add_patient', lab_id=lab.id) }}">
+                    <a class="button is-primary is-rounded" id="random-btn"
+                       hx-confirm="Are you sure?"
+                       hx-post="{{ url_for('lab.add_random_patients', lab_id=lab.id, n=5) }}">
                         <span class="icon">
                             <i class="fas fa-user-plus"></i>
                         </span>
                         <span>Random Customers</span>
                     </a>
-                    -->
                 </div>
                     <table class="table is-fullwidth is-striped">
                         <thead>
@@ -112,4 +111,12 @@
         </div>
     </div>
     </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('htmx:beforeSend', function (data) {
+            htmx.addClass(htmx.find('#' + data.target.id), 'is-loading')
+        })
+    </script>
 {% endblock %}

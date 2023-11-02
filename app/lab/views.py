@@ -1,4 +1,8 @@
+import random
+from datetime import date
+
 import arrow
+from faker import Faker
 from flask import render_template, url_for, request, flash, redirect, make_response
 from flask_login import login_required, current_user
 from . import lab_blueprint as lab
@@ -8,6 +12,8 @@ from app.main.models import UserLabAffil
 from collections import namedtuple
 
 TestOrder = namedtuple('TestOrder', ['order', 'ordered_at', 'type', 'approved_at'])
+
+fake = Faker(['th-TH'])
 
 
 @lab.route('/<int:lab_id>')
@@ -243,6 +249,49 @@ def add_patient(lab_id, customer_id=None):
         else:
             flash('Failed to add a new customer.', 'danger')
     return render_template('lab/new_customer.html', form=form, lab_id=lab_id)
+
+
+@lab.route('/<int:lab_id>/patients/random', methods=['POST'])
+@login_required
+def add_random_patients(lab_id):
+    n = request.args.get('n', 5, type=int)
+    lab = Laboratory.query.get(lab_id)
+    if request.method == 'POST':
+        for i in range(n):
+            profile = fake.profile()
+            firstname, lastname = profile['name'].split(' ')
+            age_ = date.today() - profile['birthdate']
+            if age_.days/365 < 15:
+                if profile['sex'] == 'M':
+                    title = random.choice(['เด็กชาย', 'สามเณร'])
+                else:
+                    title = 'เด็กหญิง'
+            else:
+                if profile['sex'] == 'M':
+                    title = random.choice(['นาย', 'พระภิกษุ'])
+                else:
+                    title = random.choice(['นาง', 'นางสาว'])
+            customer_ = LabCustomer(
+                gender='ชาย' if profile['sex'] == 'M' else 'หญิง',
+                dob=profile['birthdate'],
+                firstname=firstname,
+                lastname=lastname,
+                title=title,
+                lab=lab
+            )
+        activity = LabActivity(
+            lab_id=lab_id,
+            actor=current_user,
+            message='Added random customers',
+            detail=customer_.fullname,
+            added_at=arrow.now('Asia/Bangkok').datetime
+        )
+        db.session.add(activity)
+        db.session.commit()
+        flash('New random customers has been added.', 'success')
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
 
 
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/orders', methods=['GET', 'POST'])
