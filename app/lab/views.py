@@ -1,10 +1,15 @@
 import random
+import time
+
+import numpy as np
 from datetime import date
 
 import arrow
 from faker import Faker
 from flask import render_template, url_for, request, flash, redirect, make_response
 from flask_login import login_required, current_user
+from sqlalchemy import func
+
 from . import lab_blueprint as lab
 from .forms import *
 from .models import *
@@ -380,6 +385,85 @@ def add_test_order(lab_id, customer_id, order_id=None):
                            order=order,
                            customer_id=customer_id,
                            selected_test_ids=selected_test_ids)
+
+
+@lab.route('/<int:lab_id>/patients/<int:customer_id>/auto-orders', methods=['POST'])
+@login_required
+def auto_add_test_order(lab_id, customer_id):
+    time.sleep(3)
+    lab = Laboratory.query.get(lab_id)
+    num_tests = LabTest.query.count()
+    random_minutes = random.randint(0, 60)
+    order_datetime = arrow.now('Asia/Bangkok').shift(minutes=+random_minutes)
+    max_datetime = order_datetime
+    tests = LabTest.query.order_by(func.random()).limit(random.randint(1, num_tests))
+    if request.method == 'POST':
+        test_records = []
+        for test in tests:
+            updater = random.choice(lab.lab_members)
+            approver = random.choice(lab.lab_members)
+            test_record = LabTestRecord(test=test, updater=updater.user)
+            test_records.append(test_record)
+            rejected = np.random.binomial(1, 0.05, 1).sum()
+            if rejected:
+                random_minutes = random.randint(0, 30)
+                reject_datetime = order_datetime.shift(minutes=+random_minutes)
+                reject_reasons = ['สิ่งส่งตรวจไม่เหมาะสมกับการทดสอบ',
+                                  'สิ่งส่งตรวจไม่เพียงพอ',
+                                  'คุณภาพของสิ่งส่งตรวจไม่ดี',
+                                  'ภาชนะรั่วหรือแตก',
+                                  'ไม่มีรายการตรวจ',
+                                  'ข้อมูลคนไข้ไม่ตรงกัน',
+                                  'อื่นๆ']
+                reject_record = LabOrderRejectRecord(created_at=reject_datetime.datetime,
+                                                     reason=random.choice(reject_reasons),
+                                                     creator_id=updater.user.id,
+                                                     )
+                test_record.reject_record = reject_record
+                if reject_datetime > max_datetime:
+                    max_datetime = reject_datetime
+            else:
+                random_minutes = random.randint(1, 20)
+                receive_datetime = order_datetime.shift(minutes=+random_minutes)
+                random_minutes = random.randint(20, 90)
+                update_datetime = receive_datetime.shift(minutes=+random_minutes)
+                test_record.updated_at = update_datetime.datetime
+                test_record.received_at = receive_datetime.datetime
+                if test.choice_set:
+                    test_record.text_result = random.choice(test.choice_set.choice_items).result
+                else:
+                    low = test.min_value or 10
+                    high = test.max_value or 1000
+                    test_record.num_result = random.randint(low, high)
+
+                if update_datetime > max_datetime:
+                    max_datetime = update_datetime
+
+        random_minutes = random.randint(1, 60)
+        approve_datetime = max_datetime.shift(minutes=+random_minutes)
+        order = LabTestOrder(
+            lab_id=lab_id,
+            customer_id=customer_id,
+            ordered_at=order_datetime.datetime,
+            ordered_by=updater.user,
+            test_records=test_records,
+            approved_at=approve_datetime.datetime,
+            approver=approver.user,
+        )
+        activity = LabActivity(
+            lab_id=lab_id,
+            actor=current_user,
+            message='Added an order.',
+            detail=order.id,
+            added_at=arrow.now('Asia/Bangkok').datetime
+        )
+        flash('New order has been added automatically.', 'success')
+        db.session.add(order)
+        db.session.add(activity)
+        db.session.commit()
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
 
 
 @lab.route('/<int:lab_id>/orders', methods=['GET', 'POST'])
