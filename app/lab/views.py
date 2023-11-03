@@ -433,8 +433,8 @@ def auto_add_test_order(lab_id, customer_id):
                 if test.choice_set:
                     test_record.text_result = random.choice(test.choice_set.choice_items).result
                 else:
-                    low = test.min_value or 10
-                    high = test.max_value or 1000
+                    low = test.min_value if isinstance(test.min_value, int) else 10
+                    high = test.max_value if isinstance(test.max_value, int) else 1000
                     test_record.num_result = random.randint(low, high)
 
                 if update_datetime > max_datetime:
