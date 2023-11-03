@@ -397,7 +397,8 @@ def auto_add_test_order(lab_id, customer_id):
     random_minutes = random.randint(0, 60)
     order_datetime = arrow.now('Asia/Bangkok').shift(minutes=+random_minutes)
     max_datetime = order_datetime
-    tests = LabTest.query.order_by(func.random()).limit(random.randint(1, num_tests))
+    tests = LabTest.query.filter_by(lab_id=lab_id)\
+        .order_by(func.random()).limit(random.randint(1, num_tests))
     if request.method == 'POST':
         test_records = []
         for test in tests:
