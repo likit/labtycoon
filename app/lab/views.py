@@ -1,12 +1,14 @@
 import random
 import time
+from io import BytesIO
 
 import numpy as np
 from datetime import date
 
 import arrow
+import pandas as pd
 from faker import Faker
-from flask import render_template, url_for, request, flash, redirect, make_response
+from flask import render_template, url_for, request, flash, redirect, make_response, send_file
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
@@ -390,7 +392,6 @@ def add_test_order(lab_id, customer_id, order_id=None):
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/auto-orders', methods=['POST'])
 @login_required
 def auto_add_test_order(lab_id, customer_id):
-    time.sleep(3)
     lab = Laboratory.query.get(lab_id)
     num_tests = LabTest.query.count()
     random_minutes = random.randint(0, 60)
@@ -662,3 +663,46 @@ def list_rejected_orders(lab_id):
 def test_record_revisions(record_id):
     record = LabTestRecord.query.get(record_id)
     return render_template('lab/test_revisions.html', record=record)
+
+
+@lab.route('/labs/<int:lab_id>/data-export', methods=['GET'])
+@login_required
+def export_data(lab_id):
+    table = request.args.get('table')
+    models = {
+        'members': UserLabAffil,
+        'customers': LabCustomer,
+        'activities': LabActivity,
+        'tests': LabTest,
+        'orders': LabTestOrder,
+        'reject_records': LabOrderRejectRecord,
+    }
+    if table:
+        if table == 'results':
+            data = []
+            lab = Laboratory.query.get(lab_id)
+            for order in lab.test_orders:
+                for rec in order.test_records:
+                    data.append(rec.to_dict())
+            df = pd.DataFrame(data)
+            output = BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False)
+            writer.close()
+            output.seek(0)
+            return send_file(output, download_name=f'{table}.xlsx')
+        else:
+            model = models[table]
+            if table == 'reject_records':
+                data = [row.to_dict() for row in model.query]
+            else:
+                data = [row.to_dict() for row in model.query.filter_by(lab_id=lab_id)]
+            df = pd.DataFrame(data)
+            output = BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False)
+            writer.close()
+            output.seek(0)
+            return send_file(output, download_name=f'{table}.xlsx')
+
+    return render_template('lab/data_export.html', lab_id=lab_id)

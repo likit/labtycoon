@@ -5,7 +5,7 @@
     <div class="hero-body">
         <div class="container">
             <h1 class="title">
-                {{ lab.name }}
+                Data Export
             </h1>
         </div>
     </div>
@@ -28,53 +28,53 @@
                 <p class="panel-heading">
                     Menu
                 </p>
-                <a class="panel-block" href="{{ url_for('main.list_members', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='members') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
                     รายชื่อบุคลากรในแลบ
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.list_tests', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='tests') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
                     รายการทดสอบ
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.list_patients', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='customers') }}">
                     <span class="panel-icon">
                         <i class="fas fa-users"></i>
                     </span>
                     รายชื่อผู้ป่วย/ผู้รับบริการ
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='orders') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รอผลการทดสอบ
+                    คำสั่งตรวจ
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.list_activities', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='results') }}">
+                    <span class="panel-icon">
+                        <i class="fas fa-vial"></i>
+                    </span>
+                    ผลการทดสอบ
+                </a>
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='activities') }}">
                     <span class="panel-icon">
                         <i class="far fa-clock"></i>
                     </span>
                     ประวัติกิจกรรม (activity log)
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.list_rejected_orders', lab_id=lab.id) }}">
+                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='reject_records') }}">
                     <span class="panel-icon">
                         <i class="far fa-times-circle"></i>
                     </span>
                     รายการปฏิเสธสิ่งส่งตรวจ
                 </a>
-                <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab.id) }}">
-                    <span class="panel-icon">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                    </span>
-                    Data Export
-                </a>
-                <a class="panel-block" href="{{ url_for('main.index') }}">
+                <a class="panel-block" href="{{ url_for('lab.landing', lab_id=lab_id) }}">
                     <span class="panel-icon">
                        <i class="fas fa-sign-out-alt"></i>
                     </span>
-                    ออกจากแลบ
+                    Back
                 </a>
             </nav>
         </div>

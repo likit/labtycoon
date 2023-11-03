@@ -44,6 +44,15 @@ class UserLabAffil(db.Model):
     lab = db.relationship(Laboratory, backref=db.backref('lab_members',
                                                          cascade='all, delete-orphan'))
 
+    def to_dict(self):
+        return {
+            'user_id': self.user.id,
+            'user_firstname': self.user.firstname,
+            'user_lastname': self.user.lastname,
+            'user_email': self.user.email,
+            'user_license_id': self.user.license_id
+        }
+
 
 class Announcement(db.Model):
     __tablename__ = 'announcements'

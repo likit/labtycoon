@@ -36,6 +36,16 @@ class LabCustomer(db.Model):
     def __str__(self):
         return self.fullname
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'firstname': self.firstname,
+            'lastname': self.lastname,
+            'birthdate': self.dob.strftime('%Y-%m-%d') if self.dob else None,
+            'gender': self.gender,
+        }
+
     @property
     def all_test_orders(self):
         return len(self.qual_test_orders) + len(self.quan_test_orders)
@@ -56,6 +66,15 @@ class LabActivity(db.Model):
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
     lab = db.relationship(Laboratory, backref=db.backref('member_activities'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.actor_id,
+            'message': self.message,
+            'detail': self.detail,
+            'datetime': self.added_at.strftime('%Y-%m-%d %H:%M:%S') if self.added_at else None,
+        }
 
 
 class LabResultChoiceSet(db.Model):
@@ -111,6 +130,19 @@ class LabTest(db.Model):
     def __str__(self):
         return self.name
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'detail': self.detail,
+            'min_value': self.min_value,
+            'max_value': self.max_value,
+            'min_ref_value': self.min_ref_value,
+            'max_ref_value': self.max_ref_value,
+            'data_type': self.data_type,
+            'active': self.active
+        }
+
 
 class LabTestOrder(db.Model):
     __tablename__ = 'lab_test_orders'
@@ -137,6 +169,16 @@ class LabTestOrder(db.Model):
     @property
     def active_test_records(self):
         return [record for record in self.test_records if record.is_active]
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'customer_id': self.customer_id,
+            'order_datetime': self.ordered_at.strftime('%Y-%m-%d %H:%M:%S') if self.ordered_at else None,
+            'order_by': self.ordered_by_id,
+            'approve_datetime': self.approved_at.strftime('%Y-%m-%d %H:%M:%S') if self.approved_at else None,
+            'approver_id': self.approver_id,
+        }
 
 
 class LabTestRecord(db.Model):
@@ -170,6 +212,20 @@ class LabTestRecord(db.Model):
             not self.order.cancelled_at and \
             not self.order.approved_at
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'num_result': self.num_result,
+            'text_result': self.text_result,
+            'reported_datetime': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+            'reporter_id': self.updater_id,
+            'test_id': self.test_id,
+            'reject_record_id': self.reject_record_id,
+            'receive_datetime': self.received_at.strftime('%Y-%m-%d %H:%M:%S') if self.received_at else None,
+            'received_by': self.receiver_id,
+            'order_id': self.order_id
+        }
+
 
 class LabOrderRejectRecord(db.Model):
     __tablename__ = 'lab_order_reject_records'
@@ -187,6 +243,14 @@ class LabOrderRejectRecord(db.Model):
                                                                                 ]
                                                                     })
     detail = db.Column('detail', db.Text(), info={'label': 'รายละเอียด โปรดระบุ'})
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'reject_datetime': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'reason': self.reason,
+            'detail': self.detail
+        }
 
 
 sa.orm.configure_mappers()
