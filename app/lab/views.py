@@ -431,7 +431,10 @@ def auto_add_test_order(lab_id, customer_id):
                 test_record.updated_at = update_datetime.datetime
                 test_record.received_at = receive_datetime.datetime
                 if test.choice_set:
-                    test_record.text_result = random.choice(test.choice_set.choice_items).result
+                    if test.choice_set.choice_items:
+                        test_record.text_result = random.choice(test.choice_set.choice_items).result
+                    else:
+                        test_record.text_result = 'This is a mockup result.'
                 else:
                     low = test.min_value if isinstance(test.min_value, int) else 10
                     high = test.max_value if isinstance(test.max_value, int) else 1000
