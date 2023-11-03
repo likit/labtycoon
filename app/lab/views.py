@@ -402,8 +402,8 @@ def auto_add_test_order(lab_id, customer_id):
     if request.method == 'POST':
         test_records = []
         for test in tests:
-            updater = random.choice(lab.lab_members)
-            approver = random.choice(lab.lab_members)
+            updater = random.choice([member for member in lab.lab_members if member.approved])
+            approver = random.choice([member for member in lab.lab_members if member.approved])
             test_record = LabTestRecord(test=test, updater=updater.user)
             test_records.append(test_record)
             rejected = np.random.binomial(1, 0.05, 1).sum()
