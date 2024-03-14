@@ -32,31 +32,31 @@
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รายชื่อบุคลากรในแลบ
+                    รายชื่อบุคลากรในแลบ (staff)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='tests') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รายการทดสอบ
+                    รายการทดสอบ (tests)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='customers') }}">
                     <span class="panel-icon">
                         <i class="fas fa-users"></i>
                     </span>
-                    รายชื่อผู้ป่วย/ผู้รับบริการ
+                    รายชื่อผู้ป่วย/ผู้รับบริการ (clients/patients)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='orders') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    คำสั่งตรวจ
+                    คำสั่งตรวจ (orders)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='results') }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    ผลการทดสอบ
+                    ผลการทดสอบ (results)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab_id, table='activities') }}">
                     <span class="panel-icon">
@@ -68,7 +68,7 @@
                     <span class="panel-icon">
                         <i class="far fa-times-circle"></i>
                     </span>
-                    รายการปฏิเสธสิ่งส่งตรวจ
+                    รายการปฏิเสธสิ่งส่งตรวจ (specimens rejection)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.landing', lab_id=lab_id) }}">
                     <span class="panel-icon">
