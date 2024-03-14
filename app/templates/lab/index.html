@@ -32,25 +32,25 @@
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รายชื่อบุคลากรในแลบ
+                    รายชื่อบุคลากรในแลบ (staff)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.list_tests', lab_id=lab.id) }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รายการทดสอบ
+                    รายการทดสอบ (tests)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.list_patients', lab_id=lab.id) }}">
                     <span class="panel-icon">
                         <i class="fas fa-users"></i>
                     </span>
-                    รายชื่อผู้ป่วย/ผู้รับบริการ
+                    รายชื่อผู้ป่วย/ผู้รับบริการ (clients/patients)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.list_pending_orders', lab_id=lab.id) }}">
                     <span class="panel-icon">
                         <i class="fas fa-vial"></i>
                     </span>
-                    รอผลการทดสอบ
+                    รอผลการทดสอบ (pending orders)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.list_activities', lab_id=lab.id) }}">
                     <span class="panel-icon">
@@ -62,7 +62,7 @@
                     <span class="panel-icon">
                         <i class="far fa-times-circle"></i>
                     </span>
-                    รายการปฏิเสธสิ่งส่งตรวจ
+                    รายการปฏิเสธสิ่งส่งตรวจ (specimens rejection records)
                 </a>
                 <a class="panel-block" href="{{ url_for('lab.export_data', lab_id=lab.id) }}">
                     <span class="panel-icon">
@@ -72,9 +72,9 @@
                 </a>
                 <a class="panel-block" href="{{ url_for('main.index') }}">
                     <span class="panel-icon">
-                       <i class="fas fa-sign-out-alt"></i>
+                       <i class="fas fa-chevron-left"></i>
                     </span>
-                    ออกจากแลบ
+                    ออกจากแลบ (exit lab)
                 </a>
             </nav>
         </div>
