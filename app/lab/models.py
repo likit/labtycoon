@@ -65,7 +65,8 @@ class LabActivity(db.Model):
     detail = db.Column('detail', db.String())
     added_at = db.Column('added_at', db.DateTime(timezone=True))
     lab_id = db.Column('lab_id', db.ForeignKey('labs.id'))
-    lab = db.relationship(Laboratory, backref=db.backref('member_activities'))
+    lab = db.relationship(Laboratory, backref=db.backref('member_activities',
+                                                         cascade='all, delete-orphan'))
 
     def to_dict(self):
         return {
