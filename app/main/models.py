@@ -43,6 +43,7 @@ class UserLabAffil(db.Model):
                                                     cascade='all, delete-orphan'))
     lab = db.relationship(Laboratory, backref=db.backref('lab_members',
                                                          cascade='all, delete-orphan'))
+    deactivated_at = db.Column('deactivated_at', db.DateTime(timezone=True))
 
     def to_dict(self):
         return {
