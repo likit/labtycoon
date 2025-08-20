@@ -1,19 +1,48 @@
 from pytz import timezone
+from wtforms import PasswordField
+from wtforms.validators import Optional, EqualTo, ValidationError
 
 from app import create_app, db, admin
 from dotenv import load_dotenv
-from flask import render_template
+from flask import render_template, flash
 from flask_admin.contrib.sqla import ModelView
-from app.main.models import Announcement
 import arrow
 
 load_dotenv()
 
 app = create_app()
 
+
+class UserModelView(ModelView):
+    column_searchable_list = ['email']
+    form_excluded_columns = ['pwdhash']
+
+    form_extra_fields = {
+        'new_password': PasswordField(
+            'New password',
+            render_kw={'autocomplete': 'new-password'}
+        ),
+        'confirm_password': PasswordField(
+            'Confirm password',
+            validators=[EqualTo('new_password', message='Passwords must match')],
+            render_kw={'autocomplete': 'new-password'}
+        ),
+    }
+
+    def on_model_change(self, form, model, is_created):
+        pwd = form.new_password.data
+        if is_created and not pwd:
+            # Require a password when creating a new user
+            raise ValidationError('Password is required for new users.')
+        if pwd:
+            model.password = pwd  # hashes & stores into password_hash
+            flash('Password updated.', 'success')
+        return super().on_model_change(form, model, is_created)
+
+
 from app.auth.models import *
 
-admin.add_view(ModelView(User, db.session, category='Users'))
+admin.add_view(UserModelView(User, db.session, category='Users'))
 
 from app.main.models import *
 

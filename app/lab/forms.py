@@ -1,9 +1,9 @@
-from flask_wtf import FlaskForm, Form
-from wtforms import BooleanField, StringField, TextField, DecimalField, SelectField
+from flask_wtf import FlaskForm
+from wtforms import StringField
 from wtforms.fields import BooleanField
 from wtforms.widgets import Select
 from wtforms.validators import InputRequired, Optional
-from wtforms_alchemy import model_form_factory, QuerySelectField
+from wtforms_alchemy import model_form_factory
 from wtforms_alchemy.fields import QuerySelectField
 
 from .models import *

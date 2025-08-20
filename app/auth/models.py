@@ -40,6 +40,14 @@ class User(db.Model):
     def is_anonymous(self):
         return False
 
+    @property
+    def password(self):
+        return ValueError('Password is not accessible.')
+
+    @password.setter
+    def password(self, password):
+        self.pwdhash = generate_password_hash(password)
+
     def get_id(self):
         return self.id
 
