@@ -46,12 +46,18 @@
                                     {% if not current_user.is_affiliated_with(lab.id) %}
                                     <a class="button is-info is-rounded"
                                        href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
-                                        Request to join
+                                        <span class="icon">
+                                            <i class="fas fa-door-closed"></i>
+                                        </span>
+                                        <span>Request to join</span>
                                     </a>
                                     {% else %}
                                     <a class="button is-success is-rounded"
                                        href="{{ url_for('lab.landing', lab_id=lab.id) }}">
-                                        Enter
+                                        <span class="icon">
+                                            <i class="fas fa-person-booth"></i>
+                                        </span>
+                                        <span>Enter</span>
                                     </a>
                                     {% endif %}
                                 </div>

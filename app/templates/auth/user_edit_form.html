@@ -28,7 +28,7 @@
             <div class="columns">
                 <div class="column is-one-third is-offset-2">
                     <div class="box">
-                    <h1 class="title is-size-3 has-text-centered">User Registration</h1>
+                    <h1 class="title is-size-3 has-text-centered">User Edit Form</h1>
                     <hr>
                     <form method="post">
                         {{ form.hidden_tag() }}
@@ -53,34 +53,28 @@
                         <div class="field">
                             <label class="label">{{ form.email.label }}</label>
                             <div class="control">
-                                {{ form.email(class="input") }}
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label">{{ form.password.label }}</label>
-                            <div class="control">
-                                {{ form.password(class="input") }}
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label">{{ form.confirm.label }}</label>
-                            <div class="control">
-                                {{ form.confirm(class="input") }}
+                                {{ form.email(class="input", readonly=True) }}
                             </div>
                         </div>
                         <div class="field is-grouped is-grouped-centered">
                             <div class="control">
-                                <button type="submit" class="button is-success is-rounded">Submit</button>
+                                <a href="{{ url_for('main.index') }}" class="button is-light is-rounded">Cancel</a>
                             </div>
                             <div class="control">
-                                <button type="reset" class="button is-danger is-rounded">Reset</button>
+                                <button type="submit" class="button is-success is-rounded">Save</button>
                             </div>
                         </div>
                     </form>
                     </div>
+                    <a href="{{ url_for('auth.edit_user_password') }}" class="button is-danger">
+                        <span class="icon">
+                            <i class="fas fa-key"></i>
+                        </span>
+                        <span>Change Password</span>
+                    </a>
                 </div>
-                <div class="column">
-                    <div class="notification is-light">
+                <div class="column is-one-third">
+                    <div class="notification is-info is-light">
                         <div class="has-text-centered">
                             <span class="title is-size-5">User registration</span>
                         </div>

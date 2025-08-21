@@ -2,7 +2,7 @@ from . import auth_blueprint as auth
 from app import db, login_manager
 from flask_login import login_required, login_user,  logout_user, current_user
 from flask import render_template, request, flash, redirect, url_for
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, UserForm, PasswordForm
 from .models import User
 
 
@@ -69,3 +69,34 @@ def register():
             flash(form.errors, 'danger')
 
     return render_template('/auth/register.html', form=form)
+
+
+@auth.route('/user/edit', methods=['GET', 'POST'])
+def edit_user_profile():
+    form = UserForm(obj=current_user)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            form.populate_obj(current_user)
+            db.session.add(current_user)
+            db.session.commit()
+            flash('The account has been updated.', 'success')
+            return redirect(url_for('main.index'))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('auth/user_edit_form.html', form=form)
+
+
+@auth.route('/user/password/edit', methods=['GET', 'POST'])
+def edit_user_password():
+    form = PasswordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            db.session.commit()
+            flash('The password has been updated. Please login with the new password.', 'success')
+            logout_user()
+            return redirect(url_for('auth.login'))
+        else:
+            flash(form.errors, 'danger')
+    return render_template('auth/password_form.html', form=form)

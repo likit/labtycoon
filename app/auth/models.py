@@ -5,10 +5,10 @@ from app import db
 
 class User(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column('email', db.String(128), nullable=False, unique=True)
-    firstname = db.Column('firstname', db.String())
-    lastname = db.Column('lastname', db.String())
-    license_id = db.Column('license_id', db.String())
+    email = db.Column('email', db.String(128), nullable=False, unique=True, info={'label': 'Email'})
+    firstname = db.Column('firstname', db.String(), info={'label': 'First Name'})
+    lastname = db.Column('lastname', db.String(), info={'label': 'Last Name'})
+    license_id = db.Column('license_id', db.String(), info={'label': 'License ID'})
     pwdhash = db.Column('pwdhash', db.String())
 
     def __init__(self, firstname, lastname, email, password, license_id):
