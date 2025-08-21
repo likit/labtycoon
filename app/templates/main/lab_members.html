@@ -5,13 +5,7 @@
     <div class="container">
         <div class="columns">
             <div class="column">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <p class="notification is-{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                {% include "messages.html" %}
             </div>
         </div>
         <div class="columns">
@@ -25,6 +19,10 @@
                         <i class="fas fa-user-check has-text-success"></i>
                     </span>
                     <span>Approved ({{ lab.num_approved_members }})</span>
+                    <span class="icon">
+                        <i class="fas fa-user-check has-text-success"></i>
+                    </span>
+                    <span>Active ({{ lab.num_active_members }})</span>
                 </p>
                 <table class="table is-striped is-fullwidth">
                     <thead>
@@ -38,14 +36,25 @@
                     {% for member in lab.lab_members %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ member.user.fullname }}</td>
+                            <td>
+                                {{ member.user.fullname }}
+                                {% if member.user == lab.creator %}
+                                <span class="tag is-rounded is-warning">
+                                    admin
+                                </span>
+                                {% endif %}
+                            </td>
                             <td>{{ member.joined_at|humanizedt }}
                             <td>
                                 {% if not member.approved %}
                                     <span class="icon">
                                         <i class="fas fa-user-clock has-text-danger"></i>
                                     </span>
-                                {% else %}
+                                {% elif member.deactivated_at %}
+                                    <span class="icon">
+                                        <i class="fas fa-user-slash has-text-danger"></i>
+                                    </span>
+                                {% elif member.approved %}
                                     <span class="icon">
                                         <i class="fas fa-user-check has-text-success"></i>
                                     </span>
@@ -64,19 +73,48 @@
                                     </td>
                                 {% else %}
                                 <td>
-                                    <a class="button is-danger is-rounded is-small">
+                                    {% if not member.deactivated_at %}
+                                    <a class="button is-danger is-rounded is-small"
+                                       hx-indicator="this"
+                                       hx-swap="none"
+                                       hx-confirm="You want to deactivate this member?"
+                                       hx-delete="{{ url_for('main.approve_member', lab_id=lab.id, user_id=member.user.id) }}">
                                         <span class="icon">
                                             <i class="fa-solid fa-ban"></i>
                                         </span>
                                         <span>deactivate</span>
                                     </a>
+                                    {% else %}
+                                    <a class="button is-success is-rounded is-small"
+                                       hx-indicator="this"
+                                       hx-swap="none"
+                                       hx-confirm="You want to activate this member?"
+                                       hx-post="{{ url_for('main.approve_member', lab_id=lab.id, user_id=member.user.id) }}">
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        <span>activate</span>
+                                    </a>
+                                    {% endif %}
                                 </td>
                                 {% endif %}
+                            {% else %}
+                                <td></td>
+                                <td></td>
                             {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="buttons is-centered">
+                    <a href="{{ url_for('lab.landing', lab_id=session['lab_id']) }}"
+                       class="button is-rounded is-light">
+                        <span class="icon">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                        <span>Back</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

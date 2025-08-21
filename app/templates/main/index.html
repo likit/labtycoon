@@ -18,7 +18,7 @@
         </div>
         <div class="columns">
             <div class="column has-text-centered">
-                <a class="button primary" href="{{ url_for('lab.create_lab') }}">
+                <a class="button is-primary" href="{{ url_for('lab.create_lab') }}">
                     <span class="icon">
                         <i class="fas fa-plus"></i>
                     </span>
@@ -38,7 +38,7 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <p>{{ lab.desc }}</p>
+                            <p>{{ lab.desc or "No description." }}</p>
                         </div>
                         <div class="card-footer">
                             <div class="card-footer-item">

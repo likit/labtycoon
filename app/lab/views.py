@@ -8,7 +8,7 @@ from datetime import date
 import arrow
 import pandas as pd
 from faker import Faker
-from flask import render_template, url_for, request, flash, redirect, make_response, send_file
+from flask import render_template, url_for, request, flash, redirect, make_response, send_file, session
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
@@ -22,6 +22,31 @@ TestOrder = namedtuple('TestOrder', ['order', 'ordered_at', 'type', 'approved_at
 
 fake = Faker(['th-TH'])
 
+# access.py
+from functools import wraps
+from flask import request, redirect, url_for, flash
+from flask_login import current_user
+
+def require_status(param: str="lab_id"):
+    """
+    Decorator to restrict access based on current_user.<attr> membership in `allowed`.
+    """
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            # Read the status-like attribute
+            lab_id = session.get(param)
+            affil_record = UserLabAffil.query.filter_by(user_id=current_user.id, lab_id=int(lab_id)).first()
+            if affil_record.deactivated_at:
+                flash('You are not authorized to access this resource. Please contact the admin.',
+                      'danger')
+                return redirect(url_for('main.list_members', lab_id=lab_id))
+            return view_func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 
 @lab.route('/<int:lab_id>')
 @login_required
@@ -31,6 +56,7 @@ def landing(lab_id):
         flash('You do not have a permission to enter this lab.', 'danger')
         return redirect(url_for('main.index'))
     lab = Laboratory.query.get(lab_id)
+    session['lab_id'] = lab_id
     return render_template('lab/index.html', lab=lab)
 
 
@@ -53,6 +79,7 @@ def create_lab():
 
 
 @lab.route('/<int:lab_id>/tests')
+@require_status("lab_id")
 @login_required
 def list_tests(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -60,6 +87,7 @@ def list_tests(lab_id):
 
 
 @lab.route('/<int:lab_id>/choice_sets')
+@require_status("lab_id")
 @login_required
 def list_choice_sets(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -68,6 +96,7 @@ def list_choice_sets(lab_id):
 
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/items', methods=['GET', 'POST'])
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/items/<int:choice_item_id>', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def add_choice_item(lab_id, choice_set_id, choice_item_id=None):
     if choice_item_id:
@@ -99,6 +128,7 @@ def add_choice_item(lab_id, choice_set_id, choice_item_id=None):
 
 
 @lab.route('/result-sets/items/<int:choice_item_id>', methods=['DELETE'])
+@require_status("lab_id")
 @login_required
 def remove_choice_item(choice_item_id):
     item = LabResultChoiceItem.query.get(choice_item_id)
@@ -113,6 +143,7 @@ def remove_choice_item(choice_item_id):
 
 @lab.route('/<int:lab_id>/choice_sets/add', methods=['GET', 'POST'])
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def add_choice_set(lab_id, choice_set_id=None):
     if choice_set_id:
@@ -144,6 +175,7 @@ def add_choice_set(lab_id, choice_set_id=None):
 
 
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/remove')
+@require_status("lab_id")
 @login_required
 def remove_choice_set(lab_id, choice_set_id):
     choiceset = LabResultChoiceSet.query.get(choice_set_id)
@@ -157,6 +189,7 @@ def remove_choice_set(lab_id, choice_set_id):
 
 
 @lab.route('/<int:lab_id>/quantests/add', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def add_test(lab_id):
     form = LabTestForm(lab_id=lab_id)
@@ -185,6 +218,7 @@ def add_test(lab_id):
 
 
 @lab.route('/<int:lab_id>/quantests/<int:test_id>/edit', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def edit_test(lab_id, test_id):
     test = LabTest.query.get(test_id)
@@ -203,6 +237,7 @@ def edit_test(lab_id, test_id):
 
 
 @lab.route('/<int:lab_id>/quantests/<int:test_id>/remove', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def remove_quan_test(lab_id, test_id):
     if not current_user.is_affiliated_with(lab_id):
@@ -216,6 +251,7 @@ def remove_quan_test(lab_id, test_id):
 
 
 @lab.route('/<int:lab_id>/customers')
+@require_status("lab_id")
 @login_required
 def list_patients(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -224,6 +260,7 @@ def list_patients(lab_id):
 
 @lab.route('/<int:lab_id>/patients/add', methods=['GET', 'POST'])
 @lab.route('/<int:lab_id>/patients/<int:customer_id>', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def add_patient(lab_id, customer_id=None):
     if customer_id:
@@ -259,6 +296,7 @@ def add_patient(lab_id, customer_id=None):
 
 
 @lab.route('/<int:lab_id>/patients/random', methods=['POST'])
+@require_status("lab_id")
 @login_required
 def add_random_patients(lab_id):
     n = request.args.get('n', 5, type=int)
@@ -303,6 +341,7 @@ def add_random_patients(lab_id):
 
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/orders', methods=['GET', 'POST'])
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/orders/<int:order_id>', methods=['GET', 'POST', 'DELETE'])
+@require_status("lab_id")
 @login_required
 def add_test_order(lab_id, customer_id, order_id=None):
     lab = Laboratory.query.get(lab_id)
@@ -390,6 +429,7 @@ def add_test_order(lab_id, customer_id, order_id=None):
 
 
 @lab.route('/<int:lab_id>/patients/<int:customer_id>/auto-orders', methods=['POST'])
+@require_status("lab_id")
 @login_required
 def auto_add_test_order(lab_id, customer_id):
     lab = Laboratory.query.get(lab_id)
@@ -472,6 +512,7 @@ def auto_add_test_order(lab_id, customer_id):
 
 
 @lab.route('/<int:lab_id>/orders', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def list_test_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -479,6 +520,7 @@ def list_test_orders(lab_id):
 
 
 @lab.route('/records/<int:record_id>/cancel', methods=['POST'])
+@require_status("lab_id")
 @login_required
 def cancel_test_record(record_id):
     record = LabTestRecord.query.get(record_id)
@@ -501,6 +543,7 @@ def cancel_test_record(record_id):
 
 # TODO: deprecated
 @lab.route('/records/<int:record_id>/reject', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def reject_test_order(record_id):
     record = LabTestRecord.query.get(record_id)
@@ -532,6 +575,7 @@ def reject_test_order(record_id):
 
 
 @lab.route('/records/<int:record_id>/receive', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def receive_test_order(record_id):
     record = LabTestRecord.query.get(record_id)
@@ -553,6 +597,7 @@ def receive_test_order(record_id):
 
 
 @lab.route('/<int:lab_id>/orders/pending', methods=['GET', 'POST'])
+@require_status("lab_id")
 @login_required
 def list_pending_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -560,6 +605,7 @@ def list_pending_orders(lab_id):
 
 
 @lab.route('/<int:lab_id>/activities')
+@require_status("lab_id")
 @login_required
 def list_activities(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -567,6 +613,7 @@ def list_activities(lab_id):
 
 
 @lab.route('/customers/<int:customer_id>/records')
+@require_status("lab_id")
 @login_required
 def show_customer_records(customer_id):
     customer = LabCustomer.query.get(customer_id)
@@ -575,6 +622,7 @@ def show_customer_records(customer_id):
 
 
 @lab.route('/customers/<int:customer_id>/orders/<int:order_id>/records')
+@require_status("lab_id")
 @login_required
 def show_customer_test_records(customer_id, order_id):
     customer = LabCustomer.query.get(customer_id)
@@ -587,6 +635,7 @@ def show_customer_test_records(customer_id, order_id):
 
 
 @lab.route('/orders/<int:order_id>/records/<int:record_id>', methods=['POST', 'GET'])
+@require_status("lab_id")
 @login_required
 def finish_test_record(order_id, record_id):
     order = LabTestOrder.query.get(order_id)
@@ -624,6 +673,7 @@ def finish_test_record(order_id, record_id):
 
 
 @lab.route('/orders/<int:order_id>/approve', methods=['GET', 'PATCH'])
+@require_status("lab_id")
 @login_required
 def approve_test_order(order_id):
     order = LabTestOrder.query.get(order_id)
@@ -651,6 +701,7 @@ def approve_test_order(order_id):
 
 
 @lab.route('/labs/<int:lab_id>/rejects')
+@require_status("lab_id")
 @login_required
 def list_rejected_orders(lab_id):
     lab = Laboratory.query.get(lab_id)
@@ -663,6 +714,7 @@ def list_rejected_orders(lab_id):
 
 
 @lab.route('/records/<int:record_id>/revisions')
+@require_status("lab_id")
 @login_required
 def test_record_revisions(record_id):
     record = LabTestRecord.query.get(record_id)
@@ -670,6 +722,7 @@ def test_record_revisions(record_id):
 
 
 @lab.route('/labs/<int:lab_id>/data-export', methods=['GET'])
+@require_status("lab_id")
 @login_required
 def export_data(lab_id):
     table = request.args.get('table')

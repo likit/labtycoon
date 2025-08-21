@@ -21,6 +21,10 @@ class Laboratory(db.Model):
         return len([m for m in self.lab_members if m.approved])
 
     @property
+    def num_active_members(self):
+        return len([m for m in self.lab_members if m.approved and not m.deactivated_at])
+
+    @property
     def pending_test_records(self):
         records = []
         for order in self.test_orders:

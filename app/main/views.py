@@ -1,5 +1,5 @@
 import arrow
-from flask import render_template, url_for, flash, redirect
+from flask import render_template, url_for, flash, redirect, request, make_response
 from flask_login import login_required, current_user
 from . import main_blueprint as main
 from app.main.models import Laboratory, UserLabAffil
@@ -48,21 +48,41 @@ def request_join_lab(lab_id):
         return render_template('main/lab_members.html', lab=lab)
 
 
-@main.route('/labs/<int:lab_id>/approve/user/<int:user_id>')
+@main.route('/labs/<int:lab_id>/approve/user/<int:user_id>', methods=['GET', 'DELETE', 'POST'])
 @login_required
 def approve_member(lab_id, user_id):
     affil_record = UserLabAffil.query.filter_by(user_id=user_id,
                                                 lab_id=lab_id
                                                 ).first()
     lab = Laboratory.query.get(lab_id)
-    if current_user == lab.creator:
-        if not affil_record.approved:
-            affil_record.approved = True
-            db.session.add(affil_record)
-            db.session.commit()
-            flash('The user has been approved to join the lab.', 'success')
-        else:
-            flash('The user has already been approved.')
-    else:
+    if current_user != lab.creator:
         flash('You do not have a permission to approve a user.', 'danger')
+
+    if request.method == 'GET':
+        if current_user == lab.creator:
+            if not affil_record.approved:
+                affil_record.approved = True
+                db.session.add(affil_record)
+                db.session.commit()
+                flash('The user has been approved to join the lab.', 'success')
+            else:
+                flash('The user has already been approved.')
+    elif request.method == 'DELETE':
+        affil_record.deactivated_at = arrow.now('Asia/Bangkok').datetime
+        db.session.add(affil_record)
+        db.session.commit()
+        flash('The user has been deactivated for this lab.', 'success')
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
+    elif request.method == 'POST':
+        affil_record.deactivated_at = None
+        db.session.add(affil_record)
+        db.session.commit()
+        flash('The user has been activated for this lab.', 'success')
+        resp = make_response()
+        resp.headers['HX-Refresh'] = 'true'
+        return resp
+
     return redirect(url_for('main.list_members', lab_id=lab_id))
+
