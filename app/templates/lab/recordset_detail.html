@@ -15,6 +15,9 @@
                 {% if order.cancelled_at %}
                     <p class="notification is-danger">This order has been cancelled at {{ order.cancelled_at|localdatetime }}</p>
                 {% endif %}
+                <p class="notification">
+                    {{ order.customer }}
+                </p>
                 <div class="box">
                     <table class="table is-striped is-fullwidth">
                         <thead>

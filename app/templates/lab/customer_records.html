@@ -50,7 +50,7 @@
                                         <td>{{ order.ordered_by }}</td>
                                         <td>
                                             {% if order.approved_at %}
-                                                <span class="tag is-success">
+                                                <span class="tag is-success is-rounded is-medium">
                                                     <span class="icon">
                                                         <i class="fas fa-check"></i>
                                                     </span>
@@ -74,11 +74,10 @@
                                             {% elif order.approved_at and not order.cancelled_at %}
                                                 <a hx-patch="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
                                                    hx-confirm="Are you sure want to unapprove this order?"
-                                                   class="button is-small is-rounded is-danger">
+                                                   class="button is-rounded is-small is-white">
                                                     <span class="icon">
-                                                        <i class="fas fa-undo"></i>
+                                                        <i class="fas fa-undo has-text-danger"></i>
                                                     </span>
-                                                    <span>Unapprove</span>
                                                 </a>
                                             {% endif %}
                                         </td>

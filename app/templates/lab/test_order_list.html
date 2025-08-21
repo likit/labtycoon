@@ -32,7 +32,7 @@
                                     </span>
                                         <span>{{ order.id }}</span>
                                     </td>
-                                    <td>{{ order.ordered_at|humanizedt }}</td>
+                                    <td>{{ order.ordered_at }}</td>
                                     <td>
                                     <span class="icon">
                                         <i class="fas fa-link"></i>
@@ -42,12 +42,11 @@
                                     <td>{{ order.ordered_by }}</td>
                                     <td>
                                         {% if order.cancelled_at %}
-                                            <span class="tag is-light is-danger">
+                                            <span class="tag is-rounded is-medium is-danger">
                                             {{ order.cancelled_at|humanizedt }}
                                         </span>
-                                        {% endif %}
-                                        {% if order.approved_at %}
-                                            <span class="tag is-light is-success">
+                                        {% elif order.approved_at %}
+                                            <span class="tag is-rounded is-medium is-success">
                                             {{ order.approved_at|humanizedt }}
                                         </span>
                                         {% endif %}
