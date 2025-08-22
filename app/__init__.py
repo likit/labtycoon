@@ -36,6 +36,8 @@ def create_app():
 
     app.config["SQLALCHEMY_DATABASE_URI"] = uri + '?sslmode=require'
 
+    print(app.config["SQLALCHEMY_DATABASE_URI"])
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
