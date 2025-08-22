@@ -28,17 +28,7 @@ def create_app():
     from app.doc import doc_blueprint
     app.register_blueprint(doc_blueprint, url_prefix='/doc')
 
-    raw_url = os.environ.get('DATABASE_URL')
-    if raw_url.startswith("postgres://"):
-        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
-
-    url = make_url(raw_url)
-
-    # Add sslmode safely if needed
-    if "sslmode" not in url.query:
-        url = url.set(query={**url.query, "sslmode": "require"})
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = url
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
