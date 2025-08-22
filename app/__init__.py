@@ -33,8 +33,6 @@ def create_app():
     uri = os.environ.get('DATABASE_URL').strip()
     if uri and uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
-        uri += '?sslmode=require'
-
 
     app.config["SQLALCHEMY_DATABASE_URI"] = uri
 
