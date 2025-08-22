@@ -4,6 +4,7 @@ from flask_admin import Admin
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from sqlalchemy import make_url
 
 admin = Admin()
 db = SQLAlchemy()
@@ -27,7 +28,18 @@ def create_app():
     from app.doc import doc_blueprint
     app.register_blueprint(doc_blueprint, url_prefix='/doc')
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
+    raw_url = os.environ.get('DATABASE_URL')
+    if raw_url.startswith("postgres://"):
+        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+
+    url = make_url(raw_url)
+
+    # Add sslmode safely if needed
+    if "sslmode" not in url.query:
+        url = url.set(query={**url.query, "sslmode": "require"})
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = url
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
