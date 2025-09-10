@@ -1,12 +1,10 @@
 import os
-import urllib
 
 from flask import Flask
 from flask_admin import Admin
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from sqlalchemy import make_url
 
 admin = Admin()
 db = SQLAlchemy()
