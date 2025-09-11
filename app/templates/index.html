@@ -3,24 +3,31 @@
 {% block navbar %}
 {% endblock %}
 {% block content %}
-    <section class="hero is-info is-large">
+    <section class="hero is-primary">
     <div class="hero-head">
         {% include "nav.html" %}
     </div>
     <div class="hero-body">
         <div class="container">
             <div class="columns">
-                <div class="column is-half">
+                <div class="column is-two-thirds">
                     <div class="box">
-                        <h1 class="title has-text-black"><span>Welcome to</span><span class="has-text-info"> Lab Tycoon</span></h1>
+                        <h1 class="title has-text-black"><span>Welcome to</span><span class="has-text-info"> Lab Tycoon Web 2025.1</span></h1>
                         <h1 class="subtitle has-text-black">
                             Open Source Laboratory Information System for Education
                         </h1>
                         <div class="buttons">
-                            <a href="{{ url_for('main.index') }}" class="button is-success is-rounded">Enter</a>
+                            <a href="{{ url_for('main.index') }}" class="button is-success is-rounded">Start</a>
                             <a href="{{ url_for('main.about') }}" class="button is-info is-rounded">About</a>
                         </div>
                     </div>
+                    <div class="box">
+                        <h1 class="title has-text-danger is-size-5">Disclaimer</h1>
+                        <p class="has-text-black">
+                            This software is for educational purpose only. Do not use it in production.
+                        </p>
+                    </div>
+                    {% if announcements %}
                     <div class="box">
                         {% for a in announcements %}
                             <span class="icon">
@@ -29,12 +36,10 @@
                             <span class="has-text-black">{{ a.detail }}</span>
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
                 <div class="column">
-                    <p class="title is-size-4">
-                        What I cannot create, I do not understand. -- Richard Feynman
-                    </p>
-                    <img src="{{ url_for('static', filename='img/richard-feyman.jpeg') }}">
+                    <img src="{{ url_for('static', filename='img/lab_staff.png') }}">
                 </div>
             </div>
         </div>
