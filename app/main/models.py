@@ -13,16 +13,16 @@ class Laboratory(db.Model):
     creator = db.relationship(User, backref=db.backref('user', lazy=True))
 
     @property
-    def num_pending_members(self):
-        return len([m for m in self.lab_members if not m.approved])
+    def pending_members(self):
+        return [m for m in self.lab_members if not m.approved]
 
     @property
-    def num_approved_members(self):
-        return len([m for m in self.lab_members if m.approved])
+    def approved_members(self):
+        return [m for m in self.lab_members if m.approved]
 
     @property
-    def num_active_members(self):
-        return len([m for m in self.lab_members if m.approved and not m.deactivated_at])
+    def active_members(self):
+        return [m for m in self.lab_members if m.approved and not m.deactivated_at]
 
     @property
     def pending_test_records(self):
@@ -43,7 +43,7 @@ class UserLabAffil(db.Model):
     joined_at = db.Column('joined_at', db.DateTime(timezone=True))
     approved = db.Column('approved', db.Boolean(), default=False)
     user = db.relationship(User, backref=db.backref('lab_affils',
-                                                    lazy=True,
+                                                    lazy='dynamic',
                                                     cascade='all, delete-orphan'))
     lab = db.relationship(Laboratory, backref=db.backref('lab_members',
                                                          cascade='all, delete-orphan'))
