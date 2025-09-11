@@ -120,4 +120,34 @@
             </div>
         </div>
     </section>
+    <section class="section">
+    <div class="container">
+        <h1 class="title is-size-4">Data Model</h1>
+        <pre class="mermaid">
+            erDiagram
+                LAB ||--o{ CUSTOMER: serves
+                LAB ||--o{ STAFF: has
+                CUSTOMER ||--o{ ORDER : has
+                ORDER ||--|{ TEST-RECORD : has
+                STAFF ||--o{ ORDER : order
+                TEST ||--o{ TEST-RECORD: has
+                LAB ||--o{ TEST: offers
+                ORDER {
+                int orderId PK
+                int customerId FK
+                int ordererId FK
+                int approverId FK
+                datetime orderDateTime
+                datetime approveDateTime
+                datetime cancelDateTime
+            }
+        </pre>
+    </div>
+    </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    </script>
 {% endblock %}
