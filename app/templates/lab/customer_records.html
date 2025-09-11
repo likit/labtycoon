@@ -5,26 +5,25 @@
         <div class="container">
             <div class="columns">
                 <div class="column">
-                    {% include "messages.html" %}
-                </div>
-            </div>
-            <div class="columns">
-                <div class="column">
-                <div class="has-text-centered">
-                    <figure class="figure is-64x64 is-inline-block">
-                        <p class="image is-64x64">
-                            {% if customer.gender=='ชาย' %}
-                                <img src="https://avatar.iran.liara.run/public/boy?username={{ customer.firstname }}">
-                            {% else %}
-                                <img src="https://avatar.iran.liara.run/public/girl?username={{ customer.firstname }}">
-                            {% endif %}
-                        </p>
-                    </figure>
-                </div>
+                    <div class="has-text-centered">
+                        <figure class="figure is-64x64 is-inline-block">
+                            <p class="image is-64x64">
+                                {% if customer.gender=='ชาย' %}
+                                    <img src="https://avatar.iran.liara.run/public/boy?username={{ customer.firstname }}">
+                                {% else %}
+                                    <img src="https://avatar.iran.liara.run/public/girl?username={{ customer.firstname }}">
+                                {% endif %}
+                            </p>
+                        </figure>
+                    </div>
                     <h1 class="title is-size-4 has-text-centered">Lab Test Orders</h1>
-                    <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}<br>HN: {{ customer.id }}</h1>
+                    <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}<br>HN: {{ customer.id }}
+                    </h1>
+                    {% include "messages.html" %}
                     <div class="box">
-                        <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบแล้ว<button class="delete"></button></p>
+                        <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบแล้ว
+                            <button class="delete"></button>
+                        </p>
                         <table class="table is-fullwidth">
                             <thead>
                             <th>Order No.</th>
@@ -38,38 +37,38 @@
                             </thead>
                             <tbody>
                             {% for order in customer.test_orders|sort(attribute='ordered_at', reverse=True) %}
-                                    <tr {% if order.cancelled_at %} class="has-text-danger" {% endif %}>
-                                        <td>
+                                <tr {% if order.cancelled_at %} class="has-text-danger" {% endif %}>
+                                    <td>
                                             <span class="icon">
                                                 <i class="fas fa-key"></i>
                                             </span>
-                                            <span>{{ order.id }}</span>
-                                        </td>
-                                        <td>{{ order.ordered_at|humanizedt }}</td>
-                                        <td>
-                                            <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
+                                        <span>{{ order.id }}</span>
+                                    </td>
+                                    <td>{{ order.ordered_at|humanizedt }}</td>
+                                    <td>
+                                        <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
                                                 <span class="tag is-primary is-rounded">
                                                     {{ order.test_records|length }}
                                                 </span>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
                                                 <span class="tag is-danger is-rounded">
                                                     {{ order.pending_test_records|length }}
                                                 </span>
-                                            </a>
-                                        </td>
-                                        <td>
+                                        </a>
+                                    </td>
+                                    <td>
                                             <span class="icon">
                                                 <i class="fas fa-link"></i>
                                             </span>
-                                            <span>{{ order.ordered_by_id }}</span>
-                                        </td>
-                                        <td>{{ order.ordered_by }}</td>
-                                        <td>
-                                            {% if order.approved_at %}
-                                                <span class="tag is-success is-rounded is-medium">
+                                        <span>{{ order.ordered_by_id }}</span>
+                                    </td>
+                                    <td>{{ order.ordered_by }}</td>
+                                    <td>
+                                        {% if order.approved_at %}
+                                            <span class="tag is-success is-rounded is-medium">
                                                     <span class="icon">
                                                         <i class="fas fa-check"></i>
                                                     </span>
@@ -77,32 +76,32 @@
                                                         {{ order.approved_at|humanizedt }}
                                                     </span>
                                                 </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if not order.approved_at and not order.cancelled_at %}
-                                                <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
-                                                   hx-target="closest tr"
-                                                   title="Cancel this order"
-                                                   hx-confirm="Are you sure want to cancel this order?"
-                                                   class="button is-small is-rounded is-danger">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not order.approved_at and not order.cancelled_at %}
+                                            <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
+                                               hx-target="closest tr"
+                                               title="Cancel this order"
+                                               hx-confirm="Are you sure want to cancel this order?"
+                                               class="button is-small is-rounded is-danger">
                                                     <span class="icon">
                                                         <i class="fas fa-times"></i>
                                                     </span>
-                                                    <span>Cancel</span>
-                                                </a>
-                                            {% elif order.approved_at and not order.cancelled_at %}
-                                                <a hx-patch="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
-                                                   hx-confirm="Are you sure want to unapprove this order?"
-                                                   class="button is-rounded is-small is-danger">
+                                                <span>Cancel</span>
+                                            </a>
+                                        {% elif order.approved_at and not order.cancelled_at %}
+                                            <a hx-patch="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
+                                               hx-confirm="Are you sure want to unapprove this order?"
+                                               class="button is-rounded is-small is-danger">
                                                     <span class="icon">
                                                         <i class="fas fa-undo"></i>
                                                     </span>
-                                                    <span>Unapprove</span>
-                                                </a>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
+                                                <span>Unapprove</span>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -117,13 +116,24 @@
                     </span>
                     <span>Back</span>
                 </a>
+                <a class="button is-rounded is-primary"
+                   title="Auto order"
+                   hx-confirm="Do you want to get an auto-generated order?"
+                   hx-indicator="this"
+                   hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                   hx-post="{{ url_for('lab.auto_add_test_order', customer_id=customer.id) }}">
+                    <span class="icon">
+                        <i class="fas fa-robot"></i>
+                    </span>
+                    <span>Auto Order</span>
+                </a>
             </div>
         </div>
     </section>
     <section class="section">
-    <div class="container">
-        <h1 class="title is-size-4">Data Model</h1>
-        <pre class="mermaid">
+        <div class="container">
+            <h1 class="title is-size-4">Data Model</h1>
+            <pre class="mermaid">
             erDiagram
                 LAB ||--o{ CUSTOMER: serves
                 LAB ||--o{ STAFF: has
@@ -142,12 +152,12 @@
                 datetime cancelDateTime
             }
         </pre>
-    </div>
+        </div>
     </section>
 {% endblock %}
 {% block scripts %}
     {{ super() }}
     <script type="module">
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     </script>
 {% endblock %}

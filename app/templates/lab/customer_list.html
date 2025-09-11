@@ -61,20 +61,20 @@
                             <td>
                                 <div class="field is-grouped is-grouped-multiline">
                                     <div class="control">
-                                        <div class="tags has-addons">
+                                        <a href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}" class="tags has-addons">
                                             <span class="tag is-medium is-warning is-rounded">
                                                 {{ customer.pending_test_orders|length }}
                                             </span>
                                             <span class="tag is-rounded is-medium">pending</span>
-                                        </div>
+                                        </a>
                                     </div>
                                     <div class="control">
-                                        <div class="tags has-addons">
+                                        <a class="tags has-addons" href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}">
                                             <span class="tag is-success is-medium is-rounded">
                                                 {{ customer.test_orders|length }}
                                             </span>
                                             <span class="tag is-rounded is-medium">all</span>
-                                        </div>
+                                        </a>
                                     </div>
                                 </div>
                             </td>
@@ -94,7 +94,7 @@
                                            title="Auto order"
                                            id="auto-order-{{ customer.id }}-btn"
                                            hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
-                                           hx-post="{{ url_for('lab.auto_add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
+                                           hx-post="{{ url_for('lab.auto_add_test_order', customer_id=customer.id) }}">
                                             <span class="icon">
                                                 <i class="fas fa-robot"></i>
                                             </span>

@@ -19,6 +19,11 @@ class LabCustomer(db.Model):
                                                                                'เด็กหญิง',
                                                                                'เด็กชาย',
                                                                                'พระภิกษุ',
+                                                                               'ดร.',
+                                                                               'รศ.ดร.',
+                                                                               'พ.ต.ท.',
+                                                                               'พันเอกหญิง',
+                                                                               'สตพญ.',
                                                                                'สามเณร']]})
     firstname = db.Column('firstname', db.String(), info={'label': 'First Name'})
     lastname = db.Column('lastname', db.String(), info={'label': 'Last Name'})

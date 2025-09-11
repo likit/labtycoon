@@ -1,5 +1,4 @@
 import random
-import time
 from io import BytesIO
 
 import numpy as np
@@ -8,8 +7,8 @@ from datetime import date
 import arrow
 import pandas as pd
 from faker import Faker
-from flask import render_template, url_for, request, flash, redirect, make_response, send_file, session
-from flask_login import login_required, current_user
+from flask import render_template, make_response, send_file, session
+from flask_login import login_required
 from sqlalchemy import func
 
 from . import lab_blueprint as lab
@@ -443,10 +442,11 @@ def add_test_order(lab_id, customer_id, order_id=None):
                            selected_test_ids=selected_test_ids)
 
 
-@lab.route('/<int:lab_id>/patients/<int:customer_id>/auto-orders', methods=['POST'])
+@lab.route('/customers/<int:customer_id>/auto-orders', methods=['POST'])
 @require_status("lab_id")
 @login_required
-def auto_add_test_order(lab_id, customer_id):
+def auto_add_test_order(customer_id):
+    lab_id = session['lab_id']
     lab = Laboratory.query.get(lab_id)
     num_tests = LabTest.query.count()
     random_minutes = random.randint(0, 60)
@@ -492,9 +492,9 @@ def auto_add_test_order(lab_id, customer_id):
                     else:
                         test_record.text_result = 'This is a mockup result.'
                 else:
-                    low = test.min_value if isinstance(test.min_value, int) else 10
-                    high = test.max_value if isinstance(test.max_value, int) else 1000
-                    test_record.num_result = random.randint(low, high)
+                    low = test.min_value or 0
+                    high = test.max_value or 1000
+                    test_record.num_result = random.randint(int(low), int(high))
 
                 if update_datetime > max_datetime:
                     max_datetime = update_datetime
