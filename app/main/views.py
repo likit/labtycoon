@@ -45,6 +45,7 @@ def request_join_lab(lab_id):
         )
         db.session.add(affil_record)
         db.session.commit()
+        flash('Your request has been sent. Please wait to be approved.', 'success')
         return render_template('main/lab_members.html', lab=lab)
 
 

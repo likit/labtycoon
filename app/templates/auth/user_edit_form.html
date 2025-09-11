@@ -66,6 +66,10 @@
                         </div>
                     </form>
                     </div>
+                    <p class="notification is-warning">
+                        ข้อควรระวัง ไม่ควรเปิดเผยรหัสผ่านให้กับผู้อื่นโดยเด็ดขาดเนื่องจากจะทำให้ผู้อื่นใช้บัญชีของท่านในการเข้าสู่ระบบและทำธุรกรรมต่าง ๆ ได้
+                        การรายงานผลหรือรับรองผลที่ท่านไม่ได้เห็นชอบอาจจะมีผลเสียต่อจรรยาบรรณวิชาชีพและกฎหมายที่เกี่ยวข้องหากเกิดคดีความ
+                    </p>
                     <a href="{{ url_for('auth.edit_user_password') }}" class="button is-danger">
                         <span class="icon">
                             <i class="fas fa-key"></i>
@@ -126,31 +130,8 @@
                             </li>
                         </ul>
                     </div>
-                    <div id="userDiagramDiv"></div>
                 </div>
             </div>
         </div>
     </section>
-{% endblock %}
-{% block scripts %}
-    {{ super() }}
-    <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.14.1/dist/cytoscape.min.js"></script>
-    <script>
-    var cy = cytoscape({
-        container: document.getElementById('userDiagramDiv'), // container to render in
-        elements: [
-            {
-                data: {id: 'UserAccount'}
-            },
-        ],
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'label': 'data(id)'
-                }
-            }
-        ]
-    });
-    </script>
 {% endblock %}

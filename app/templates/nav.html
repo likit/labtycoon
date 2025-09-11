@@ -35,8 +35,13 @@
                     </span>
                     <span>{{ current_user.fullname }}</span>
                 </a>
-                <a class="button is-info is-rounded" href="{{ url_for('auth.logout') }}">
-                    Log out
+                <a class="button is-danger is-rounded" href="{{ url_for('auth.logout') }}">
+                    <span class="icon">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </span>
+                    <span>
+                        Log out
+                    </span>
                 </a>
             {% else %}
                 <a class="button is-primary is-rounded" href="{{ url_for('auth.login') }}">
