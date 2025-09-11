@@ -1,5 +1,4 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_wtf import FlaskForm
 from app import db
 
 
@@ -52,4 +51,10 @@ class User(db.Model):
         return self.id
 
     def is_affiliated_with(self, lab_id):
-        return lab_id in [affil.lab.id for affil in self.lab_affils]
+        return lab_id in [affil.lab.id for affil in self.lab_affils.filter_by(approved=True, deactivated_at=None)]
+
+    def is_waiting_to_join(self, lab_id):
+        return lab_id in [affil.lab.id for affil in self.lab_affils.filter_by(approved=False, deactivated_at=None)]
+
+    def is_deactivated_from(self, lab_id):
+        return lab_id in [affil.lab.id for affil in self.lab_affils.filter_by(approved=True) if affil.deactivated_at]

@@ -9,16 +9,11 @@
             </div>
         </div>
         <div class="columns">
-            <div class="column">
-                <p class="notification is-info">
-                    สร้างห้องปฏิบัติการใหม่หรือส่งคำขอเพื่อเข้าร่วมห้องปฏิบัติการอื่นโดยคลิกที่ชื่อห้องปฏิบัติการ
-                    <button class="delete"></button>
-                </p>
-            </div>
-        </div>
-        <div class="columns">
             <div class="column has-text-centered">
-                <a class="button is-primary" href="{{ url_for('lab.create_lab') }}">
+                <a class="button is-medium is-rounded is-success is-outlined"
+                   href="{{ url_for('lab.create_lab') }}"
+                   title="Create your own laboratory."
+                >
                     <span class="icon">
                         <i class="fas fa-plus"></i>
                     </span>
@@ -29,43 +24,69 @@
             </div>
         </div>
         <div class="columns">
-            <div class="column is-one-third is-offset-4">
-                {% for lab in labs %}
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-title">
-                                {{ lab.name }}
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <p>{{ lab.desc or "No description." }}</p>
-                        </div>
-                        <div class="card-footer">
-                            <div class="card-footer-item">
-                                <div class="buttons is-centered">
-                                    {% if not current_user.is_affiliated_with(lab.id) %}
-                                    <a class="button is-info is-rounded"
-                                       href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
+            <div class="column">
+                <table class="table is-fullwidth is-striped">
+                <thead>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Created At</th>
+                <th>Creator</th>
+                <th>Active Members</th>
+                <th>Pending Members</th>
+                <th></th>
+                </thead>
+                    {% for lab in labs %}
+                        <tr>
+                            <td>{{ lab.name }}</td>
+                            <td>{{ lab.desc or "No description." }}</td>
+                            <td>{{ lab.created_at|localdatetime }}</td>
+                            <td>{{ lab.creator }}</td>
+                            <td>{{ lab.active_members|length }}</td>
+                            <td>{{ lab.pending_members|length }}</td>
+                            <td>
+                                {% if current_user.is_waiting_to_join(lab.id) %}
+                                    <button class="button is-warning is-rounded"
+                                            title="Please wait for the admin to approve your request."
+                                    >
                                         <span class="icon">
-                                            <i class="fas fa-door-closed"></i>
+                                            <i class="fa-solid fa-clock"></i>
                                         </span>
+                                        <span>Pending...</span>
+                                    </button>
+                                {% elif current_user.is_deactivated_from(lab.id) %}
+                                    <button class="button is-danger is-rounded" title="You are not allowed to enter this lab. Please contact the lab admin.">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-circle-xmark"></i>
+                                        </span>
+                                        <span>Deactivated</span>
+                                    </button>
+                                {% elif not current_user.is_affiliated_with(lab.id) %}
+                                    <a class="button is-info is-rounded"
+                                       title="Send a request to join this lab."
+                                       href="{{ url_for('main.request_join_lab', lab_id=lab.id) }}">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-bell"></i>
+                                            </span>
                                         <span>Request to join</span>
                                     </a>
-                                    {% else %}
+                                {% else %}
                                     <a class="button is-success is-rounded"
                                        href="{{ url_for('lab.landing', lab_id=lab.id) }}">
-                                        <span class="icon">
-                                            <i class="fas fa-person-booth"></i>
-                                        </span>
+                                            <span class="icon">
+                                                <i class="fa-solid fa-right-to-bracket"></i>
+                                            </span>
                                         <span>Enter</span>
                                     </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-                {% endfor %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column is-one-third is-offset-4">
             </div>
         </div>
     </div>
