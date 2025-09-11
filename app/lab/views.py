@@ -314,6 +314,7 @@ def add_random_patients(lab_id):
     n = request.args.get('n', 5, type=int)
     lab = Laboratory.query.get(lab_id)
     if request.method == 'POST':
+        names = []
         for i in range(n):
             profile = fake.profile()
             firstname, lastname = profile['name'].split(' ')
@@ -325,9 +326,9 @@ def add_random_patients(lab_id):
                     title = 'เด็กหญิง'
             else:
                 if profile['sex'] == 'M':
-                    title = random.choice(['นาย', 'พระภิกษุ'])
+                    title = random.choice(['นาย', 'พระภิกษุ', 'พ.ต.ท', 'รศ.ดร.', 'ดร.'])
                 else:
-                    title = random.choice(['นาง', 'นางสาว'])
+                    title = random.choice(['นาง', 'นางสาว', 'ดร.', 'พันเอกหญิง', 'สตพญ.'])
             customer_ = LabCustomer(
                 gender='ชาย' if profile['sex'] == 'M' else 'หญิง',
                 dob=profile['birthdate'],
@@ -336,11 +337,13 @@ def add_random_patients(lab_id):
                 title=title,
                 lab=lab
             )
+            db.session.add(customer_)
+            names.append(customer_.fullname)
         activity = LabActivity(
             lab_id=lab_id,
             actor=current_user,
             message='Added random customers',
-            detail=customer_.fullname,
+            detail=','.join(names),
             added_at=arrow.now('Asia/Bangkok').datetime
         )
         db.session.add(activity)

@@ -17,12 +17,13 @@
                         <span>New Customer</span>
                     </a>
                     <a class="button is-primary is-rounded" id="random-btn"
-                       hx-confirm="Are you sure?"
+                       hx-confirm="Do you want the system to autogenerate new customers?"
+                       hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
                        hx-post="{{ url_for('lab.add_random_patients', lab_id=lab.id, n=5) }}">
                         <span class="icon">
                             <i class="fas fa-robot"></i>
                         </span>
-                        <span>Random Customers</span>
+                        <span>Generate New Customers</span>
                     </a>
                 </div>
                     <table id="table" class="table is-fullwidth is-striped">
@@ -92,6 +93,7 @@
                                         <a class="button is-rounded"
                                            title="Auto order"
                                            id="auto-order-{{ customer.id }}-btn"
+                                           hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
                                            hx-post="{{ url_for('lab.auto_add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
                                             <span class="icon">
                                                 <i class="fas fa-robot"></i>
