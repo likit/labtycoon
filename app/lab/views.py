@@ -69,6 +69,10 @@ def create_lab():
             lab = Laboratory()
             form.populate_obj(lab)
             lab.creator = current_user
+            lab.created_at = arrow.now('Asia/Bangkok').datetime
+            affil = UserLabAffil(lab=lab, user=current_user, approved=True)
+            affil.joined_at = arrow.now('Asia/Bangkok').datetime
+            lab.lab_members.append(affil)
             db.session.add(lab)
             db.session.commit()
             flash('Your new lab has been created.', 'success')
