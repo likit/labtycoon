@@ -263,7 +263,7 @@ def list_patients(lab_id):
 
 
 @lab.route('/<int:lab_id>/patients/add', methods=['GET', 'POST'])
-@lab.route('/<int:lab_id>/patients/<int:customer_id>', methods=['GET', 'POST'])
+@lab.route('/<int:lab_id>/patients/<int:customer_id>', methods=['GET', 'POST', 'DELETE'])
 @require_status("lab_id")
 @login_required
 def add_patient(lab_id, customer_id=None):
@@ -273,6 +273,14 @@ def add_patient(lab_id, customer_id=None):
     else:
         form = LabCustomerForm()
     lab = Laboratory.query.get(lab_id)
+    if request.method == 'DELETE':
+        customer = LabCustomer.query.get(customer_id)
+        db.session.delete(customer)
+        db.session.commit()
+        flash('The record has been removed along with its associated records.', 'success')
+        resp = make_response()
+        resp.headers['HX-Redirect'] = url_for('lab.list_patients', lab_id=lab_id)
+        return resp
     if request.method == 'POST':
         if form.validate_on_submit():
             if not customer_id:
@@ -296,7 +304,7 @@ def add_patient(lab_id, customer_id=None):
             return render_template('lab/customer_list.html', lab=lab)
         else:
             flash('Failed to add a new customer.', 'danger')
-    return render_template('lab/new_customer.html', form=form, lab_id=lab_id)
+    return render_template('lab/new_customer.html', form=form, lab_id=lab_id, customer_id=customer_id)
 
 
 @lab.route('/<int:lab_id>/patients/random', methods=['POST'])

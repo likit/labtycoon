@@ -5,6 +5,7 @@
     <div class="container">
         <div class="columns">
             <div class="column is-one-third is-offset-4">
+                <h1 class="title has-text-centered">Customer Form</h1>
                 <form method="post" class="box">
                     {{ form.hidden_tag() }}
                     <div class="field">
@@ -52,6 +53,19 @@
                         </div>
                     </div>
                 </form>
+                {% if customer_id %}
+                <div class="buttons is-centered">
+                    <a class="button is-danger"
+                       hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                       hx-confirm="Do you really want to delete this customer along with his/her records?"
+                       hx-delete="{{ url_for('lab.add_patient', customer_id=customer_id, lab_id=lab_id) }}">
+                        <span class="icon">
+                            <i class="fa-solid fa-trash"></i>
+                        </span>
+                        <span>Delete</span>
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
