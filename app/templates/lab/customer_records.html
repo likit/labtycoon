@@ -10,15 +10,27 @@
             </div>
             <div class="columns">
                 <div class="column">
-                    <h1 class="title is-size-4 has-text-centered">All Orders</h1>
-                    <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}</h1>
+                <div class="has-text-centered">
+                    <figure class="figure is-64x64 is-inline-block">
+                        <p class="image is-64x64">
+                            {% if customer.gender=='ชาย' %}
+                                <img src="https://avatar.iran.liara.run/public/boy?username={{ customer.firstname }}">
+                            {% else %}
+                                <img src="https://avatar.iran.liara.run/public/girl?username={{ customer.firstname }}">
+                            {% endif %}
+                        </p>
+                    </figure>
+                </div>
+                    <h1 class="title is-size-4 has-text-centered">Lab Test Orders</h1>
+                    <h1 class="subtitle is-size-4 has-text-centered">{{ customer.fullname }}<br>HN: {{ customer.id }}</h1>
                     <div class="box">
-                        <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบให้ผู้ใช้แล้ว<button class="delete"></button></p>
+                        <p class="notification">รายการคำสั่งตรวจที่รับรองผลแล้วหมายถึงส่งผลการทดสอบแล้ว<button class="delete"></button></p>
                         <table class="table is-fullwidth">
                             <thead>
                             <th>Order No.</th>
                             <th>Ordered At</th>
                             <th>Tests</th>
+                            <th>Pending Tests</th>
                             <th>Ordered By FK</th>
                             <th>Ordered By</th>
                             <th>Approved</th>
@@ -28,23 +40,30 @@
                             {% for order in customer.test_orders|sort(attribute='ordered_at', reverse=True) %}
                                     <tr {% if order.cancelled_at %} class="has-text-danger" {% endif %}>
                                         <td>
-                                        <span class="icon">
-                                            <i class="fas fa-key"></i>
-                                        </span>
+                                            <span class="icon">
+                                                <i class="fas fa-key"></i>
+                                            </span>
                                             <span>{{ order.id }}</span>
                                         </td>
                                         <td>{{ order.ordered_at|humanizedt }}</td>
                                         <td>
                                             <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
-                                                <span class="tag is-warning is-rounded">
+                                                <span class="tag is-primary is-rounded">
                                                     {{ order.test_records|length }}
                                                 </span>
                                             </a>
                                         </td>
                                         <td>
-                                        <span class="icon">
-                                            <i class="fas fa-link"></i>
-                                        </span>
+                                            <a href="{{ url_for('lab.show_customer_test_records', customer_id=customer.id, order_id=order.id) }}">
+                                                <span class="tag is-danger is-rounded">
+                                                    {{ order.pending_test_records|length }}
+                                                </span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="icon">
+                                                <i class="fas fa-link"></i>
+                                            </span>
                                             <span>{{ order.ordered_by_id }}</span>
                                         </td>
                                         <td>{{ order.ordered_by }}</td>
@@ -64,6 +83,7 @@
                                             {% if not order.approved_at and not order.cancelled_at %}
                                                 <a hx-delete="{{ url_for('lab.add_test_order', lab_id=order.lab_id, order_id=order.id, customer_id=order.customer_id) }}"
                                                    hx-target="closest tr"
+                                                   title="Cancel this order"
                                                    hx-confirm="Are you sure want to cancel this order?"
                                                    class="button is-small is-rounded is-danger">
                                                     <span class="icon">
@@ -74,10 +94,11 @@
                                             {% elif order.approved_at and not order.cancelled_at %}
                                                 <a hx-patch="{{ url_for('lab.approve_test_order', order_id=order.id) }}"
                                                    hx-confirm="Are you sure want to unapprove this order?"
-                                                   class="button is-rounded is-small is-white">
+                                                   class="button is-rounded is-small is-danger">
                                                     <span class="icon">
-                                                        <i class="fas fa-undo has-text-danger"></i>
+                                                        <i class="fas fa-undo"></i>
                                                     </span>
+                                                    <span>Unapprove</span>
                                                 </a>
                                             {% endif %}
                                         </td>

@@ -81,6 +81,7 @@
                                 <div class="field has-addons">
                                     <p class="control">
                                         <a class="button is-rounded"
+                                           title="New order"
                                            href="{{ url_for('lab.add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
                                             <span class="icon">
                                                 <i class="fas fa-plus-circle"></i>
@@ -89,6 +90,7 @@
                                     </p>
                                     <p class="control">
                                         <a class="button is-rounded"
+                                           title="Auto order"
                                            id="auto-order-{{ customer.id }}-btn"
                                            hx-post="{{ url_for('lab.auto_add_test_order', lab_id=lab.id, customer_id=customer.id) }}">
                                             <span class="icon">
@@ -98,6 +100,7 @@
                                     </p>
                                     <p class="control">
                                         <a class="button is-rounded"
+                                           title="Order list"
                                            href="{{ url_for('lab.show_customer_records', customer_id=customer.id) }}">
                                             <span class="icon">
                                                 <i class="fas fa-clipboard-list"></i>

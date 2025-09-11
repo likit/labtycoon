@@ -164,8 +164,8 @@ class LabTestOrder(db.Model):
     approver = db.relationship(User, backref=db.backref('approved_quan_orders'), foreign_keys=[approver_id])
 
     @property
-    def pending_tests(self):
-        return len([test for test in self.test_orders if test.finished_at is None])
+    def pending_test_records(self):
+        return [record for record in self.active_test_records if record.updated_at is None]
 
     @property
     def active_test_records(self):
