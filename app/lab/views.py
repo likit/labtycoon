@@ -128,7 +128,7 @@ def add_choice_item(lab_id, choice_set_id, choice_item_id=None):
         else:
             flash('An error occurred. Please try again.', 'danger')
         return redirect(url_for('lab.list_choice_sets', lab_id=lab_id))
-    return render_template('lab/new_choice_item.html', form=form)
+    return render_template('lab/new_choice_item.html', form=form, lab_id=lab_id)
 
 
 @lab.route('/result-sets/items/<int:choice_item_id>', methods=['DELETE'])
@@ -175,7 +175,7 @@ def add_choice_set(lab_id, choice_set_id=None):
         else:
             flash('Error occurred while adding a new choice set.', 'danger')
         return redirect(url_for('lab.list_choice_sets', lab_id=lab_id))
-    return render_template('lab/new_choice_set.html', form=form)
+    return render_template('lab/new_choice_set.html', form=form, lab_id=lab_id)
 
 
 @lab.route('/<int:lab_id>/choice_sets/<int:choice_set_id>/remove')

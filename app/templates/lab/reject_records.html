@@ -90,4 +90,31 @@
         </div>
     </div>
     </section>
+    <section class="section">
+        <div class="container">
+            <h1 class="title is-size-4">Data Model</h1>
+            <pre class="mermaid">
+        erDiagram
+            STAFF ||--o{ REJECT-RECORD : "creates"
+            REJECT-RECORD ||--|| TEST-RECORD: has
+            REJECT-RECORD {
+                int recordID PK
+                int staff_id FK
+                string reason
+                string detail
+            }
+    </pre>
+        </div>
+    </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    </script>
+    <script>
+        document.addEventListener('htmx:beforeSend', function () {
+            htmx.addClass(htmx.find('#approve-btn'), 'is-loading')
+        })
+    </script>
 {% endblock %}

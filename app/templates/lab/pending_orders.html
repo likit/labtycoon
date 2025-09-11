@@ -37,7 +37,7 @@
                                         <span>{{ qtest.id }}</span>
                                     </td>
                                     <td>
-                                        {{ qtest.ordered_at|humanizedt }}
+                                        {{ qtest.order.ordered_at|humanizedt }}
                                     </td>
                                     <td>
                                         <span class="icon">
@@ -57,16 +57,16 @@
                                         <span class="icon">
                                             <i class="fas fa-link"></i>
                                         </span>
-                                        <span>{{ qtest.ordered_by_id }}</span>
+                                        <span>{{ qtest.order.ordered_by_id }}</span>
                                     </td>
-                                    <td>{{ qtest.ordered_by }}</td>
+                                    <td>{{ qtest.order.ordered_by }}</td>
                                     <td>{{ qtest.received_at|humanizedt }}</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             {% if qtest.received_at and not qtest.order.approved_at %}
                                             <a href="{{ url_for('lab.finish_test_record', order_id=qtest.order.id, record_id=qtest.id) }}"
                                                 class="button is-small is-rounded is-success">
-                                                Finish
+                                                Report
                                             </a>
                                             {% endif %}
                                             <a hx-post="{{ url_for('lab.cancel_test_record', record_id=qtest.id) }}"

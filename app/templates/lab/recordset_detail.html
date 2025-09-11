@@ -100,7 +100,12 @@
                             </td>
                             <td>
                                 {% if rec.reject_record %}
-                                    <span class="tag is-danger">rejected</span>
+                                    <span class="tag is-danger is-small is-rounded">
+                                        <span class="icon">
+                                            <i class="fas fa-minus-circle"></i>
+                                        </span>
+                                        <span>{{ rec.reject_record.reason }}</span>
+                                    </span>
                                 {% endif %}
                                 {% if rec.is_active %}
                                     <div class="field has-addons">
@@ -198,9 +203,36 @@
         </div>
     </div>
 </section>
+<section class="section">
+    <div class="container">
+        <h1 class="title is-size-4">Data Model</h1>
+        <pre class="mermaid">
+        erDiagram
+            ORDER ||--|{ TEST-RECORD : has
+            STAFF ||--o{ TEST-RECORD : "updates/approves"
+            TEST ||--o{ TEST-RECORD: has
+            TEST-RECORD ||--|| REJECT-RECORD: has
+            TEST-RECORD {
+                int recordID PK
+                int orderID
+                int testID FK
+                int updaterID FK
+                int rejectRecordID FK
+                float numericResult
+                string textResult
+                string comment
+                datetime updateDateTime
+                datetime receiveDateTime
+            }
+    </pre>
+    </div>
+</section>
 {% endblock %}
 {% block scripts %}
     {{ super() }}
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    </script>
     <script>
         document.addEventListener('htmx:beforeSend', function () {
             htmx.addClass(htmx.find('#approve-btn'), 'is-loading')

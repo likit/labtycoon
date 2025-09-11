@@ -199,7 +199,7 @@ class LabTestRecord(db.Model):
     order_id = db.Column('order_id', db.ForeignKey('lab_test_orders.id'))
     order = db.relationship(LabTestOrder, backref=db.backref('test_records', cascade='all, delete-orphan'))
     reject_record_id = db.Column('reject_record_id', db.ForeignKey('lab_order_reject_records.id'))
-    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('test_records'))
+    reject_record = db.relationship('LabOrderRejectRecord', backref=db.backref('test_record', uselist=False))
     received_at = db.Column('received_at', db.DateTime(timezone=True))
     receiver_id = db.Column('receiver_id', db.ForeignKey('user.id'))
     receiver = db.relationship(User,
