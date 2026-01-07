@@ -9,6 +9,7 @@ import pandas as pd
 from faker import Faker
 from flask import render_template, make_response, send_file, session
 from flask_login import login_required
+from mako.testing.helpers import result_lines
 from sqlalchemy import func
 
 from . import lab_blueprint as lab
@@ -72,7 +73,19 @@ def create_lab():
             affil = UserLabAffil(lab=lab, user=current_user, approved=True)
             affil.joined_at = arrow.now('Asia/Bangkok').datetime
             lab.lab_members.append(affil)
+            choice_set = LabResultChoiceSet(lab=lab, name='Qualitative Antigen Test')
+            choice_item1 = LabResultChoiceItem(choice_set=choice_set,
+                                               result='Positive',
+                                               interpretation='Positive for the antigen',)
+            choice_item2 = LabResultChoiceItem(choice_set=choice_set,
+                                               result='Negative',
+                                               interpretation='Negative for the antigen',)
+            choice_item3 = LabResultChoiceItem(choice_set=choice_set,
+                                               result='Error',
+                                               interpretation='Result is not interpretable',)
+            choice_set.choice_items = [choice_item1, choice_item2, choice_item3]
             db.session.add(lab)
+            db.session.add(choice_set)
             db.session.commit()
             flash('Your new lab has been created.', 'success')
             return redirect(url_for('main.index'))
